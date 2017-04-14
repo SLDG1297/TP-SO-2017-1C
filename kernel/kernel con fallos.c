@@ -1,10 +1,7 @@
 /*
  ============================================================================
  Name        : kernel.c
- Author      : 
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
+ Author      : Zero Gravity
  ============================================================================
  */
 #include <sys/types.h>
@@ -120,6 +117,7 @@ int main(int argc, char* argv[]) {
 				{
 					printf("Accept correcto\n");
 					FD_SET(nuevoSocket, &socketsRelevantes);
+					send(nuevoSocket, "Conexion aceptada", sizeof("Conexion aceptada"), 0);
 
 					//Actualizando el maximo descriptor de fichero
 
@@ -157,13 +155,13 @@ int main(int argc, char* argv[]) {
                 //Se cierra el socket
 			    close(i);
 			    FD_CLR(i, &socketsRelevantes);
-			    
+
                 }
 			    else
 			    {
 
 			      puts(buffer);
-			      send(nuevoSocket, buffer, longitudBytesRecibidos, 0);
+			     // send(nuevoSocket, buffer, longitudBytesRecibidos, 0);
 
 
 			      for(j = 0; j <= fileDescMax; j++)
@@ -172,7 +170,7 @@ int main(int argc, char* argv[]) {
 			    	{
 			    	   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
 
-			    	     if(j != sockListener && j != i)
+			    	     if(j != sockListener )
 
 			    	      {
 			    	       if(send(j, buffer, longitudBytesRecibidos, 0) == -1)
