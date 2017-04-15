@@ -1,0 +1,34 @@
+23:49:48 **** Build of configuration Debug for project memoria ****
+make all 
+Building file: ../memoria.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"memoria.d" -MT"memoria.d" -o "memoria.o" "../memoria.c"
+../memoria.c: In function ‘main’:
+../memoria.c:47:6: warning: unused variable ‘RETARDO_MEMORIA’ [-Wunused-variable]
+  int RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
+      ^
+../memoria.c:46:6: warning: unused variable ‘CACHE_X_PROC’ [-Wunused-variable]
+  int CACHE_X_PROC = busquedaClaveNumerica(configuracion, "CACHE_X_PROC");
+      ^
+../memoria.c:45:6: warning: unused variable ‘ENTRADAS_CACHE’ [-Wunused-variable]
+  int ENTRADAS_CACHE = busquedaClaveNumerica(configuracion, "ENTRADAS_CACHE");
+      ^
+../memoria.c:44:6: warning: unused variable ‘MARCO_SIZE’ [-Wunused-variable]
+  int MARCO_SIZE = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
+      ^
+../memoria.c:43:6: warning: unused variable ‘MARCOS’ [-Wunused-variable]
+  int MARCOS = busquedaClaveNumerica(configuracion, "MARCOS");
+      ^
+../memoria.c:42:6: warning: unused variable ‘PUERTO’ [-Wunused-variable]
+  int PUERTO = busquedaClaveNumerica(configuracion, "PUERTO");
+      ^
+Finished building: ../memoria.c
+ 
+Building target: memoria
+Invoking: GCC C Linker
+gcc  -o "memoria"  ./memoria.o   -lcommons
+Finished building target: memoria
+ 
+
+23:49:51 Build Finished (took 2s.722ms)
+

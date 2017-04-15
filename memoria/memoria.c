@@ -46,7 +46,5 @@ int main(int argc, char *argv[])
 	int CACHE_X_PROC = busquedaClaveNumerica(configuracion, "CACHE_X_PROC");
 	int RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
 
-	printf("%d\n%d\n%d\n%d\n%d\n%d\n", PUERTO, MARCOS, MARCO_SIZE, ENTRADAS_CACHE, CACHE_X_PROC, RETARDO_MEMORIA);
-
 	return EXIT_SUCCESS;
 }

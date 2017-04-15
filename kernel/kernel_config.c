@@ -31,28 +31,32 @@ t_config* llamarArchivo (){
 
 	//Asignar ruta de acceso al archivo de configuración.
 	directorio = RUTA_ARCHIVO ;
+
 	return config_create(directorio);
 }
 
-//La funcion busqueda clave int busca, a partir de una clave string, pasada por parametro, en el archivo
-//kernel config el dato de tipo int al cual hace referencia esa clave.
-int busquedaClaveInt (t_config* configuracion, char* palabraClave){
-	int auxiliarDeClave=0;
-	if(config_has_property(configuracion, palabraClave)){
-		auxiliarDeClave = config_get_int_value(configuracion, palabraClave);}
-		else{
-			perror("No se encontró la palabra clave.");}
-	return auxiliarDeClave;
+
+
+// busquedaClaveNumerica(): Devuelve un dato numerico en función de una
+// palabra clave que se encuentre en el archivo de configuración.
+int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
+	int clave;
+	if (config_has_property(configuracion, palabraClave))
+		clave = config_get_int_value(configuracion, palabraClave);
+	else
+		perror("No se encontró");
+	return clave;
 }
-//La funcion busqueda clave string busca, a partir de una clave string, pasada por parametro, en el archivo
-//kernel config el dato de tipo string al cual hace referencia esa clave.
-char* busquedaClaveChar (t_config* configuracion, char* palabraClave){
-	int auxiliarDeClave=0;
-	if(config_has_property(configuracion, palabraClave)){
-		auxiliarDeClave = config_get_string_value(configuracion, palabraClave);}
-		else{
-			perror("No se encontró la palabra clave.");}
-	return auxiliarDeClave;
+
+// busquedaClaveAlfanumerica(): Devuelve un dato alfanumerico en función de una
+// palabra clave que se encuentre en el archivo de configuración.
+char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
+	char* clave;
+	if (config_has_property(configuracion, palabraClave))
+		clave = config_get_string_value(configuracion, palabraClave);
+	else
+		perror("No se encontró.");
+	return clave;
 }
 
 
@@ -66,21 +70,19 @@ int main(int argc, char *argv[])
 	configuracion = llamarArchivo();
 
 	//Obtener IP del Kernel del archivo de configuración y chequear que sea correcto.
-	int	PUERTO_PROG = busquedaClaveInt(configuracion,"PUERTO_PROG");
-
-
-	int PUERTO_CPU = busquedaClaveInt(configuracion,"PUERTO_CPU");
-	int PUERTO_MEMORIA = busquedaClaveInt(configuracion,"PUERTO_MEMORIA");
-	int PUERTO_FS = busquedaClaveInt(configuracion,"PUERTO_FS");
-	int QUANTUM = busquedaClaveInt(configuracion,"QUANTUM");
-	int QUANTUM_SLEEP = busquedaClaveInt(configuracion,"QUANTUM_SLEEP");
-	int GRADO_MULTIPROG= busquedaClaveInt(configuracion,"GRADO_MULTIPROG");
+	int	PUERTO_PROG = busquedaClaveNumerica(configuracion,"PUERTO_PROG");
+	int PUERTO_CPU = busquedaClaveNumerica(configuracion,"PUERTO_CPU");
+	int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion,"PUERTO_MEMORIA");
+	int PUERTO_FS = busquedaClaveNumerica(configuracion,"PUERTO_FS");
+	int QUANTUM = busquedaClaveNumerica(configuracion,"QUANTUM");
+	int QUANTUM_SLEEP = busquedaClaveNumerica(configuracion,"QUANTUM_SLEEP");
+	int GRADO_MULTIPROG= busquedaClaveNumerica(configuracion,"GRADO_MULTIPROG");
 	int SEM_INIT [3];
-	int STACK_SIZE= busquedaClaveInt(configuracion,"STACK_SIZE");
+	int STACK_SIZE= busquedaClaveNumerica(configuracion,"STACK_SIZE");
 
-	char* IP_MEMORIA = busquedaClaveChar(configuracion,"IP_MEMORIA");
-	char* IP_FS = busquedaClaveChar(configuracion,"IP_FS");
-	char* ALGORITMO = busquedaClaveChar(configuracion, "ALGORITMO");
+	char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion,"IP_MEMORIA");
+	char* IP_FS = busquedaClaveAlfanumerica(configuracion,"IP_FS");
+	char* ALGORITMO = busquedaClaveAlfanumerica(configuracion, "ALGORITMO");
 	char* SEM_IDS [3];
 	char* SHARED_VARS[3];
 
