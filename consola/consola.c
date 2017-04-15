@@ -4,19 +4,18 @@
  Author      : Zero Gravity
  ============================================================================
  */
-
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
+#include <arpa/inet.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 #include <commons/log.h>
 #include <commons/string.h>
@@ -29,7 +28,7 @@
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
-//#include <funcionesDeBusquedaClave.h>
+
 
 #define RUTA_ARCHIVO "./config_consola.cfg"
 
@@ -69,13 +68,6 @@ char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
 
 int main(int argc, char *argv[]) {
 
-	int sock, bytesRecibidos;
-	char datosEnviar[1024], datosRecibir[1024];
-	memset(datosEnviar, '\0', 1024);
-	memset(datosRecibir, '\0', 1024);
-	struct hostent *host;
-	struct sockaddr_in kernel_dir;
-
 	//Estructura para manejar el archivo de configuración -- t_config*
 	//Crear estructura de configuración para obtener los datos del archivo de configuración.
 	t_config* configuracion;
@@ -87,16 +79,16 @@ int main(int argc, char *argv[]) {
 	//Obtener el puerto de Kernel del archivo de configuración y chequear que sea correcto.
 	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
 
-	/*****************************************************************
+
 	 int sock, bytesRecibidos;
 	        char datosEnviar[1024],datosRecibir[1024];
 	        memset (datosEnviar,'\0',1024);
 	        memset (datosRecibir,'\0',1024);
-	        struct hostent *host;
+	       // struct hostent *host;
 	        struct sockaddr_in kernel_dir;
 
 			// IP_KERNEL
-	        host = gethostbyname(argv[1]);
+	       // host = gethostbyname(argv[1]);
 
 	        //Se crea el socket para conectarse con el kernel
 	        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -108,8 +100,9 @@ int main(int argc, char *argv[]) {
 	        //Direccion del servidor(kernel)
 	        kernel_dir.sin_family = AF_INET;
 	        //PUERTO_KERNEL
-	        kernel_dir.sin_port = htons(puerto);
-	        kernel_dir.sin_addr = *((struct in_addr *)host->h_addr);
+	        kernel_dir.sin_port = htons(PUERTO_KERNEL);
+	        kernel_dir.sin_addr.s_addr = inet_addr(IP_KERNEL);
+	        //*((struct in_addr *)host->h_addr);
 	        bzero(&(kernel_dir.sin_zero),8);
 
 	        //Conexion al kernel
@@ -131,7 +124,7 @@ int main(int argc, char *argv[]) {
 
 	               memset (datosEnviar,'\0',1024);
 	        }
-	       	   **************************************************************/
+
 
 
 	        return 0;

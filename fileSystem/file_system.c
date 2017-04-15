@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 	int PUERTO = busquedaClaveNumerica(configuracion, "PUERTO");
 	char* PUNTO_MONTAJE = busquedaClaveAlfanumerica(configuracion,"PUNTO_MONTAJE");
 
-	/**********************************************************
+
 	int sockDeEspera; //Socket para esperar conexion con el kernel
 		int longitudDatosEnviados;
 		int sockAlKernel;//Socket para entablar conexion con el kernel
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
 	    memset (buffer,'\0',1024);
 		}
 
-		*****************************************************************************/
+
 
 	return 0;
 }

@@ -96,7 +96,6 @@ int main(int argc, char *argv[])
 //	char* SEM_IDS [3];
 //	char* SHARED_VARS[3];
 
-/*****************************************************************************************
 	//Defincion de variables
 
 	fd_set socketsRelevantes; //Lista completa de sockets
@@ -139,8 +138,8 @@ int main(int argc, char *argv[])
 
     memoria_dir.sin_family = AF_INET;
     //PUERTO_MEMORIA
-    memoria_dir.sin_port = htons(puertoMemoria);
-    memoria_dir.sin_addr.s_addr = INADDR_ANY;
+    memoria_dir.sin_port = htons(PUERTO_MEMORIA);
+    memoria_dir.sin_addr.s_addr = inet_addr(IP_MEMORIA);
     bzero(&(memoria_dir.sin_zero), 8);
 
 	puts("Enviando conexion a proceso memoria\n");
@@ -185,8 +184,8 @@ int main(int argc, char *argv[])
 
     filesystem_dir.sin_family = AF_INET;
     //PUERTO_FS
-    filesystem_dir.sin_port = htons(puertoFileSystem);
-    filesystem_dir.sin_addr.s_addr = INADDR_ANY;
+    filesystem_dir.sin_port = htons(PUERTO_FS);
+    filesystem_dir.sin_addr.s_addr = inet_addr(IP_FS);
     bzero(&(filesystem_dir.sin_zero), 8);
 
     puts("Enviando conexion a proceso FileSystem\n");
@@ -234,7 +233,7 @@ int main(int argc, char *argv[])
 	puts("Socket listener creado");
 	kernel_dir.sin_family = AF_INET;
 	//PUERTO_PROG
-	kernel_dir.sin_port = htons(puerto);
+	kernel_dir.sin_port = htons(PUERTO_PROG); //Aca se pone el puerto del listener
 	kernel_dir.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(kernel_dir.sin_zero), 8);
 
@@ -256,7 +255,7 @@ int main(int argc, char *argv[])
 
 	printf("Listen correcto\n");
 	//PUERTO_PROG
-	printf("\nEsperando en el puerto %i\n",puerto);
+	printf("\nEsperando en el puerto %i\n", 5000);
 
 	//Se agregan el listener a los sockets relevantes y se lo asigna como maximo por ser el unico en la lista en este momento
 	FD_SET(sockListener, &socketsRelevantes);
@@ -365,7 +364,6 @@ int main(int argc, char *argv[])
 			   }
 			 }
 	}
-		*****************************************************************************************************************/
 	   return 0;
 }
 

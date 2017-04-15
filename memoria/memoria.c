@@ -65,7 +65,8 @@ int main(int argc, char *argv[]) {
 	 int RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
 	 */
 
-	/***********************************************************************************
+
+
 	 int sockDeEspera; //Socket para esperar conexion con el kernel
 	 int longitudDatosEnviados;
 	 int sockAlKernel;//Socket para entablar conexion con el kernel
@@ -95,7 +96,7 @@ int main(int argc, char *argv[]) {
 	 //Direccion para esperar la conexion con el kernel
 	 espera.sin_family = AF_INET;
 	 //PUERTO_MEMORIA
-	 espera.sin_port = htons(puertoMemoria);
+	 espera.sin_port = htons(PUERTO_MEMORIA);
 	 espera.sin_addr.s_addr = INADDR_ANY;
 	 bzero(&(espera.sin_zero), 8);
 
@@ -143,7 +144,7 @@ int main(int argc, char *argv[]) {
 	 printf ("Buffer: %s\n",buffer);
 	 memset (buffer,'\0',1024);
 	 }
-	 ************************************************************************************************************************/
+
 
 	 return 0;
 
