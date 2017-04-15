@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 	//Obtener el puerto de Kernel del archivo de configuración y chaquear que sea correcto.
 	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
 
+	puts(IP_KERNEL);
 
 
 	return 0;

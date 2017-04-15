@@ -34,7 +34,27 @@ t_config* llamarArchivo (){
 
 	return config_create(directorio);
 }
+// busquedaClaveNumerica(): Devuelve un dato numerico en función de una
+// palabra clave que se encuentre en el archivo de configuración.
+int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
+	int clave;
+	if (config_has_property(configuracion, palabraClave))
+		clave = config_get_int_value(configuracion, palabraClave);
+	else
+		perror("No se encontró");
+	return clave;
+}
 
+// busquedaClaveAlfanumerica(): Devuelve un dato alfanumerico en función de una
+// palabra clave que se encuentre en el archivo de configuración.
+char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
+	char* clave;
+	if (config_has_property(configuracion, palabraClave))
+		clave = config_get_string_value(configuracion, palabraClave);
+	else
+		perror("No se encontró.");
+	return clave;
+}
 
 
 // busquedaClaveNumerica(): Devuelve un dato numerico en función de una
@@ -74,6 +94,7 @@ int main(int argc, char *argv[])
 	//Obtener el puerto de Kernel del archivo de configuración y chaquear que sea correcto.
 	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
 
+	puts(IP_KERNEL);
 
 
 	return 0;

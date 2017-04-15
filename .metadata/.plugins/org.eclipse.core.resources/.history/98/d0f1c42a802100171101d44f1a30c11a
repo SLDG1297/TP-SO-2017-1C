@@ -19,7 +19,7 @@
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
-//#include <funcionesDeBusquedaClave.h>
+#include <funcionesDeBusquedaClave.h>
 
 #define RUTA_ARCHIVO "./config_consola.cfg"
 
@@ -34,7 +34,6 @@ t_config* llamarArchivo (){
 
 	return config_create(directorio);
 }
-
 
 
 // busquedaClaveNumerica(): Devuelve un dato numerico en función de una
@@ -74,6 +73,7 @@ int main(int argc, char *argv[])
 	//Obtener el puerto de Kernel del archivo de configuración y chaquear que sea correcto.
 	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
 
+	puts(IP_KERNEL);
 
 
 	return 0;

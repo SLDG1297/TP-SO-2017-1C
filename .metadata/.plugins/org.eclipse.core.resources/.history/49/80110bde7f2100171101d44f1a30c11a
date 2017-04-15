@@ -36,7 +36,6 @@ t_config* llamarArchivo (){
 }
 
 
-
 // busquedaClaveNumerica(): Devuelve un dato numerico en función de una
 // palabra clave que se encuentre en el archivo de configuración.
 int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
@@ -74,6 +73,7 @@ int main(int argc, char *argv[])
 	//Obtener el puerto de Kernel del archivo de configuración y chaquear que sea correcto.
 	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
 
+	puts(IP_KERNEL);
 
 
 	return 0;
