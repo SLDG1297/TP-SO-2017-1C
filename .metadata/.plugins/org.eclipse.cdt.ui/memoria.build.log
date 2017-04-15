@@ -1,27 +1,16 @@
-23:49:48 **** Build of configuration Debug for project memoria ****
+12:44:21 **** Incremental Build of configuration Debug for project memoria ****
 make all 
 Building file: ../memoria.c
 Invoking: GCC C Compiler
 gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"memoria.d" -MT"memoria.d" -o "memoria.o" "../memoria.c"
 ../memoria.c: In function ‘main’:
-../memoria.c:47:6: warning: unused variable ‘RETARDO_MEMORIA’ [-Wunused-variable]
-  int RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
-      ^
-../memoria.c:46:6: warning: unused variable ‘CACHE_X_PROC’ [-Wunused-variable]
-  int CACHE_X_PROC = busquedaClaveNumerica(configuracion, "CACHE_X_PROC");
-      ^
-../memoria.c:45:6: warning: unused variable ‘ENTRADAS_CACHE’ [-Wunused-variable]
-  int ENTRADAS_CACHE = busquedaClaveNumerica(configuracion, "ENTRADAS_CACHE");
-      ^
-../memoria.c:44:6: warning: unused variable ‘MARCO_SIZE’ [-Wunused-variable]
-  int MARCO_SIZE = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
-      ^
-../memoria.c:43:6: warning: unused variable ‘MARCOS’ [-Wunused-variable]
-  int MARCOS = busquedaClaveNumerica(configuracion, "MARCOS");
-      ^
-../memoria.c:42:6: warning: unused variable ‘PUERTO’ [-Wunused-variable]
-  int PUERTO = busquedaClaveNumerica(configuracion, "PUERTO");
-      ^
+../memoria.c:110:51: warning: pointer targets in passing argument 3 of ‘accept’ differ in signedness [-Wpointer-sign]
+   if ((sockAlKernel = accept(sockDeEspera,(struct sockaddr *) &datosDelKernel,&longitudEstructuraSocket)) == -1)
+                                                   ^
+In file included from ../memoria.c:5:0:
+/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘socklen_t * __restrict__’ but argument is of type ‘int *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
 Finished building: ../memoria.c
  
 Building target: memoria
@@ -30,5 +19,5 @@ gcc  -o "memoria"  ./memoria.o   -lcommons
 Finished building target: memoria
  
 
-23:49:51 Build Finished (took 2s.722ms)
+12:44:23 Build Finished (took 2s.54ms)
 

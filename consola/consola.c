@@ -1,13 +1,23 @@
 /*
- * configConsola.c
- *
- *  Created on: 14/4/2017
- *      Author: utnso
+ ============================================================================
+ Name        : consola.c
+ Author      : Zero Gravity
+ ============================================================================
  */
-
 
 #include <stdlib.h>
 #include <stdio.h>
+
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+
 #include <commons/log.h>
 #include <commons/string.h>
 #include <commons/config.h>
@@ -24,18 +34,16 @@
 #define RUTA_ARCHIVO "./config_consola.cfg"
 
 // llamarArchivo(): Genera una estructura de datos de configuración.
-t_config* llamarArchivo (){
+t_config* llamarArchivo() {
 
 	//Dirección para manejar el archivo de configuración.
 	char* directorio;
 
 	//Asignar ruta de acceso al archivo de configuración.
-	directorio = RUTA_ARCHIVO ;
+	directorio = RUTA_ARCHIVO;
 
 	return config_create(directorio);
 }
-
-
 
 // busquedaClaveNumerica(): Devuelve un dato numerico en función de una
 // palabra clave que se encuentre en el archivo de configuración.
@@ -59,10 +67,15 @@ char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
 	return clave;
 }
 
+int main(int argc, char *argv[]) {
 
+	int sock, bytesRecibidos;
+	char datosEnviar[1024], datosRecibir[1024];
+	memset(datosEnviar, '\0', 1024);
+	memset(datosRecibir, '\0', 1024);
+	struct hostent *host;
+	struct sockaddr_in kernel_dir;
 
-int main(int argc, char *argv[])
-{
 	//Estructura para manejar el archivo de configuración -- t_config*
 	//Crear estructura de configuración para obtener los datos del archivo de configuración.
 	t_config* configuracion;
@@ -71,10 +84,55 @@ int main(int argc, char *argv[])
 	//Obtener IP del Kernel del archivo de configuración y chequear que sea correcto.
 	char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
 
-	//Obtener el puerto de Kernel del archivo de configuración y chaquear que sea correcto.
+	//Obtener el puerto de Kernel del archivo de configuración y chequear que sea correcto.
 	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
 
+	/*****************************************************************
+	 int sock, bytesRecibidos;
+	        char datosEnviar[1024],datosRecibir[1024];
+	        memset (datosEnviar,'\0',1024);
+	        memset (datosRecibir,'\0',1024);
+	        struct hostent *host;
+	        struct sockaddr_in kernel_dir;
+
+			// IP_KERNEL
+	        host = gethostbyname(argv[1]);
+
+	        //Se crea el socket para conectarse con el kernel
+	        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	        {
+	            perror("Socket");
+	            exit(1);
+	        }
+
+	        //Direccion del servidor(kernel)
+	        kernel_dir.sin_family = AF_INET;
+	        //PUERTO_KERNEL
+	        kernel_dir.sin_port = htons(puerto);
+	        kernel_dir.sin_addr = *((struct in_addr *)host->h_addr);
+	        bzero(&(kernel_dir.sin_zero),8);
+
+	        //Conexion al kernel
+	        if (connect(sock, (struct sockaddr *)&kernel_dir,sizeof(struct sockaddr)) == -1)
+	        {
+	            perror("Connect");
+	            exit(1);
+	        }
+
+	        //El cliente espera un mensaje de parte del kernel (handshake)
+	        bytesRecibidos=recv(sock,datosRecibir,1024,0);
+	        datosRecibir[bytesRecibidos] = '\0';
+
+	        while(1)
+	        {
+	           printf("\nDatos a enviar: ");
+	           gets(datosEnviar);
+	           send(sock,datosEnviar,strlen(datosEnviar), 0);
+
+	               memset (datosEnviar,'\0',1024);
+	        }
+	       	   **************************************************************/
 
 
-	return 0;
+	        return 0;
 }

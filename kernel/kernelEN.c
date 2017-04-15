@@ -1,9 +1,3 @@
-/*
- ============================================================================
- Name        : kernel.c
- Author      : Zero Gravity
- ============================================================================
- */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -14,6 +8,8 @@
 #include <errno.h>
 #include <string.h>
 #define puerto 5000
+#define puertoMemoria 5010
+#define puertoFileSystem 5020
 
 
 int main(int argc, char* argv[]) {
@@ -26,16 +22,113 @@ int main(int argc, char* argv[]) {
 	FD_ZERO(&socketsFiltrados);
 	int fileDescMax; // Numero del descriptor de fichero mas grande
 	int sockListener; //Socket para escuchar nuevas conexiones
+	int sockMemoria;
+	int sockFileSystem;
 	int nuevoSocket; //Socket para aceptar
 	char buffer[1024]; //Buffer de datos
+	memset (buffer,'\0',1024);
+	char* handshake= "Kernel conectado";
 	int longitudBytesRecibidos;
-	struct sockaddr_in kernel_dir, cliente_dir;
+	struct sockaddr_in kernel_dir, cliente_dir, filesystem_dir,memoria_dir;
 	int yes = 1;
 	int longitudEstructuraSocket;
 	int i, j; //Contadores del for
 	struct timeval tv;
 	tv.tv_sec = 2;
 	tv.tv_usec = 500000;
+
+
+
+	//Conexion al proceso Memoria
+
+	sockMemoria = socket (AF_INET,SOCK_STREAM,0);
+	if (sockMemoria == -1)
+	{
+		perror("Fallo en la creacion del socket a memoria");
+		exit(1);
+	}
+
+	if (setsockopt(sockMemoria, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+	{
+		perror("Error en el setsockopt del socket memoria");
+		exit(1);
+	}
+
+    memoria_dir.sin_family = AF_INET;
+    memoria_dir.sin_port = htons(puertoMemoria);
+    memoria_dir.sin_addr.s_addr = INADDR_ANY;
+    bzero(&(memoria_dir.sin_zero), 8);
+
+	puts("Enviando conexion a proceso memoria\n");
+
+    if(connect(sockMemoria, (struct sockaddr *)&memoria_dir, sizeof(struct sockaddr))==-1)
+	{
+	  perror ("Error al conectarse al proceso memoria");
+	  exit (1);
+	}
+
+	if (recv(sockMemoria,buffer,sizeof(buffer),0) == -1)
+	{
+	  perror ("Error en el handshake de memoria (recepcion)");
+	  exit(1);
+	}
+
+    if (send(sockMemoria,handshake,strlen(handshake),0) == -1)
+	{
+      perror ("Error en el handshake de memoria (envio)");
+	  exit(1);
+	}
+
+    puts(buffer);
+    FD_SET(sockMemoria, &socketsRelevantes);
+    memset (buffer,'\0',1024);
+
+
+	//Conexion al proceso fileSystem
+
+	sockFileSystem = socket (AF_INET,SOCK_STREAM,0);
+	if (sockFileSystem == -1)
+	{
+		perror("Fallo en la creacion del socket fileSystem");
+		exit(1);
+	}
+
+	if (setsockopt(sockFileSystem, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+	{
+		perror("Error en el setsockopt del socket fileSystem");
+		exit(1);
+	}
+
+    filesystem_dir.sin_family = AF_INET;
+    filesystem_dir.sin_port = htons(puertoFileSystem);
+    filesystem_dir.sin_addr.s_addr = INADDR_ANY;
+    bzero(&(filesystem_dir.sin_zero), 8);
+
+    puts("Enviando conexion a proceso FileSystem\n");
+
+    if(connect(sockFileSystem, (struct sockaddr *)&filesystem_dir, sizeof(struct sockaddr))==-1)
+	{
+	perror ("Error al conectarse al proceso fileSystem");
+	exit (1);
+	}
+
+	if (recv (sockFileSystem,buffer,sizeof(buffer),0)==-1)
+	{
+	perror ("Error en el handshake de fileSystem (recepcion)");
+	exit(1);
+	}
+
+	if (send(sockFileSystem,handshake,strlen(handshake),0)==-1)
+	{
+	perror ("Error en el handshake de fileSystem (envio)");
+	exit(1);
+	}
+
+	puts(buffer);
+	FD_SET(sockFileSystem, &socketsRelevantes);
+	    memset (buffer,'\0',1024);
+
+
 
 	//Creacion del socket escucha y verificacion de error
 
@@ -84,6 +177,7 @@ int main(int argc, char* argv[]) {
 
 	while (1)
 	{
+	memset(buffer,'\0',1024);
 	socketsFiltrados = socketsRelevantes;
 
 	if (select(fileDescMax + 1, &socketsFiltrados, NULL, NULL, &tv) == -1)
@@ -170,7 +264,7 @@ int main(int argc, char* argv[]) {
 			    	{
 			    	   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
 
-			    	     if(j != sockListener )
+			    	     if(j != sockListener && j != i )
 
 			    	      {
 			    	       if(send(j, buffer, longitudBytesRecibidos, 0) == -1)
@@ -184,6 +278,6 @@ int main(int argc, char* argv[]) {
 			   }
 			 }
 	}
-   printf("Explota");
+
    return 0;
-	}
+}
