@@ -30,54 +30,58 @@
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
 
+#include "../librerias/controlArchivosDeConfiguracion.h"
+
 #define RUTA_ARCHIVO "./config_kernel.cfg"
-
-t_config* llamarArchivo (){
-
-	//Dirección para manejar el archivo de configuración.
-	char* directorio;
-
-	//Asignar ruta de acceso al archivo de configuración.
-	directorio = RUTA_ARCHIVO ;
-
-	return config_create(directorio);
-}
-
-
-
-// busquedaClaveNumerica(): Devuelve un dato numerico en función de una
-// palabra clave que se encuentre en el archivo de configuración.
-int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
-	int clave;
-	if (config_has_property(configuracion, palabraClave))
-		clave = config_get_int_value(configuracion, palabraClave);
-	else
-		perror("No se encontró");
-	return clave;
-}
-
-// busquedaClaveAlfanumerica(): Devuelve un dato alfanumerico en función de una
-// palabra clave que se encuentre en el archivo de configuración.
-char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
-	char* clave;
-	if (config_has_property(configuracion, palabraClave))
-		clave = config_get_string_value(configuracion, palabraClave);
-	else
-		perror("No se encontró.");
-	return clave;
-}
-
+#define SIZE_DATA 1024
 
 
 int main(int argc, char *argv[])
 {
+	//CODIGO PARA LLAMAR AL ARCHIVO
 
-	//Estructura para manejar el archivo de configuración -- t_config*
-	//Crear estructura de configuración para obtener los datos del archivo de configuración.
-	t_config* configuracion;
-	configuracion = llamarArchivo();
+		//Estructura para manejar el archivo de configuración -- t_config*
+		//Crear estructura de configuración para obtener los datos del archivo de configuración.
 
-	//Obtener IP del Kernel del archivo de configuración y chequear que sea correcto.
+		t_config* configuracion;
+		char* ruta = RUTA_ARCHIVO;
+		configuracion = llamarArchivo(ruta);
+
+//DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL
+
+	//*Lista completa de sockets
+	fd_set socketsRelevantes;
+	//*Sockets filtrados por el select
+	fd_set socketsFiltrados;
+	FD_ZERO(&socketsRelevantes);
+	FD_ZERO(&socketsFiltrados);
+	//*Numero del descriptor de fichero mas grande
+	int fileDescMax;
+	//*Socket para escuchar nuevas conexiones
+	int sockListener;
+	int sockMemoria;
+	int sockFileSystem;
+	//*Socket para aceptar
+	int nuevoSocket;
+	int longitudBytesRecibidos;
+	int yes = 1;
+	int longitudEstructuraSocket;
+	//*Contadores del for
+	int i, j;
+
+	char* handshake= "Kernel conectado";
+	char buffer[1024]; //Buffer de datos
+
+	memset (buffer,'\0',SIZE_DATA);
+
+	struct sockaddr_in kernel_dir, cliente_dir, filesystem_dir,memoria_dir;
+	struct timeval tv;
+
+	tv.tv_sec = 2;
+	tv.tv_usec = 500000;
+
+//DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
+
 	int	PUERTO_PROG = busquedaClaveNumerica(configuracion,"PUERTO_PROG");
 //	int PUERTO_CPU = busquedaClaveNumerica(configuracion,"PUERTO_CPU");
 	int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion,"PUERTO_MEMORIA");
@@ -91,279 +95,248 @@ int main(int argc, char *argv[])
 //	int SEM_INIT [3];
 //	int STACK_SIZE= busquedaClaveNumerica(configuracion,"STACK_SIZE");
 
-
 //	char* ALGORITMO = busquedaClaveAlfanumerica(configuracion, "ALGORITMO");
 //	char* SEM_IDS [3];
 //	char* SHARED_VARS[3];
 
-	//Defincion de variables
 
-	fd_set socketsRelevantes; //Lista completa de sockets
-	fd_set socketsFiltrados; //Sockets filtrados clientaddrpor el select
-	FD_ZERO(&socketsRelevantes);
-	FD_ZERO(&socketsFiltrados);
-	int fileDescMax; // Numero del descriptor de fichero mas grande
-	int sockListener; //Socket para escuchar nuevas conexiones
-	int sockMemoria;
-	int sockFileSystem;
-	int nuevoSocket; //Socket para aceptar
-	char buffer[1024]; //Buffer de datos
-	memset (buffer,'\0',1024);
-	char* handshake= "Kernel conectado";
-	int longitudBytesRecibidos;
-	struct sockaddr_in kernel_dir, cliente_dir, filesystem_dir,memoria_dir;
-	int yes = 1;
-	int longitudEstructuraSocket;
-	int i, j; //Contadores del for
-	struct timeval tv;
-	tv.tv_sec = 2;
-	tv.tv_usec = 500000;
+//DECLARACION DE VARIABLES PARA VALORES DE RESPUESTA
+
+	int valorRtaSetSockOpt = 0;
+	int valorRtaConnect=0;
+	int valorRtaRecv=0;
+	int valorRtaSend= 0;
+	int valorRtaSelect=0;
+	int valorRtaBind=0;
+	int valorRtaListen = 0;
 
 
+//CODIGO PRINCIPAL DE LA CONSOLA
 
-	//Conexion al proceso Memoria
 
+//CONEXION AL PROCESO MEMORIA
 	sockMemoria = socket (AF_INET,SOCK_STREAM,0);
-	if (sockMemoria == -1)
-	{
+
+	if (sockMemoria == -1){
 		perror("Fallo en la creacion del socket a memoria");
 		exit(1);
 	}
 
-	if (setsockopt(sockMemoria, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-	{
+	valorRtaSetSockOpt = setsockopt(sockMemoria, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+
+	if (valorRtaSetSockOpt== -1){
 		perror("Error en el setsockopt del socket memoria");
 		exit(1);
 	}
 
+//ASIGNACION DE DATOS DE LA MEMORIA
     memoria_dir.sin_family = AF_INET;
-    //PUERTO_MEMORIA
     memoria_dir.sin_port = htons(PUERTO_MEMORIA);
     memoria_dir.sin_addr.s_addr = inet_addr(IP_MEMORIA);
     bzero(&(memoria_dir.sin_zero), 8);
 
 	puts("Enviando conexion a proceso memoria\n");
 
-    if(connect(sockMemoria, (struct sockaddr *)&memoria_dir, sizeof(struct sockaddr))==-1)
-	{
+	valorRtaConnect=connect(sockMemoria, (struct sockaddr *)&memoria_dir, sizeof(struct sockaddr));
+
+    if(valorRtaConnect==-1)	{
 	  perror ("Error al conectarse al proceso memoria");
 	  exit (1);
 	}
 
-	if (recv(sockMemoria,buffer,sizeof(buffer),0) == -1)
-	{
+    valorRtaRecv = recv(sockMemoria,buffer,sizeof(buffer),0);
+
+    if (valorRtaRecv == -1){
 	  perror ("Error en el handshake de memoria (recepcion)");
 	  exit(1);
 	}
 
-    if (send(sockMemoria,handshake,strlen(handshake),0) == -1)
-	{
+	valorRtaSend = send(sockMemoria,handshake,strlen(handshake),0);
+
+    if (valorRtaSend == -1){
       perror ("Error en el handshake de memoria (envio)");
 	  exit(1);
 	}
 
     puts(buffer);
     FD_SET(sockMemoria, &socketsRelevantes);
-    memset (buffer,'\0',1024);
+    memset (buffer,'\0',SIZE_DATA);
 
 
-	//Conexion al proceso fileSystem
+//CONEXION AL PROCESO FILE SYSTEM
 
 	sockFileSystem = socket (AF_INET,SOCK_STREAM,0);
-	if (sockFileSystem == -1)
-	{
+
+	if (sockFileSystem == -1){
 		perror("Fallo en la creacion del socket fileSystem");
 		exit(1);
 	}
-
-	if (setsockopt(sockFileSystem, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-	{
+	valorRtaSetSockOpt = setsockopt(sockFileSystem, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+	if (valorRtaSetSockOpt == -1){
 		perror("Error en el setsockopt del socket fileSystem");
 		exit(1);
 	}
 
+//ASIGNACION DE DATOS PARA EL FILE SYSTEM
     filesystem_dir.sin_family = AF_INET;
-    //PUERTO_FS
     filesystem_dir.sin_port = htons(PUERTO_FS);
     filesystem_dir.sin_addr.s_addr = inet_addr(IP_FS);
     bzero(&(filesystem_dir.sin_zero), 8);
 
     puts("Enviando conexion a proceso FileSystem\n");
 
-    if(connect(sockFileSystem, (struct sockaddr *)&filesystem_dir, sizeof(struct sockaddr))==-1)
-	{
-	perror ("Error al conectarse al proceso fileSystem");
-	exit (1);
+    valorRtaConnect =connect(sockFileSystem, (struct sockaddr *)&filesystem_dir, sizeof(struct sockaddr));
+    if(valorRtaConnect==-1){
+    	perror ("Error al conectarse al proceso fileSystem");
+    	exit (1);
+	}
+    valorRtaRecv=recv (sockFileSystem,buffer,sizeof(buffer),0);
+	if (valorRtaRecv ==-1){
+		perror ("Error en el handshake de fileSystem (recepcion)");
+		exit(1);
 	}
 
-	if (recv (sockFileSystem,buffer,sizeof(buffer),0)==-1)
-	{
-	perror ("Error en el handshake de fileSystem (recepcion)");
-	exit(1);
-	}
+	valorRtaSend = send(sockFileSystem,handshake,strlen(handshake),0);
 
-	if (send(sockFileSystem,handshake,strlen(handshake),0)==-1)
-	{
-	perror ("Error en el handshake de fileSystem (envio)");
-	exit(1);
+	if (valorRtaSend==-1){
+		perror ("Error en el handshake de fileSystem (envio)");
+		exit(1);
 	}
 
 	puts(buffer);
 	FD_SET(sockFileSystem, &socketsRelevantes);
-	    memset (buffer,'\0',1024);
+	    memset (buffer,'\0',SIZE_DATA);
 
 
 
-	//Creacion del socket escucha y verificacion de error
+//CREACION DEL SOCKET ESCUCHA Y VERIFICACION DE ERROR
 
-	if ((sockListener = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	{
+	sockListener = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockListener == -1){
 		perror("Socket");
 		exit(1);
 	}
 
-	if (setsockopt(sockListener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-		{
-			perror("Error en setsockopt");
-			exit(1);
-		}
+	valorRtaSetSockOpt=setsockopt(sockListener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) ;
+
+	if (valorRtaSetSockOpt== -1){
+		perror("Error en setsockopt");
+		exit(1);
+	}
 
 	printf("Setsockopt correcto\n");
-
 	puts("Socket listener creado");
+
+//ASIGNACION DE DATOS PARA EL KERNEL
+
 	kernel_dir.sin_family = AF_INET;
-	//PUERTO_PROG
 	kernel_dir.sin_port = htons(PUERTO_PROG); //Aca se pone el puerto del listener
 	kernel_dir.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(kernel_dir.sin_zero), 8);
 
-	//Se asocia el listener al puerto de escucha
+	//*Se asocia el listener al puerto de escucha
 
-	if (bind(sockListener, (struct sockaddr *) &kernel_dir,sizeof(struct sockaddr)) == -1)
-	{
+	valorRtaBind =bind(sockListener, (struct sockaddr *) &kernel_dir,sizeof(struct sockaddr));
+	if (valorRtaBind == -1){
 		perror("Error en Bind");
 		exit(1);
 	}
 
 	printf("Bind correcto\n");
 
-	if (listen(sockListener, 10) == -1)
-	{
+	valorRtaListen =listen(sockListener, 10);
+	if (valorRtaListen == -1){
 		perror("Error en listen");
 		exit(1);
 	}
 
 	printf("Listen correcto\n");
-	//PUERTO_PROG
-	printf("\nEsperando en el puerto %i\n", 5000);
+	printf("\nEsperando en el puerto %i\n", PUERTO_PROG);
 
-	//Se agregan el listener a los sockets relevantes y se lo asigna como maximo por ser el unico en la lista en este momento
+	//*Se agregan el listener a los sockets relevantes y se lo asigna como maximo por ser el unico en la lista en este momento
 	FD_SET(sockListener, &socketsRelevantes);
 	fileDescMax = sockListener;
 
-	while (1)
-	{
-	memset(buffer,'\0',1024);
-	socketsFiltrados = socketsRelevantes;
+	while (1){
+		memset(buffer,'\0',SIZE_DATA);
+		socketsFiltrados = socketsRelevantes;
 
-	if (select(fileDescMax + 1, &socketsFiltrados, NULL, NULL, &tv) == -1)
+		valorRtaSelect = select(fileDescMax + 1, &socketsFiltrados, NULL, NULL, &tv);
+		if (valorRtaSelect == -1){
+			perror("Error en select");
+			exit(1);
+		}
 
-	{
-		perror("Error en select");
-		exit(1);
-	}
+		for (i = 0; i <= fileDescMax; i++){
 
+			if(FD_ISSET(i, &socketsFiltrados)){
 
+				if(i == sockListener){
 
-	for (i = 0; i <= fileDescMax; i++)
+					longitudEstructuraSocket = sizeof(cliente_dir);
+					nuevoSocket = accept(sockListener,(struct sockaddr *) &cliente_dir,&longitudEstructuraSocket);
 
-	{
-		if(FD_ISSET(i, &socketsFiltrados))
+					if (nuevoSocket == -1)
+						perror("Error en accept");
 
-		{
+						else{
 
-			if(i == sockListener)
+							printf("Accept correcto\n");
+							FD_SET(nuevoSocket, &socketsRelevantes);
+							send(nuevoSocket, "Conexion aceptada", sizeof("Conexion aceptada"), 0);
 
-			{
-				longitudEstructuraSocket = sizeof(cliente_dir);
-				if ((nuevoSocket = accept(sockListener,(struct sockaddr *) &cliente_dir,&longitudEstructuraSocket)) == -1)
+							//Actualizando el maximo descriptor de fichero
 
-				{
-					perror("Error en accept");
-				}
+							if(nuevoSocket > fileDescMax)
+								  fileDescMax = nuevoSocket;
 
+							printf("%s: Nueva conexion de %s en el socket %d\n", argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
+
+							}
+
+						}
 				else
+					{
+					longitudBytesRecibidos = recv(i, buffer, sizeof(buffer), 0);
 
-				{
-					printf("Accept correcto\n");
-					FD_SET(nuevoSocket, &socketsRelevantes);
-					send(nuevoSocket, "Conexion aceptada", sizeof("Conexion aceptada"), 0);
+					if(longitudBytesRecibidos<= 0){
 
-					//Actualizando el maximo descriptor de fichero
+						//Error o fin de conexion?
 
-					if(nuevoSocket > fileDescMax)
+						if(longitudBytesRecibidos == 0)
+							printf("%s: Socket %d colgado\n", argv[0], i); //Conexion cerrada
 
-					    {
-					      fileDescMax = nuevoSocket;
-					    }
+							else
+								perror("Error en el recv");
 
-					    printf("%s: Nueva conexion de %s en el socket %d\n", argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
+						//Se cierra el socket
+						close(i);
+						FD_CLR(i, &socketsRelevantes);
+						}
+						else{
 
-					    }
+						puts(buffer);
+						  for(j = 0; j <= fileDescMax; j++){
+							if(FD_ISSET(j, &socketsRelevantes)){
+							   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
+								 if(j != sockListener && j != i ) {
+								   if(send(j, buffer, longitudBytesRecibidos, 0) == -1)
+								   perror("Error en send");
+								 	 	 	 	 	 	 	 }
 
-					    }
-			else
+														}//cierra - if(FD_ISSET(j, &socketsRelevantes))
 
-			    {
+							 					}//cierra - for(j = 0; j <= fileDescMax; j++)
 
-			    if((longitudBytesRecibidos = recv(i, buffer, sizeof(buffer), 0)) <= 0)
-			    {
+						   	   }//cierra - else puts(buffer)
 
-			    //Error o fin de conexion?
+					 	 }//cierra - else longitud bytes recibidos
 
-			    if(longitudBytesRecibidos == 0)
+				   }//if(FD_ISSET(i, &socketsFiltrados))
 
-			    //Conexion cerrada
+			}//cierra -  for(i = 0; i <= fileDescMax; i++)
 
-			    printf("%s: Socket %d colgado\n", argv[0], i);
-
-                else
-                {
-			    perror("Error en el recv");
-				}
-
-                //Se cierra el socket
-			    close(i);
-			    FD_CLR(i, &socketsRelevantes);
-
-                }
-			    else
-			    {
-
-			      puts(buffer);
-			     // send(nuevoSocket, buffer, longitudBytesRecibidos, 0);
-
-
-			      for(j = 0; j <= fileDescMax; j++)
-			      {
-			    	if(FD_ISSET(j, &socketsRelevantes))
-			    	{
-			    	   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
-
-			    	     if(j != sockListener && j != i )
-
-			    	      {
-			    	       if(send(j, buffer, longitudBytesRecibidos, 0) == -1)
-                           perror("Error en send");
-			    	      }
-
-			    	    }
-			    	 }
-			       }
-			     }
-			   }
-			 }
-	}
+		}//cierra -  while(1)
 	   return 0;
 }
 

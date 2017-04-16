@@ -1,23 +1,6 @@
-16:19:27 **** Incremental Build of configuration Debug for project kernel ****
+22:14:01 **** Incremental Build of configuration Debug for project kernel ****
 make all 
-Building file: ../kernel.c
-Invoking: GCC C Compiler
-gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"kernel.d" -MT"kernel.d" -o "kernel.o" "../kernel.c"
-../kernel.c: In function ‘main’:
-../kernel.c:289:52: warning: pointer targets in passing argument 3 of ‘accept’ differ in signedness [-Wpointer-sign]
-     if ((nuevoSocket = accept(sockListener,(struct sockaddr *) &cliente_dir,&longitudEstructuraSocket)) == -1)
-                                                    ^
-In file included from ../kernel.c:12:0:
-/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘socklen_t * __restrict__’ but argument is of type ‘int *’
- extern int accept (int __fd, __SOCKADDR_ARG __addr,
-            ^
-Finished building: ../kernel.c
- 
-Building target: kernel
-Invoking: GCC C Linker
-gcc  -o "kernel"  ./kernel.o   -lcommons
-Finished building target: kernel
- 
+make: No se hace nada para «all».
 
-16:19:28 Build Finished (took 903ms)
+22:14:01 Build Finished (took 421ms)
 

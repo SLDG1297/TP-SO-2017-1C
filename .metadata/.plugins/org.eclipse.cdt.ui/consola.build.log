@@ -1,6 +1,21 @@
-16:16:56 **** Incremental Build of configuration Debug for project consola ****
+22:14:23 **** Incremental Build of configuration Debug for project consola ****
 make all 
-make: No se hace nada para «all».
+Building file: ../consola.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"consola.d" -MT"consola.d" -o "consola.o" "../consola.c"
+../consola.c: In function ‘main’:
+../consola.c:106:13: warning: ‘gets’ is deprecated (declared at /usr/include/stdio.h:638) [-Wdeprecated-declarations]
+             gets(datosEnviar);
+             ^
+Finished building: ../consola.c
+ 
+Building target: consola
+Invoking: GCC C Linker
+gcc  -o "consola"  ./consola.o   -lcommons
+./consola.o: En la función `main':
+/home/utnso/workspace/tp-2017-1c-Zero-Gravity/consola/Debug/../consola.c:106: aviso: the `gets' function is dangerous and should not be used.
+Finished building target: consola
+ 
 
-16:16:56 Build Finished (took 87ms)
+22:14:25 Build Finished (took 2s.561ms)
 
