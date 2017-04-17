@@ -31,6 +31,7 @@
 #include <commons/collections/queue.h>
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
+#include "../librerias/controlErrores.h"
 
 #define RUTA_ARCHIVO "./config_memoria.cfg"
 #define SIZE_DATA 1024
@@ -88,18 +89,10 @@ int main(int argc, char *argv[]) {
 
 
 	 sockDeEspera = socket(AF_INET,SOCK_STREAM,0);
-
-	 if (sockDeEspera == -1){
-		 perror("Fallo en la creacion del socket de espera");
-		 exit(1);
-	 }
+	 esErrorConSalida(sockDeEspera,"Fallo en la creacion del socket de espera");
 
 	 valorRtaSetSockOpt = setsockopt(sockDeEspera, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
-	 if (valorRtaSetSockOpt == -1) {
-		 perror("Error en setsockopt en el socket de espera");
-		 exit(1);
-	 }
+	 esErrorConSalida(valorRtaSetSockOpt,"Error en setSockOpt en el socket de espera");
 
 	 printf("Setsockopt correcto\n");
 	 puts("Socket de espera creado\n");
@@ -112,33 +105,24 @@ int main(int argc, char *argv[]) {
 	 bzero(&(espera.sin_zero), 8);
 
 	 valorRtaBind = bind(sockDeEspera, (struct sockaddr *) &espera,sizeof(struct sockaddr));
-
-	 if (valorRtaBind == -1) {
-		 perror("Error en Bind");
-		 exit(1);
-	 }
+	 esErrorConSalida(valorRtaBind,"Error en Bind");
 
 	 printf("Bind correcto\n");
 	 puts("Esperando la conexion del kernel\n");
 
 	 valorRtaListen = listen(sockDeEspera,1);
+	 esErrorConSalida(valorRtaListen,"Error en Listen");
 
-	 if ( valorRtaListen == -1) {
-		 perror("Error en listen");
-		 exit(1);
-	 }
 
 	 longitudEstructuraSocket= sizeof (datosDelKernel);
+
 	 sockAlKernel = accept(sockDeEspera,(struct sockaddr *) &datosDelKernel,&longitudEstructuraSocket);
-	 if (sockAlKernel == -1)
-		 perror("Error en accept");
+	 esErrorConSalida(sockAlKernel,"Error en el accept");
 
 	 close(sockDeEspera); //Se cierra el socket que se usaba para escuchar ya que no es relevante
 
 	 longitudDatosEnviados = send(sockAlKernel,handshake, strlen(handshake),0);
-
-	 if(longitudDatosEnviados == -1)
-		 perror ("Fallo en el handshake");
+	 esErrorSinSalida(longitudDatosEnviados,"Fallo en el handshake");
 
 	 puts ("La conexion al proceso kernel fue exitosa\n");
 	 puts ("Esperando mensajes\n");
@@ -146,13 +130,10 @@ int main(int argc, char *argv[]) {
 	 while(1) {
 
 		 bytesRecibidos = recv(sockAlKernel,buffer,sizeof(buffer),0);
-		 if(bytesRecibidos == -1)
-			 perror ("Error en la recepcion");
+		 esErrorSinSalida(bytesRecibidos,"Fallo en la recepcion");
 
-		 if(bytesRecibidos == 0){
-			 perror("El kernel se ha desconectado");
-			 exit(1);
-		 }
+		 sinBytesRecibidos(bytesRecibidos);
+
 		 printf ("Buffer: %s\n",buffer);
 		 memset (buffer,'\0',SIZE_DATA);
 	 }

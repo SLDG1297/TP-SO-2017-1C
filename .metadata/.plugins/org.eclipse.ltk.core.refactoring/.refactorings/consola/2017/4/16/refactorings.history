@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;consola/configConsola.c&apos; to &apos;consola.c&apos;" description="Rename resource &apos;configConsola.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="configConsola.c" name="consola.c" stamp="1492212776986" updateReferences="true"/>
-</session>

@@ -30,6 +30,7 @@
 #include <commons/collections/queue.h>
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
+#include "../librerias/controlErrores.h"
 
 #define RUTA_ARCHIVO "./config_consola.cfg"
 #define SIZE_DATA 1024
@@ -63,18 +64,17 @@ int main(int argc, char *argv[]) {
 
 //DECLARACION DE VARIABLES PARA VALORES DE RESPUESTA
 
-		int valorRtaConnect;
+		int valorRtaConnect = 0;
 
 // CODIGO PRINCIPAL DE LA CONSOLA
 
 	       // host = gethostbyname(argv[1]);
 
 	        //*Se crea el socket para conectarse con el kernel
-	        if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-	        {
-	            perror("Socket");
-	            exit(1);
-	        }
+
+			sock = socket(AF_INET, SOCK_STREAM, 0);
+			esErrorConSalida(sock,"Error en el Socket");
+
 
 	        //ASIGNACION DE DATOS DEL KERNEL
 
@@ -87,12 +87,8 @@ int main(int argc, char *argv[]) {
 	        //CONEXION A KERNEL
 
 	        valorRtaConnect = connect(sock, (struct sockaddr *)&kernel_dir,sizeof(struct sockaddr));
+	        esErrorConSalida(valorRtaConnect,"Error en el connect");
 
-	        if (valorRtaConnect == -1)
-	        {
-	            perror("Connect");
-	            exit(1);
-	        }
 
 	        //*El cliente espera un mensaje de parte del kernel (handshake)
 
@@ -103,7 +99,7 @@ int main(int argc, char *argv[]) {
 	        while(1)
 	        {
 	           printf("\nDatos a enviar: ");
-	           gets(datosEnviar);
+	           scanf("s%",datosEnviar);
 	           send(sock,datosEnviar,strlen(datosEnviar), 0);
 
 	               memset (datosEnviar,'\0',1024);

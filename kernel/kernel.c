@@ -31,6 +31,7 @@
 #include <commons/collections/queue.h>
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
+#include "../librerias/controlErrores.h"
 
 #define RUTA_ARCHIVO "./config_kernel.cfg"
 #define SIZE_DATA 1024
@@ -115,19 +116,13 @@ int main(int argc, char *argv[])
 
 
 //CONEXION AL PROCESO MEMORIA
-	sockMemoria = socket (AF_INET,SOCK_STREAM,0);
 
-	if (sockMemoria == -1){
-		perror("Fallo en la creacion del socket a memoria");
-		exit(1);
-	}
+	sockMemoria = socket (AF_INET,SOCK_STREAM,0);
+	// esErrorConSalida controla si el resultado obtenido por una funcion X fue un error, siendo el error considerado con el valor -1
+	esErrorConSalida(sockMemoria,"Fallo en la creacion del socket a memoria");
 
 	valorRtaSetSockOpt = setsockopt(sockMemoria, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
-	if (valorRtaSetSockOpt== -1){
-		perror("Error en el setsockopt del socket memoria");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaSetSockOpt,"Error en el setsockopt del socket memoria");
 
 //ASIGNACION DE DATOS DE LA MEMORIA
     memoria_dir.sin_family = AF_INET;
@@ -138,25 +133,14 @@ int main(int argc, char *argv[])
 	puts("Enviando conexion a proceso memoria\n");
 
 	valorRtaConnect=connect(sockMemoria, (struct sockaddr *)&memoria_dir, sizeof(struct sockaddr));
-
-    if(valorRtaConnect==-1)	{
-	  perror ("Error al conectarse al proceso memoria");
-	  exit (1);
-	}
+	esErrorConSalida(valorRtaConnect,"Error al conectarse al proceso memoria");
 
     valorRtaRecv = recv(sockMemoria,buffer,sizeof(buffer),0);
-
-    if (valorRtaRecv == -1){
-	  perror ("Error en el handshake de memoria (recepcion)");
-	  exit(1);
-	}
+	esErrorConSalida(valorRtaRecv,"Error en el handshake de memoria (recepcion)");
 
 	valorRtaSend = send(sockMemoria,handshake,strlen(handshake),0);
+	esErrorConSalida(valorRtaSend,"Error en el handshake de memoria (envio)");
 
-    if (valorRtaSend == -1){
-      perror ("Error en el handshake de memoria (envio)");
-	  exit(1);
-	}
 
     puts(buffer);
     FD_SET(sockMemoria, &socketsRelevantes);
@@ -166,16 +150,11 @@ int main(int argc, char *argv[])
 //CONEXION AL PROCESO FILE SYSTEM
 
 	sockFileSystem = socket (AF_INET,SOCK_STREAM,0);
+	esErrorConSalida(sockFileSystem,"Fallo en la creacion del socket fileSystem");
 
-	if (sockFileSystem == -1){
-		perror("Fallo en la creacion del socket fileSystem");
-		exit(1);
-	}
+
 	valorRtaSetSockOpt = setsockopt(sockFileSystem, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-	if (valorRtaSetSockOpt == -1){
-		perror("Error en el setsockopt del socket fileSystem");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaSetSockOpt,"Error en el setsockopt del socket fileSystem");
 
 //ASIGNACION DE DATOS PARA EL FILE SYSTEM
     filesystem_dir.sin_family = AF_INET;
@@ -186,22 +165,15 @@ int main(int argc, char *argv[])
     puts("Enviando conexion a proceso FileSystem\n");
 
     valorRtaConnect =connect(sockFileSystem, (struct sockaddr *)&filesystem_dir, sizeof(struct sockaddr));
-    if(valorRtaConnect==-1){
-    	perror ("Error al conectarse al proceso fileSystem");
-    	exit (1);
-	}
+	esErrorConSalida(valorRtaConnect,"Error al conectarse al proceso fileSystem");
+
     valorRtaRecv=recv (sockFileSystem,buffer,sizeof(buffer),0);
-	if (valorRtaRecv ==-1){
-		perror ("Error en el handshake de fileSystem (recepcion)");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaRecv,"Error en el handshake de fileSystem (recepcion)");
+
 
 	valorRtaSend = send(sockFileSystem,handshake,strlen(handshake),0);
 
-	if (valorRtaSend==-1){
-		perror ("Error en el handshake de fileSystem (envio)");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaSend,"Error en el handshake de fileSystem (envio)");
 
 	puts(buffer);
 	FD_SET(sockFileSystem, &socketsRelevantes);
@@ -212,17 +184,11 @@ int main(int argc, char *argv[])
 //CREACION DEL SOCKET ESCUCHA Y VERIFICACION DE ERROR
 
 	sockListener = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockListener == -1){
-		perror("Socket");
-		exit(1);
-	}
+	esErrorConSalida(sockListener,"Error en el Socket ");
+
 
 	valorRtaSetSockOpt=setsockopt(sockListener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) ;
-
-	if (valorRtaSetSockOpt== -1){
-		perror("Error en setsockopt");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaSetSockOpt,"Error en setsockopt");
 
 	printf("Setsockopt correcto\n");
 	puts("Socket listener creado");
@@ -237,18 +203,14 @@ int main(int argc, char *argv[])
 	//*Se asocia el listener al puerto de escucha
 
 	valorRtaBind =bind(sockListener, (struct sockaddr *) &kernel_dir,sizeof(struct sockaddr));
-	if (valorRtaBind == -1){
-		perror("Error en Bind");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaBind,"Error en Bind");
+
 
 	printf("Bind correcto\n");
 
 	valorRtaListen =listen(sockListener, 10);
-	if (valorRtaListen == -1){
-		perror("Error en listen");
-		exit(1);
-	}
+	esErrorConSalida(valorRtaListen,"Error en listen");
+
 
 	printf("Listen correcto\n");
 	printf("\nEsperando en el puerto %i\n", PUERTO_PROG);
@@ -262,10 +224,7 @@ int main(int argc, char *argv[])
 		socketsFiltrados = socketsRelevantes;
 
 		valorRtaSelect = select(fileDescMax + 1, &socketsFiltrados, NULL, NULL, &tv);
-		if (valorRtaSelect == -1){
-			perror("Error en select");
-			exit(1);
-		}
+		esErrorConSalida(valorRtaSelect,"Error en select");
 
 		for (i = 0; i <= fileDescMax; i++){
 
@@ -279,7 +238,7 @@ int main(int argc, char *argv[])
 					if (nuevoSocket == -1)
 						perror("Error en accept");
 
-						else{
+					else{
 
 							printf("Accept correcto\n");
 							FD_SET(nuevoSocket, &socketsRelevantes);
@@ -306,8 +265,8 @@ int main(int argc, char *argv[])
 						if(longitudBytesRecibidos == 0)
 							printf("%s: Socket %d colgado\n", argv[0], i); //Conexion cerrada
 
-							else
-								perror("Error en el recv");
+						else
+							perror("Error en el recv");
 
 						//Se cierra el socket
 						close(i);
@@ -320,8 +279,8 @@ int main(int argc, char *argv[])
 							if(FD_ISSET(j, &socketsRelevantes)){
 							   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
 								 if(j != sockListener && j != i ) {
-								   if(send(j, buffer, longitudBytesRecibidos, 0) == -1)
-								   perror("Error en send");
+								   valorRtaSend = send(j, buffer, longitudBytesRecibidos, 0);
+									 esErrorSinSalida(valorRtaSend,"Error en Send");
 								 	 	 	 	 	 	 	 }
 
 														}//cierra - if(FD_ISSET(j, &socketsRelevantes))
@@ -339,4 +298,3 @@ int main(int argc, char *argv[])
 		}//cierra -  while(1)
 	   return 0;
 }
-
