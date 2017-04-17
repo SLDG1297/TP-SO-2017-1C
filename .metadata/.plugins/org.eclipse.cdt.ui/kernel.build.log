@@ -1,0 +1,23 @@
+15:23:01 **** Build of configuration Debug for project kernel ****
+make all 
+Building file: ../kernel.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"kernel.d" -MT"kernel.d" -o "kernel.o" "../kernel.c"
+../kernel.c: In function ‘main’:
+../kernel.c:237:48: warning: pointer targets in passing argument 3 of ‘accept’ differ in signedness [-Wpointer-sign]
+      nuevoSocket = accept(sockListener,(struct sockaddr *) &cliente_dir,&longitudEstructuraSocket);
+                                                ^
+In file included from ../kernel.c:12:0:
+/usr/include/i386-linux-gnu/sys/socket.h:243:12: note: expected ‘socklen_t * __restrict__’ but argument is of type ‘int *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
+Finished building: ../kernel.c
+ 
+Building target: kernel
+Invoking: GCC C Linker
+gcc  -o "kernel"  ./kernel.o   -lcommons
+Finished building target: kernel
+ 
+
+15:23:03 Build Finished (took 2s.197ms)
+

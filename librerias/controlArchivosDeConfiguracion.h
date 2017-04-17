@@ -8,6 +8,8 @@
 #ifndef CONTROLARCHIVOSDECONFIGURACION_H_
 #define CONTROLARCHIVOSDECONFIGURACION_H_
 
+#include <commons/config.h>
+
 t_config* llamarArchivo(char* RUTA_ARCHIVO) {
 
 	//Dirección para manejar el archivo de configuración.

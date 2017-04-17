@@ -11,7 +11,7 @@
 void esErrorConSalida(int valorRtaFuncion, char* mensajeError){
 	if (valorRtaFuncion == -1){
 		perror(mensajeError);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}	
 }
 
@@ -24,7 +24,7 @@ void esErrorSinSalida(int valorRtaFuncion, char* mensajeError){
 void sinBytesRecibidos(int bytesRecibidos){
 	if(bytesRecibidos == 0)	{
 		perror("El kernel se ha desconectado");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 }
 

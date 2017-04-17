@@ -37,6 +37,7 @@
 #define SIZE_DATA 1024
 
 
+
 int main(int argc, char *argv[])
 {
 	//CODIGO PARA LLAMAR AL ARCHIVO
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 
-	int	PUERTO_PROG = busquedaClaveNumerica(configuracion,"PUERTO_PROG");
+	int	PUERTO_KERNEL = busquedaClaveNumerica(configuracion,"PUERTO_KERNEL");
 //	int PUERTO_CPU = busquedaClaveNumerica(configuracion,"PUERTO_CPU");
 	int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion,"PUERTO_MEMORIA");
 	int PUERTO_FS = busquedaClaveNumerica(configuracion,"PUERTO_FS");
@@ -118,7 +119,7 @@ int main(int argc, char *argv[])
 //CONEXION AL PROCESO MEMORIA
 
 	sockMemoria = socket (AF_INET,SOCK_STREAM,0);
-	// esErrorConSalida controla si el resultado obtenido por una funcion X fue un error, siendo el error considerado con el valor -1
+	//esErrorConSalida controla si el resultado obtenido por una funcion X fue un error, siendo el error considerado con el valor -1
 	esErrorConSalida(sockMemoria,"Fallo en la creacion del socket a memoria");
 
 	valorRtaSetSockOpt = setsockopt(sockMemoria, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
@@ -196,7 +197,7 @@ int main(int argc, char *argv[])
 //ASIGNACION DE DATOS PARA EL KERNEL
 
 	kernel_dir.sin_family = AF_INET;
-	kernel_dir.sin_port = htons(PUERTO_PROG); //Aca se pone el puerto del listener
+	kernel_dir.sin_port = htons(PUERTO_KERNEL); //Aca se pone el puerto del listener
 	kernel_dir.sin_addr.s_addr = INADDR_ANY;
 	bzero(&(kernel_dir.sin_zero), 8);
 
@@ -213,7 +214,7 @@ int main(int argc, char *argv[])
 
 
 	printf("Listen correcto\n");
-	printf("\nEsperando en el puerto %i\n", PUERTO_PROG);
+	printf("\nEsperando en el puerto %i\n", PUERTO_KERNEL);
 
 	//*Se agregan el listener a los sockets relevantes y se lo asigna como maximo por ser el unico en la lista en este momento
 	FD_SET(sockListener, &socketsRelevantes);

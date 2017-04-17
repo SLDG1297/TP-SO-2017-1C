@@ -1,0 +1,10 @@
+15:16:26 **** Build of configuration Debug for project fileSystem2 ****
+make all 
+Building target: fileSystem2
+Invoking: GCC C Linker
+gcc  -o "fileSystem2"  ./file_system.o   -lcommons
+Finished building target: fileSystem2
+ 
+
+15:16:27 Build Finished (took 999ms)
+

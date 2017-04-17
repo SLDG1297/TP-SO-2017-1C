@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 			sinBytesRecibidos(bytesRecibidos);
 
 			printf ("Buffer: %s\n",buffer);
-			memset (buffer,'\0',1024);
+			memset (buffer,'\0',SIZE_BUFFER);
 		}
 
 
