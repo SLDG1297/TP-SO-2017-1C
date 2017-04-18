@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;kernel/kernel_config.c&apos; to &apos;kernel.c&apos;" description="Rename resource &apos;kernel_config.c&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="kernel_config.c" name="kernel.c" stamp="1492268954487" updateReferences="true"/>
-</session>
