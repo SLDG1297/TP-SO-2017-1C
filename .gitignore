@@ -1,3 +1,8 @@
+.project
+.classpath
+target/*
+.settings/*
+
 # Object files
 *.o
 *.ko
