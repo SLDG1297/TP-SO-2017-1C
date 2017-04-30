@@ -31,9 +31,13 @@
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
 
+//Sigan las instrucciones de acá para instalar el parser:
+//https://github.com/sisoputnfrba/ansisop-parser
+#include <parser/metadata_program.h>
+
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
-#define RUTA_ARCHIVO "./config_consola.cfg"
+#define RUTA_ARCHIVO "./config_cpu.cfg"
 #define SIZE_DATA 1024
 #define codigoCpu "1"
 
@@ -44,9 +48,9 @@ int main(int argc, char *argv[]) {
 //Estructura para manejar el archivo de configuración -- t_config*
 //Crear estructura de configuración para obtener los datos del archivo de configuración.
 
-	/*t_config* configuracion;
+	t_config* configuracion;
 	char* ruta = RUTA_ARCHIVO;
-	configuracion = llamarArchivo(ruta);*/
+	configuracion = llamarArchivo(ruta);
 
 //DECLARACION DE VARIABLES PARA LA CONEXION AL KERNEL Y A LA MEMORIA
 
@@ -58,19 +62,19 @@ int main(int argc, char *argv[]) {
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 
-	//*Obtener IP del Kernel del archivo de configuración y chequear que sea correcto.
-	char* IP_KERNEL = "127.0.0.1";//busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
-	char* IP_MEMORIA = "127.0.0.1";//busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+	//*Obtener IP de0 Kernel y Memoria del archivo de configuración y chequear que sea correcto.
+	char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+	char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
 
-	//*Obtener el puerto de Kernel y de la memoria del archivo de configuración y chequear que sea correcto.
-	int PUERTO_KERNEL = 6000;//busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
-	int PUERTO_MEMORIA = 5020;//busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+	//*Obtener el puerto de Kernel y Memoria del archivo de configuración y chequear que sea correcto.
+	int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+	int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
 
 //DECLARACION DE VARIABLES PARA VALORES DE RESPUESTA
 
 	int valorRtaConnect = 0;
 
-// CODIGO PRINCIPAL DE LA CPU
+//CODIGO PRINCIPAL DE LA CPU
 
 	// host = gethostbyname(argv[1]);
 
