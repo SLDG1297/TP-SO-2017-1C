@@ -8,6 +8,8 @@
 #ifndef CONTROLERRORES_H_
 #define CONTROLERRORES_H_
 
+#include <stdlib.h>
+
 void esErrorConSalida(int valorRtaFuncion, char* mensajeError){
 	if (valorRtaFuncion == -1){
 		perror(mensajeError);
@@ -27,7 +29,5 @@ void sinBytesRecibidos(int bytesRecibidos){
 		exit(EXIT_FAILURE);
 	}
 }
-
-
 
 #endif /* CONTROLERRORES_H_ */

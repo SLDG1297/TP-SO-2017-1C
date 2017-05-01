@@ -6,7 +6,7 @@
  */
 
 
- #include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include <sys/types.h>
@@ -31,12 +31,14 @@
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
 
-//Sigan las instrucciones de acá para instalar el parser:
+//Sigan las instrucciones de acá para instalar el parser acá:
 //https://github.com/sisoputnfrba/ansisop-parser
 #include <parser/metadata_program.h>
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
+#include "../librerias/operacionesCPU.h"
+
 #define RUTA_ARCHIVO "./config_cpu.cfg"
 #define SIZE_DATA 1024
 #define codigoCpu "1"
@@ -112,7 +114,7 @@ int main(int argc, char *argv[]) {
 	datosRecibir[bytesRecibidosKernel] = '\0';
 
 	//CONEXION A MEMORIA
-	valorRtaConnect = connect(sockMemoria, (struct sockaddr *) &memoria_dir,sizeof(struct sockaddr));
+	valorRtaConnect = connect(sockMemoria, (struct sockaddr *) &memoria_dir, sizeof(struct sockaddr));
 	esErrorConSalida(valorRtaConnect, "Error en el connect");
 
 	//*La cpu espera un mensaje de parte de la memoria (handshake)
