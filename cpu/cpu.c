@@ -120,7 +120,10 @@ int main(int argc, char *argv[]) {
 	bytesRecibidosMemoria = recv(sockMemoria, datosRecibir, SIZE_DATA, 0);
 	datosRecibir[bytesRecibidosMemoria] = '\0';
 
-	while (1) {
+
+
+	while (1)
+	{
 		printf("\nDatos a enviar: ");
 		gets(datosEnviar);
 		send(sockKernel, datosEnviar, strlen(datosEnviar), 0);
