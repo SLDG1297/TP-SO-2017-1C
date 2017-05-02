@@ -8,6 +8,16 @@
 #ifndef OPERACIONESCPU_H_
 #define OPERACIONESCPU_H_
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+#include <parser/metadata_program.h>
+
+#include "../librerias/controlErrores.h"
+
+#define SIZE_DATA 1024
+
 // Primera aproximación de las funciones que realiza la CPU y sus estructuras de datos.
 // Tranquilos, va a haber cambios XD
 
@@ -38,15 +48,19 @@ typedef struct{
 } stack; // Datos de una llamada a función.
 
 
-//PCB
 typedef struct {
 	int pid; // Identificador de un proceso.
 	int pc; // Program counter: indica el número de la siguiente instrucción a ejecutarse.
-	int paginasUsadas; // Cantidad de páginas usadas por el programa (Desde 0).
-	int indiceCodigo[][]; // Identifica línea útil de código a partir de su posición en el programa para convertirla en una posición de memoria para su consulta.
+	// int paginasUsadas; // Cantidad de páginas usadas por el programa (Desde 0).
+	// uint8_t indiceCodigo[][]; // Identifica línea útil de código a partir de su posición en el programa para convertirla en una posición de memoria para su consulta.
 	// ¿diccionario? indiceEtiqueta; // Tiene el valor del PC que necesita una función para ser llamada.
-	stack indiceStack; // Ordena valores almacenados en la pila de funciones con sus valores.
+	// stack indiceStack; // Ordena valores almacenados en la pila de funciones con sus valores.
+	int exitCode; // Motivo por el cual finalizó un programa.
 } pcb; // El Process Control Block que maneja el Kernel.
+// De momento, me limito a los dos datos de los que habla el checkpoint.
+
+
+char buffer[SIZE_DATA];
 
 
 
@@ -55,24 +69,28 @@ typedef struct {
 
 // Con Kernel
 
-void recibirPCB(pcb unPcb); // Recibe PCB del Kernel para ejecutar un programa.
+void handshakeKernel(int socketKernel); // Realiza handshake con el Kernel.
 
-void concluirOperacion(); // Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
+pcb recibirPCB(int socketKernel); // Recibe PCB del Kernel para ejecutar un programa.
 
-void finEjecucion(); // Indicar finalización de un proceso.
+void concluirOperacion(int socketKernel); // Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
 
-void conectarNuevaCPU(); // Conectar otra CPU al sistema.
+void finEjecucion(int socketKernel); // Indicar finalización de un proceso.
 
-void desconectarCPU(int senial); // ¿Por qué no puedo poner 'ñ'?
+void conectarNuevaCPU(int socketKernel); // Conectar otra CPU al sistema.
+
+void desconectarCPU(int senial, int socketKernel); // ¿Por qué no puedo poner 'ñ'?
 
 
 // Con Memoria
 
-void solicitarSentencia(posicionMemoria unaPos); // Solicitar sentencia en Memoria.
+void handshakeMemoria(int socketMemoria); // Realiza handshake con Memoria.
 
-void obtenerDatos(posicionMemoria unaPos); // Obtiene información de un programa en ejecución.
+char* solicitarSentencia(posicionMemoria unaPos, int socketMemoria); // Solicitar sentencia en Memoria.
 
-void actualizarValores(/* Cosas, */ posicionMemoria unaPos); // Actualiza estrtucturas tras una operación.
+char* obtenerDatos(posicionMemoria unaPos, int socketMemoria); // Obtiene información de un programa en ejecución.
+
+void actualizarValores(char* nuevosDatos, posicionMemoria unaPos, int socketMemoria); // Actualiza estrtucturas tras una operación.
 
 
 
@@ -89,5 +107,93 @@ void actualizarPC(int PC, int valor); // Incrementa el Program Counter con la pr
 void arrojarExcepcion(/* Excepción */);
 
 
+
+// Auxiliares
+
+void limpiarBuffer();
+
+
+
+
+// Definiciones
+
+pcb recibirPCB(int socketKernel){
+	pcb datosPcb;
+
+	limpiarBuffer();
+
+	int cantidadRecibida = recv(socketKernel, buffer, SIZE_DATA, 0);
+	esErrorConSalida(cantidadRecibida, "Error al recibir PCB.");
+
+	// Acá tendría que pasar lo del buffer al PCB.
+
+	return datosPcb;
+}
+
+void concluirOperacion(pcb datosPcb, int socketKernel){
+	limpiarBuffer();
+
+	// Acá debería setearse el buffer con los datos de la operación que terminó.
+
+	send(socketKernel, buffer, SIZE_DATA, 0);
+}
+
+void finEjecucion(int socketKernel){
+	limpiarBuffer();
+
+	// Acá debería setearse el buffer con el Exit Code del proceso.
+
+	send(socketKernel, buffer, SIZE_DATA, 0);
+}
+
+char* solicitarSentencia(posicionMemoria unaPos, int socketMemoria){
+	char* unaSentencia;
+
+	limpiarBuffer();
+
+	// Acá debería setearse el buffer con la posición de la sentencia que se busca en Memoria.
+
+	send(socketMemoria, buffer, SIZE_DATA, 0);
+
+	int cantidadRecibida = recv(socketMemoria, buffer, SIZE_DATA, 0);
+	esErrorConSalida(cantidadRecibida, "Error al recibir sentencia.");
+
+	// Acá se devuelve la línea útil que debería ser parseada por la CPU.
+
+	return unaSentencia;
+}
+
+char* obtenerDatos(posicionMemoria unaPos, int socketMemoria){
+	char* unosDatos;
+
+	limpiarBuffer();
+
+	// Acá debería setearse el buffer con la posición del dato que se busca en Memoria.
+
+	send(socketMemoria, buffer, SIZE_DATA, 0);
+
+	int cantidadRecibida = recv(socketMemoria, buffer, SIZE_DATA, 0);
+	esErrorConSalida(cantidadRecibida, "Error al recibir sentencia.");
+
+	// Acá se devuelve dato con el que va a operar la CPU.
+
+	return unosDatos;
+}
+
+void actualizarValores(char* nuevosDatos, posicionMemoria unaPos, int socketMemoria){
+	limpiarBuffer();
+
+	// Acá se setea el buffer con la posición en Memoria que va a recibir los nuevos datos.
+
+	send(socketMemoria, buffer, SIZE_DATA, 0);
+}
+
+void actualizarPC(int PC, int valor){
+	PC = valor; // Lo único que debe funcionar correctamente XD
+}
+
+void limpiarBuffer(){
+	memset (buffer,'\0',SIZE_DATA);
+}
 
 #endif /* OPERACIONESCPU_H_ */
