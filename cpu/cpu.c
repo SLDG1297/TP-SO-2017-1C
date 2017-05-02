@@ -5,10 +5,6 @@
  *      Author: utnso
  */
 
-
-#include <stdlib.h>
-#include <stdio.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -108,7 +104,8 @@ int main(int argc, char *argv[]) {
 	valorRtaConnect = connect(sockKernel, (struct sockaddr *) &kernel_dir, sizeof(struct sockaddr));
 	esErrorConSalida(valorRtaConnect, "Error en el connect");
 
-	//*La cpu espera un mensaje de parte del kernel (handshake)
+	//*La cpu espera un mensaje de parte del kernel (handsake);
+	handshakeKernel(sockKernel);
 
 	bytesRecibidosKernel = recv(sockKernel, datosRecibir, SIZE_DATA, 0);
 	datosRecibir[bytesRecibidosKernel] = '\0';
@@ -118,6 +115,7 @@ int main(int argc, char *argv[]) {
 	esErrorConSalida(valorRtaConnect, "Error en el connect");
 
 	//*La cpu espera un mensaje de parte de la memoria (handshake)
+	handshakeMemoria(sockMemoria);
 
 	bytesRecibidosMemoria = recv(sockMemoria, datosRecibir, SIZE_DATA, 0);
 	datosRecibir[bytesRecibidosMemoria] = '\0';
@@ -126,7 +124,7 @@ int main(int argc, char *argv[]) {
 		printf("\nDatos a enviar: ");
 		gets(datosEnviar);
 		send(sockKernel, datosEnviar, strlen(datosEnviar), 0);
-		memset(datosEnviar, '\0', 1024);
+		memset(datosEnviar, '\0', SIZE_DATA);
 	}
 
 	return 0;
