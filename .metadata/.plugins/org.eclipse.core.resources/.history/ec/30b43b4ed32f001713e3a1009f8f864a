@@ -44,9 +44,9 @@ typedef struct{
 
 
 typedef struct{
-	t_list argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
-	t_list variables; // Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
-	int retPos; // Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+	// listaArgumentos argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+	t_list // listaVariables variables; // Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
+	int* retPos; // Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
 	posicionMemoria retVar; // Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
 } stack; // Datos de una llamada a función.
 

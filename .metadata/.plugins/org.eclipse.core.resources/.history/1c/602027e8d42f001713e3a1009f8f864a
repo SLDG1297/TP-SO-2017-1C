@@ -40,7 +40,7 @@
 #define SIZE_DATA 1024
 #define codigoCpu "2"
 
-pcb PCB;
+
 
 int main(int argc, char *argv[]){
 //CODIGO PARA LLAMAR AL ARCHIVO

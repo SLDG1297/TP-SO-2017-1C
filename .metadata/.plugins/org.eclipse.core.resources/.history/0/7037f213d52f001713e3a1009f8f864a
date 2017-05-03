@@ -42,7 +42,8 @@
 
 pcb PCB;
 
-int main(int argc, char *argv[]){
+
+
 //CODIGO PARA LLAMAR AL ARCHIVO
 
 //Estructura para manejar el archivo de configuración -- t_config*

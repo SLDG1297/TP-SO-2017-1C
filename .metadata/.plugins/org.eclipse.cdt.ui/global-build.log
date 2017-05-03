@@ -1,0 +1,1883 @@
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:47:21 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../cpu.c:36:0:
+../../librerias/operacionesCPU.h: In function ‘funcion’:
+../../librerias/operacionesCPU.h:121:2: error: unknown type name ‘jaja’
+  jaja saludos
+  ^
+../../librerias/operacionesCPU.h:122:1: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘}’ token
+ }
+ ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h:45:11: error: static declaration of ‘definirVariable’ follows non-static declaration
+ t_puntero definirVariable(t_nombre_variable identificador_variable){
+           ^
+../../librerias/primitivasParser.h:21:11: note: previous declaration of ‘definirVariable’ was here
+ t_puntero definirVariable(t_nombre_variable identificador_variable);
+           ^
+../cpu.c:43:5: warning: ‘main’ is normally a non-static function [-Wmain]
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:127:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:126:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../cpu.c:55:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:55:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: In function ‘funcion’:
+../cpu.c:140:1: error: expected declaration or statement at end of input
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:47:30 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../cpu.c:36:0:
+../../librerias/operacionesCPU.h: In function ‘funcion’:
+../../librerias/operacionesCPU.h:121:2: error: unknown type name ‘jaja’
+  jaja saludos
+  ^
+../../librerias/operacionesCPU.h:122:1: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘}’ token
+ }
+ ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h:45:11: error: static declaration of ‘definirVariable’ follows non-static declaration
+ t_puntero definirVariable(t_nombre_variable identificador_variable){
+           ^
+../../librerias/primitivasParser.h:21:11: note: previous declaration of ‘definirVariable’ was here
+ t_puntero definirVariable(t_nombre_variable identificador_variable);
+           ^
+../cpu.c:43:5: warning: ‘main’ is normally a non-static function [-Wmain]
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:127:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:126:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../cpu.c:55:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:55:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: In function ‘funcion’:
+../cpu.c:140:1: error: expected declaration or statement at end of input
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:49:13 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+../cpu.c: In function ‘main’:
+../cpu.c:127:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:126:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../cpu.c:55:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:55:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:36:0:
+../cpu.c: In function ‘solicitarSentencia’:
+../../librerias/operacionesCPU.h:159:2: warning: ‘unaSentencia’ is used uninitialized in this function [-Wuninitialized]
+  return unaSentencia;
+  ^
+../cpu.c: In function ‘obtenerDatos’:
+../../librerias/operacionesCPU.h:176:2: warning: ‘unosDatos’ is used uninitialized in this function [-Wuninitialized]
+  return unosDatos;
+  ^
+Finished building: ../cpu.c
+ 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:49:50 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:49:55 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:50:05 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:50:25 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:50:58 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+03:51:18 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:26:03 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:26:49 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:27:10 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:31:26 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:37:06 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:38:20 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:44:56 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+../cpu.c: In function ‘main’:
+../cpu.c:130:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:58:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:58:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:47:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+In file included from ../cpu.c:36:0:
+../cpu.c: In function ‘solicitarSentencia’:
+../../librerias/operacionesCPU.h:162:2: warning: ‘unaSentencia’ is used uninitialized in this function [-Wuninitialized]
+  return unaSentencia;
+  ^
+../cpu.c: In function ‘obtenerDatos’:
+../../librerias/operacionesCPU.h:179:2: warning: ‘unosDatos’ is used uninitialized in this function [-Wuninitialized]
+  return unosDatos;
+  ^
+Finished building: ../cpu.c
+ 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:46:45 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:47:15 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:128:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../../librerias/primitivasParser.h:48:1: note: each undeclared identifier is reported only once for each function it appears in
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:128:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:47:18 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:128:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../../librerias/primitivasParser.h:48:1: note: each undeclared identifier is reported only once for each function it appears in
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:128:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:47:34 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:128:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../../librerias/primitivasParser.h:48:1: note: each undeclared identifier is reported only once for each function it appears in
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:128:6: warning: unused variable ‘PCB’ [-Wunused-variable]
+  pcb PCB = recibirPCB(sockKernel);
+      ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:48:17 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:128:2: error: ‘PCB’ undeclared (first use in this function)
+  PCB = recibirPCB(sockKernel);
+  ^
+../../librerias/../cpu/cpu.c:128:2: note: each undeclared identifier is reported only once for each function it appears in
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:128:2: error: ‘PCB’ undeclared (first use in this function)
+  PCB = recibirPCB(sockKernel);
+  ^
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:48:29 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:128:2: error: ‘PCB’ undeclared (first use in this function)
+  PCB = recibirPCB(sockKernel);
+  ^
+../../librerias/../cpu/cpu.c:128:2: note: each undeclared identifier is reported only once for each function it appears in
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:128:2: error: ‘PCB’ undeclared (first use in this function)
+  PCB = recibirPCB(sockKernel);
+  ^
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:48:34 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:48:38 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:49:01 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:49:16 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:130:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:58:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:58:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:46:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:46:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:130:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:58:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:58:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:49:24 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:54:2: warning: data definition has no type or storage class [enabled by default]
+  configuracion = llamarArchivo(ruta);
+  ^
+../../librerias/../cpu/cpu.c:54:2: warning: type defaults to ‘int’ in declaration of ‘configuracion’ [-Wimplicit-int]
+../../librerias/../cpu/cpu.c:54:2: error: conflicting types for ‘configuracion’
+../../librerias/../cpu/cpu.c:52:12: note: previous declaration of ‘configuracion’ was here
+  t_config* configuracion;
+            ^
+../../librerias/../cpu/cpu.c:54:18: warning: initialization makes integer from pointer without a cast [enabled by default]
+  configuracion = llamarArchivo(ruta);
+                  ^
+../../librerias/../cpu/cpu.c:54:2: error: initializer element is not constant
+  configuracion = llamarArchivo(ruta);
+  ^
+../../librerias/../cpu/cpu.c:60:22: error: expected ‘)’ before '\x0'
+  memset(datosEnviar, '\0', SIZE_DATA);
+                      ^
+../../librerias/../cpu/cpu.c:61:23: error: expected ‘)’ before '\x0'
+  memset(datosRecibir, '\0', SIZE_DATA);
+                       ^
+../../librerias/../cpu/cpu.c:67:2: warning: passing argument 1 of ‘busquedaClaveAlfanumerica’ makes pointer from integer without a cast [enabled by default]
+  char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:32:7: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
+       ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:67:2: error: initializer element is not constant
+  char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+  ^
+../../librerias/../cpu/cpu.c:68:2: warning: passing argument 1 of ‘busquedaClaveAlfanumerica’ makes pointer from integer without a cast [enabled by default]
+  char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:32:7: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
+       ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:68:2: error: initializer element is not constant
+  char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+  ^
+../../librerias/../cpu/cpu.c:71:2: warning: passing argument 1 of ‘busquedaClaveNumerica’ makes pointer from integer without a cast [enabled by default]
+  int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:23:5: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:71:2: error: initializer element is not constant
+  int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+  ^
+../../librerias/../cpu/cpu.c:72:2: warning: passing argument 1 of ‘busquedaClaveNumerica’ makes pointer from integer without a cast [enabled by default]
+  int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:23:5: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:72:2: error: initializer element is not constant
+  int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+  ^
+../../librerias/../cpu/cpu.c:82:2: warning: data definition has no type or storage class [enabled by default]
+  sockKernel = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../../librerias/../cpu/cpu.c:82:2: warning: type defaults to ‘int’ in declaration of ‘sockKernel’ [-Wimplicit-int]
+../../librerias/../cpu/cpu.c:82:2: error: initializer element is not constant
+../../librerias/../cpu/cpu.c:83:31: error: expected ‘)’ before string constant
+  esErrorConSalida(sockKernel, "Error en el Socket");
+                               ^
+../../librerias/../cpu/cpu.c:84:2: warning: data definition has no type or storage class [enabled by default]
+  sockMemoria = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../../librerias/../cpu/cpu.c:84:2: warning: type defaults to ‘int’ in declaration of ‘sockMemoria’ [-Wimplicit-int]
+../../librerias/../cpu/cpu.c:84:2: error: initializer element is not constant
+../../librerias/../cpu/cpu.c:85:35: error: expected ‘)’ before string constant
+     esErrorConSalida(sockMemoria, "Error en el Socket");
+                                   ^
+../../librerias/../cpu/cpu.c:90:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  kernel_dir.sin_family = AF_INET;
+            ^
+../../librerias/../cpu/cpu.c:91:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  kernel_dir.sin_port = htons(PUERTO_KERNEL);
+            ^
+../../librerias/../cpu/cpu.c:92:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  kernel_dir.sin_addr.s_addr = inet_addr(IP_KERNEL);
+            ^
+../../librerias/../cpu/cpu.c:93:8: error: expected declaration specifiers or ‘...’ before ‘&’ token
+  bzero(&(kernel_dir.sin_zero), 8);
+        ^
+../../librerias/../cpu/cpu.c:93:32: error: expected declaration specifiers or ‘...’ before numeric constant
+  bzero(&(kernel_dir.sin_zero), 8);
+                                ^
+../../librerias/../cpu/cpu.c:98:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  memoria_dir.sin_family = AF_INET;
+             ^
+../../librerias/../cpu/cpu.c:99:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  memoria_dir.sin_port = htons(PUERTO_MEMORIA);
+             ^
+../../librerias/../cpu/cpu.c:100:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  memoria_dir.sin_addr.s_addr = inet_addr(IP_MEMORIA);
+             ^
+../../librerias/../cpu/cpu.c:101:8: error: expected declaration specifiers or ‘...’ before ‘&’ token
+  bzero(&(kernel_dir.sin_zero), 8);
+        ^
+../../librerias/../cpu/cpu.c:101:32: error: expected declaration specifiers or ‘...’ before numeric constant
+  bzero(&(kernel_dir.sin_zero), 8);
+                                ^
+../../librerias/../cpu/cpu.c:105:2: warning: data definition has no type or storage class [enabled by default]
+  valorRtaConnect = connect(sockKernel, (struct sockaddr *) &kernel_dir, sizeof(struct sockaddr));
+  ^
+../../librerias/../cpu/cpu.c:105:2: warning: type defaults to ‘int’ in declaration of ‘valorRtaConnect’ [-Wimplicit-int]
+../../librerias/../cpu/cpu.c:105:2: error: redefinition of ‘valorRtaConnect’
+../../librerias/../cpu/cpu.c:76:6: note: previous definition of ‘valorRtaConnect’ was here
+  int valorRtaConnect = 0;
+      ^
+../../librerias/../cpu/cpu.c:105:87: error: initializer element is not constant
+  valorRtaConnect = connect(sockKernel, (struct sockaddr *) &kernel_dir, sizeof(struct sockaddr));
+                                                                                       ^
+../../librerias/../cpu/cpu.c:106:36: error: expected ‘)’ before string constant
+  esErrorConSalida(valorRtaConnect, "Error en el connect");
+                                    ^
+../../librerias/../cpu/cpu.c:41:19: error: expected ‘)’ before string constant
+ #define codigoCpu "2"
+                   ^
+../../librerias/../cpu/cpu.c:111:19: note: in expansion of macro ‘codigoCpu’
+  send(sockKernel, codigoCpu, strlen(codigoCpu), 0);
+                   ^
+../../librerias/../cpu/cpu.c:116:2: warning: data definition has no type or storage class [enabled by default]
+  valorRtaConnect = connect(sockMemoria, (struct sockaddr *) &memoria_dir, sizeof(struct sockaddr));
+  ^
+../../librerias/../cpu/cpu.c:116:2: warning: type defaults to ‘int’ in declaration of ‘valorRtaConnect’ [-Wimplicit-int]
+../../librerias/../cpu/cpu.c:116:2: error: redefinition of ‘valorRtaConnect’
+../../librerias/../cpu/cpu.c:76:6: note: previous definition of ‘valorRtaConnect’ was here
+  int valorRtaConnect = 0;
+      ^
+../../librerias/../cpu/cpu.c:116:89: error: initializer element is not constant
+  valorRtaConnect = connect(sockMemoria, (struct sockaddr *) &memoria_dir, sizeof(struct sockaddr));
+                                                                                         ^
+../../librerias/../cpu/cpu.c:117:36: error: expected ‘)’ before string constant
+  esErrorConSalida(valorRtaConnect, "Error en el connect");
+                                    ^
+../../librerias/../cpu/cpu.c:41:19: error: expected ‘)’ before string constant
+ #define codigoCpu "2"
+                   ^
+../../librerias/../cpu/cpu.c:122:20: note: in expansion of macro ‘codigoCpu’
+  send(sockMemoria, codigoCpu, strlen(codigoCpu), 0);
+                    ^
+../../librerias/../cpu/cpu.c:129:2: warning: data definition has no type or storage class [enabled by default]
+  PCB = recibirPCB(sockKernel);
+  ^
+../../librerias/../cpu/cpu.c:129:2: warning: type defaults to ‘int’ in declaration of ‘PCB’ [-Wimplicit-int]
+../../librerias/../cpu/cpu.c:129:2: error: conflicting types for ‘PCB’
+../../librerias/../cpu/cpu.c:43:5: note: previous declaration of ‘PCB’ was here
+ pcb PCB;
+     ^
+../../librerias/../cpu/cpu.c:129:8: error: incompatible types when initializing type ‘int’ using type ‘pcb’
+  PCB = recibirPCB(sockKernel);
+        ^
+../../librerias/../cpu/cpu.c:135:2: error: expected identifier or ‘(’ before ‘while’
+  while (1) {
+  ^
+../../librerias/../cpu/cpu.c:142:2: error: expected identifier or ‘(’ before ‘return’
+  return 0;
+  ^
+../../librerias/../cpu/cpu.c:143:1: error: expected identifier or ‘(’ before ‘}’ token
+ }
+ ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:5: error: incompatible types when assigning to type ‘int’ from type ‘pcb’
+ PCB = x;
+     ^
+../cpu.c: At top level:
+../cpu.c:53:8: error: redefinition of ‘ruta’
+  char* ruta = RUTA_ARCHIVO;
+        ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:53:8: note: previous definition of ‘ruta’ was here
+  char* ruta = RUTA_ARCHIVO;
+        ^
+../cpu.c:54:2: warning: data definition has no type or storage class [enabled by default]
+  configuracion = llamarArchivo(ruta);
+  ^
+../cpu.c:54:2: warning: type defaults to ‘int’ in declaration of ‘configuracion’ [-Wimplicit-int]
+../cpu.c:54:2: error: conflicting types for ‘configuracion’
+../cpu.c:52:12: note: previous declaration of ‘configuracion’ was here
+  t_config* configuracion;
+            ^
+../cpu.c:54:18: warning: initialization makes integer from pointer without a cast [enabled by default]
+  configuracion = llamarArchivo(ruta);
+                  ^
+../cpu.c:54:2: error: initializer element is not constant
+  configuracion = llamarArchivo(ruta);
+  ^
+../cpu.c:60:22: error: expected ‘)’ before '\x0'
+  memset(datosEnviar, '\0', SIZE_DATA);
+                      ^
+../cpu.c:61:23: error: expected ‘)’ before '\x0'
+  memset(datosRecibir, '\0', SIZE_DATA);
+                       ^
+../cpu.c:67:8: error: redefinition of ‘IP_KERNEL’
+  char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+        ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:67:8: note: previous definition of ‘IP_KERNEL’ was here
+  char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+        ^
+../cpu.c:67:2: warning: passing argument 1 of ‘busquedaClaveAlfanumerica’ makes pointer from integer without a cast [enabled by default]
+  char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:32:7: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
+       ^
+../cpu.c:67:2: error: initializer element is not constant
+  char* IP_KERNEL = busquedaClaveAlfanumerica(configuracion, "IP_KERNEL");
+  ^
+../cpu.c:68:8: error: redefinition of ‘IP_MEMORIA’
+  char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+        ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:68:8: note: previous definition of ‘IP_MEMORIA’ was here
+  char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+        ^
+../cpu.c:68:2: warning: passing argument 1 of ‘busquedaClaveAlfanumerica’ makes pointer from integer without a cast [enabled by default]
+  char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:32:7: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ char* busquedaClaveAlfanumerica(t_config* configuracion, char* palabraClave) {
+       ^
+../cpu.c:68:2: error: initializer element is not constant
+  char* IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+  ^
+../cpu.c:71:6: error: redefinition of ‘PUERTO_KERNEL’
+  int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+      ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:71:6: note: previous definition of ‘PUERTO_KERNEL’ was here
+  int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+      ^
+../cpu.c:71:2: warning: passing argument 1 of ‘busquedaClaveNumerica’ makes pointer from integer without a cast [enabled by default]
+  int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:23:5: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
+     ^
+../cpu.c:71:2: error: initializer element is not constant
+  int PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+  ^
+../cpu.c:72:6: error: redefinition of ‘PUERTO_MEMORIA’
+  int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+      ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:72:6: note: previous definition of ‘PUERTO_MEMORIA’ was here
+  int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+      ^
+../cpu.c:72:2: warning: passing argument 1 of ‘busquedaClaveNumerica’ makes pointer from integer without a cast [enabled by default]
+  int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+  ^
+In file included from ../cpu.c:34:0:
+../../librerias/controlArchivosDeConfiguracion.h:23:5: note: expected ‘struct t_config *’ but argument is of type ‘int’
+ int busquedaClaveNumerica(t_config* configuracion, char* palabraClave) {
+     ^
+../cpu.c:72:2: error: initializer element is not constant
+  int PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+  ^
+../cpu.c:76:6: error: redefinition of ‘valorRtaConnect’
+  int valorRtaConnect = 0;
+      ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:76:6: note: previous definition of ‘valorRtaConnect’ was here
+  int valorRtaConnect = 0;
+      ^
+../cpu.c:82:2: warning: data definition has no type or storage class [enabled by default]
+  sockKernel = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../cpu.c:82:2: warning: type defaults to ‘int’ in declaration of ‘sockKernel’ [-Wimplicit-int]
+../cpu.c:82:2: error: redefinition of ‘sockKernel’
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:82:2: note: previous definition of ‘sockKernel’ was here
+  sockKernel = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../cpu.c:82:2: error: initializer element is not constant
+  sockKernel = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../cpu.c:83:31: error: expected ‘)’ before string constant
+  esErrorConSalida(sockKernel, "Error en el Socket");
+                               ^
+../cpu.c:84:2: warning: data definition has no type or storage class [enabled by default]
+  sockMemoria = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../cpu.c:84:2: warning: type defaults to ‘int’ in declaration of ‘sockMemoria’ [-Wimplicit-int]
+../cpu.c:84:2: error: redefinition of ‘sockMemoria’
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:84:2: note: previous definition of ‘sockMemoria’ was here
+  sockMemoria = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../cpu.c:84:2: error: initializer element is not constant
+  sockMemoria = socket(AF_INET, SOCK_STREAM, 0);
+  ^
+../cpu.c:85:35: error: expected ‘)’ before string constant
+     esErrorConSalida(sockMemoria, "Error en el Socket");
+                                   ^
+../cpu.c:90:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  kernel_dir.sin_family = AF_INET;
+            ^
+../cpu.c:91:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  kernel_dir.sin_port = htons(PUERTO_KERNEL);
+            ^
+../cpu.c:92:12: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  kernel_dir.sin_addr.s_addr = inet_addr(IP_KERNEL);
+            ^
+../cpu.c:93:8: error: expected declaration specifiers or ‘...’ before ‘&’ token
+  bzero(&(kernel_dir.sin_zero), 8);
+        ^
+../cpu.c:93:32: error: expected declaration specifiers or ‘...’ before numeric constant
+  bzero(&(kernel_dir.sin_zero), 8);
+                                ^
+../cpu.c:98:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  memoria_dir.sin_family = AF_INET;
+             ^
+../cpu.c:99:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  memoria_dir.sin_port = htons(PUERTO_MEMORIA);
+             ^
+../cpu.c:100:13: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘.’ token
+  memoria_dir.sin_addr.s_addr = inet_addr(IP_MEMORIA);
+             ^
+../cpu.c:101:8: error: expected declaration specifiers or ‘...’ before ‘&’ token
+  bzero(&(kernel_dir.sin_zero), 8);
+        ^
+../cpu.c:101:32: error: expected declaration specifiers or ‘...’ before numeric constant
+  bzero(&(kernel_dir.sin_zero), 8);
+                                ^
+../cpu.c:105:2: warning: data definition has no type or storage class [enabled by default]
+  valorRtaConnect = connect(sockKernel, (struct sockaddr *) &kernel_dir, sizeof(struct sockaddr));
+  ^
+../cpu.c:105:2: warning: type defaults to ‘int’ in declaration of ‘valorRtaConnect’ [-Wimplicit-int]
+../cpu.c:105:2: error: redefinition of ‘valorRtaConnect’
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:76:6: note: previous definition of ‘valorRtaConnect’ was here
+  int valorRtaConnect = 0;
+      ^
+../cpu.c:105:87: error: initializer element is not constant
+  valorRtaConnect = connect(sockKernel, (struct sockaddr *) &kernel_dir, sizeof(struct sockaddr));
+                                                                                       ^
+../cpu.c:106:36: error: expected ‘)’ before string constant
+  esErrorConSalida(valorRtaConnect, "Error en el connect");
+                                    ^
+../cpu.c:41:19: error: expected ‘)’ before string constant
+ #define codigoCpu "2"
+                   ^
+../cpu.c:111:19: note: in expansion of macro ‘codigoCpu’
+  send(sockKernel, codigoCpu, strlen(codigoCpu), 0);
+                   ^
+../cpu.c:116:2: warning: data definition has no type or storage class [enabled by default]
+  valorRtaConnect = connect(sockMemoria, (struct sockaddr *) &memoria_dir, sizeof(struct sockaddr));
+  ^
+../cpu.c:116:2: warning: type defaults to ‘int’ in declaration of ‘valorRtaConnect’ [-Wimplicit-int]
+../cpu.c:116:2: error: redefinition of ‘valorRtaConnect’
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:76:6: note: previous definition of ‘valorRtaConnect’ was here
+  int valorRtaConnect = 0;
+      ^
+../cpu.c:116:89: error: initializer element is not constant
+  valorRtaConnect = connect(sockMemoria, (struct sockaddr *) &memoria_dir, sizeof(struct sockaddr));
+                                                                                         ^
+../cpu.c:117:36: error: expected ‘)’ before string constant
+  esErrorConSalida(valorRtaConnect, "Error en el connect");
+                                    ^
+../cpu.c:41:19: error: expected ‘)’ before string constant
+ #define codigoCpu "2"
+                   ^
+../cpu.c:122:20: note: in expansion of macro ‘codigoCpu’
+  send(sockMemoria, codigoCpu, strlen(codigoCpu), 0);
+                    ^
+../cpu.c:129:2: warning: data definition has no type or storage class [enabled by default]
+  PCB = recibirPCB(sockKernel);
+  ^
+../cpu.c:129:2: warning: type defaults to ‘int’ in declaration of ‘PCB’ [-Wimplicit-int]
+../cpu.c:129:2: error: conflicting types for ‘PCB’
+../cpu.c:43:5: note: previous declaration of ‘PCB’ was here
+ pcb PCB;
+     ^
+../cpu.c:129:8: error: incompatible types when initializing type ‘int’ using type ‘pcb’
+  PCB = recibirPCB(sockKernel);
+        ^
+../cpu.c:135:2: error: expected identifier or ‘(’ before ‘while’
+  while (1) {
+  ^
+../cpu.c:142:2: error: expected identifier or ‘(’ before ‘return’
+  return 0;
+  ^
+../cpu.c:143:1: error: expected identifier or ‘(’ before ‘}’ token
+ }
+ ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:49:49 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:47:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:47:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:49:51 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:47:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:47:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:51:47 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../../librerias/primitivasParser.h:48:1: note: each undeclared identifier is reported only once for each function it appears in
+../cpu.c: In function ‘main’:
+../cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:52:09 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:47:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:47:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:131:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:59:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:59:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:52:18 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:52:31 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:52:42 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:52:43 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:52:44 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:53:11 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c: In function ‘main’:
+../../librerias/../cpu/cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../../librerias/../cpu/cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../../librerias/../cpu/cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+../cpu.c: At top level:
+../cpu.c:45:5: error: redefinition of ‘main’
+ int main(int argc, char *argv[]){
+     ^
+In file included from ../../librerias/primitivasParser.h:14:0,
+                 from ../cpu.c:37:
+../../librerias/../cpu/cpu.c:45:5: note: previous definition of ‘main’ was here
+ int main(int argc, char *argv[]){
+     ^
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:53:18 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: error: ‘PCB’ undeclared (first use in this function)
+ PCB = x;
+ ^
+../../librerias/primitivasParser.h:48:1: note: each undeclared identifier is reported only once for each function it appears in
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:49:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+make: *** [cpu.o] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:54:23 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building file: ../cpu.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"cpu.d" -MT"cpu.d" -o "cpu.o" "../cpu.c"
+../cpu.c: In function ‘main’:
+../cpu.c:129:8: warning: unused variable ‘instruccion’ [-Wunused-variable]
+  char* instruccion;
+        ^
+../cpu.c:57:53: warning: unused variable ‘bytesRecibidosMemoria’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                                                     ^
+../cpu.c:57:31: warning: unused variable ‘bytesRecibidosKernel’ [-Wunused-variable]
+  int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
+                               ^
+In file included from ../cpu.c:37:0:
+../../librerias/primitivasParser.h: In function ‘definirVariable’:
+../../librerias/primitivasParser.h:48:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+In file included from ../cpu.c:36:0:
+../cpu.c: In function ‘solicitarSentencia’:
+../../librerias/operacionesCPU.h:162:2: warning: ‘unaSentencia’ is used uninitialized in this function [-Wuninitialized]
+  return unaSentencia;
+  ^
+../cpu.c: In function ‘obtenerDatos’:
+../../librerias/operacionesCPU.h:179:2: warning: ‘unosDatos’ is used uninitialized in this function [-Wuninitialized]
+  return unosDatos;
+  ^
+Finished building: ../cpu.c
+ 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
+04:54:35 **** Incremental Build of configuration Debug for project cpu ****
+make all 
+Building target: cpu
+Invoking: GCC C Linker
+gcc  -o "cpu"  ./cpu.o   
+./cpu.o: En la función `llamarArchivo':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:20: referencia a `config_create' sin definir
+./cpu.o: En la función `busquedaClaveNumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:25: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:26: referencia a `config_get_int_value' sin definir
+./cpu.o: En la función `busquedaClaveAlfanumerica':
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:34: referencia a `config_has_property' sin definir
+/home/utnso/git/tp-2017-1c-Zero-Gravity/cpu/Debug/../../librerias/controlArchivosDeConfiguracion.h:35: referencia a `config_get_string_value' sin definir
+collect2: error: ld returned 1 exit status
+make: *** [cpu] Error 1
+
+**** Build of configuration Debug for project librerias ****
+
+Nothing to build for project librerias
