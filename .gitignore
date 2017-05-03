@@ -1,7 +1,10 @@
-.project
-.classpath
+.metadata/*
 target/*
 .settings/*
+.project
+.cproject
+.classpath
+**/Debug/*
 
 # Object files
 *.o
