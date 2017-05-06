@@ -1,0 +1,2 @@
+[INFO] 10:50:11:486 Memoria/(5924:5924): El bloque de memorias administrativas ocupa 267
+[INFO] 10:50:11:495 Memoria/(5924:5924): Son 1 estructuras con un peso individual de 12

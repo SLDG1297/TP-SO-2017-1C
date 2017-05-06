@@ -23,6 +23,15 @@ void esErrorSinSalida(int valorRtaFuncion, char* mensajeError){
 	}
 }
 
+void errorSalidaSocket(int valorRtaFuncion, char* mensajeError, int* socket){
+	if (valorRtaFuncion == -1){
+		perror(mensajeError);
+		close(socket);
+		exit(EXIT_FAILURE);
+	}
+}
+
+
 void sinBytesRecibidos(int bytesRecibidos){
 	if(bytesRecibidos == 0)	{
 		perror("El kernel se ha desconectado");
