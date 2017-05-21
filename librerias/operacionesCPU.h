@@ -26,19 +26,37 @@
 // Estructuras de datos
 
 typedef struct{
+	t_puntero_instruccion	primerInstruccion;	// El numero de la primera instrucción (Begin).
+	t_size					instruccionesSize;	// Cantidad de instrucciones del programa.
+	t_intructions*			instrucciones; 		// Instrucciones del programa.
+} indiceCodigo;
+
+// El índice de Código del PCB con las líneas útiles de código.
+
+typedef struct{
+	t_size			etiquetasSize;		// Tamaño del mapa serializado de etiquetas.
+	char*			etiquetas;			// La serializacion de las etiquetas.
+	int				cantidadFunciones;
+	int				cantidadEtiquetas;
+} indiceEtiqueta;
+
+// El índice de Etiqueta del PCB para poder identificar las funciones de un programa.
+
+typedef struct{
 	t_list 			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
 	t_list 			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
 	t_puntero 		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
 	t_intructions	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
 } indiceStack;
 
-// Datos de una llamada a función.
+// El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
 
 typedef struct {
 	int 				pid; 					// Identificador de un proceso.
 	int 				pc; 					// Program counter: indica el número de la siguiente instrucción a ejecutarse.
 	int 				paginasUsadas; 			// Cantidad de páginas usadas por el programa (Desde 0).
-	t_metadata_program 	indiceCodigoEtiqueta;	// Identifica líneas útiles de un programa y sus llamadas a funciones.
+	indiceCodigo		indiceCodigo;			// Identifica líneas útiles de un programa
+	indiceEtiqueta		indiceEtiqueta;			// Identifica llamadas a funciones.
 	indiceStack			indiceStack; 			// Ordena valores almacenados en la pila de funciones con sus valores.
 	int 				exitCode; 				// Motivo por el cual finalizó un programa.
 } pcb;
