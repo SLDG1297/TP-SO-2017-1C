@@ -10,6 +10,7 @@
 
 #include <commons/config.h>
 
+
 t_config* llamarArchivo(char* RUTA_ARCHIVO) {
 
 	//Dirección para manejar el archivo de configuración.
