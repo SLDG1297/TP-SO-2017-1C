@@ -44,8 +44,8 @@ typedef struct{
 
 
 typedef struct{
-	t_list argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
-	t_list variables; // Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
+	t_list* argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+	t_list* variables; // Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
 	int retPos; // Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
 	posicionMemoria retVar; // Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
 } stack; // Datos de una llamada a función.
@@ -57,7 +57,7 @@ typedef struct {
 	// int paginasUsadas; // Cantidad de páginas usadas por el programa (Desde 0).
 	// uint8_t indiceCodigo[][]; // Identifica línea útil de código a partir de su posición en el programa para convertirla en una posición de memoria para su consulta.
 	// ¿diccionario? indiceEtiqueta; // Tiene el valor del PC que necesita una función para ser llamada.
-	stack indiceStack; // Ordena valores almacenados en la pila de funciones con sus valores.
+	t_list* indiceStack; // Ordena valores almacenados en la pila de funciones con sus valores.
 	int exitCode; // Motivo por el cual finalizó un programa.
 } pcb; // El Process Control Block que maneja el Kernel.
 // De momento, me limito a los dos datos de los que habla el checkpoint.

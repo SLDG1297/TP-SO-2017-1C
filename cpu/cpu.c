@@ -40,8 +40,6 @@
 #define SIZE_DATA 1024
 #define codigoCpu "2"
 
-pcb PCB;
-
 int main(int argc, char *argv[]){
 //CODIGO PARA LLAMAR AL ARCHIVO
 
@@ -125,7 +123,10 @@ int main(int argc, char *argv[]){
 	//---------------------------------------------------------------------------------------------------
 	//Una vez que la cpu ya está conectada, se queda esperando a que le llegue un PCB para empezar a trabajar.
 
-	PCB = recibirPCB(sockKernel);
+	pcb PCB = recibirPCB(sockKernel);
+
+	llenarPCB(&PCB);
+
 	char* instruccion;
 	//analizadorLinea(instruccion,);
 

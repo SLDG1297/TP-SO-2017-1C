@@ -8,11 +8,24 @@
 #ifndef PRIMITIVASPARSER_H_
 #define PRIMITIVASPARSER_H_
 
+#include <commons/collections/list.h>
+
 #include <parser/metadata_program.h>
 #include <parser/sintax.h>
 #include <parser/parser.h>
-//#include "../cpu/cpu.c"
+#include "../librerias/operacionesCPU.h"
 
+//Funciones generales
+
+pcb* PCB;
+
+void llenarPCB(pcb* _PCB);
+
+void llenarPCB(pcb* _PCB){
+	PCB = _PCB;
+}
+
+//Funcion para tener cargado el pcb
 
 //OPERACIONES PARA ESTRUCTURA AnSISOP_funciones -----------------------------------------------------------------------
 
@@ -41,9 +54,17 @@ void finalizar(void);
 
 void retornar(t_valor_variable retorno);
 
+
 //Definiciones
 
 t_puntero definirVariable(t_nombre_variable identificador_variable){
+	//posicionMemoria posMem = solicitarEspacioAMemoria(tamañoDeVariable);
+	stack nuevaPosStack;
+	//nuevaPosStack.argumentos = NULL;
+
+	//nuevaPosStack.variables;
+
+	int index = list_add(PCB->indiceStack,nuevaPosStack);
 
 }
 
