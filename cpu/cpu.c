@@ -35,6 +35,7 @@
 #include "../librerias/controlErrores.h"
 #include "../librerias/operacionesCPU.h"
 #include "../librerias/primitivasParser.h"
+#include "../librerias/serializador.h"
 
 #define RUTA_ARCHIVO "./config_cpu.cfg"
 #define SIZE_DATA 1024

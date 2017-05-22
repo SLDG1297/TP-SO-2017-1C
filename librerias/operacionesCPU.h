@@ -13,186 +13,142 @@
 #include <netinet/in.h>
 
 #include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
 #include <commons/collections/node.h>
 
 #include <parser/metadata_program.h>
 
 #include "../librerias/controlErrores.h"
+#include "../librerias/serializador.h"
 
 #define SIZE_DATA 1024
 
-// Primera aproximación de las funciones que realiza la CPU y sus estructuras de datos.
-// Tranquilos, va a haber cambios XD
+// Estructuras de datos
 
+typedef struct{
+	t_puntero_instruccion	primerInstruccion;	// El numero de la primera instrucción (Begin).
+	t_size					instruccionesSize;	// Cantidad de instrucciones del programa.
+	t_intructions*			instrucciones; 		// Instrucciones del programa.
+} indiceCodigo;
 
+// El índice de Código del PCB con las líneas útiles de código.
+
+typedef struct{
+	t_size			etiquetasSize;		// Tamaño del mapa serializado de etiquetas.
+	char*			etiquetas;			// La serializacion de las etiquetas.
+	int				cantidadFunciones;
+	int				cantidadEtiquetas;
+} indiceEtiqueta;
+
+// El índice de Etiqueta del PCB para poder identificar las funciones de un programa.
+
+typedef struct{
+	t_list*			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+	t_list*			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
+	t_puntero 		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+	t_intructions	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
+} indiceStack;
+
+// El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
+
+typedef struct {
+	int 				pid; 				// Identificador de un proceso.
+	int 				pc; 				// Program counter: indica el número de la siguiente instrucción a ejecutarse.
+	int 				paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
+	indiceCodigo		indiceCodigo;		// Identifica líneas útiles de un programa
+	indiceEtiqueta		indiceEtiqueta;		// Identifica llamadas a funciones.
+	indiceStack			indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
+	int 				exitCode; 			// Motivo por el cual finalizó un programa.
+} pcb;
+
+// El Process Control Block que maneja el Kernel y tiene toda la información del proceso que ejecuta la CPU.
 
 // Declaraciones
 
-
-// Estructuras de datos (Cuidado si hay estructuras similares a otros procesos. ¡¡Avisen!!)
-
-// Otra cosa: por ahora dice "int", pero lo mejor es tener cuidado con eso. El tamaño de un "int" depende de la palabra del procesador.
-// Lo mejor es siempre usar un "int" con tamaño fijo.
-// Lean bien esto: http://www.gnu.org/software/libc/manual/html_node/Integers.html
-
-
-typedef struct{
-	int pag; // Página donde está almacenado un dato en memoria.
-	int offset; // Despleazamiento de un dato respecto a la posición inicial de memoria.
-	int size; // Tamaño del dato alojado en memoria.
-} posicionMemoria; // Modelo de una posición en memoria.
-
-
-typedef struct{
-	t_list* argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
-	t_list* variables; // Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
-	int retPos; // Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
-	posicionMemoria retVar; // Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
-} stack; // Datos de una llamada a función.
-
-
-typedef struct {
-	int pid; // Identificador de un proceso.
-	int pc; // Program counter: indica el número de la siguiente instrucción a ejecutarse.
-	// int paginasUsadas; // Cantidad de páginas usadas por el programa (Desde 0).
-	// uint8_t indiceCodigo[][]; // Identifica línea útil de código a partir de su posición en el programa para convertirla en una posición de memoria para su consulta.
-	// ¿diccionario? indiceEtiqueta; // Tiene el valor del PC que necesita una función para ser llamada.
-	t_list* indiceStack; // Ordena valores almacenados en la pila de funciones con sus valores.
-	int exitCode; // Motivo por el cual finalizó un programa.
-} pcb; // El Process Control Block que maneja el Kernel.
-// De momento, me limito a los dos datos de los que habla el checkpoint.
-
-
-char buffer[SIZE_DATA];
-
-
-
 // Funciones de comunicación: las clasificamos así porque requieren de interacción entre el CPU con otros procesos.
-
 
 // Con Kernel
 
-void handshakeKernel(int socketKernel); // Realiza handshake con el Kernel.
+void 	handshakeKernel(int socketKernel); 							// Realiza handshake con el Kernel.
 
-pcb recibirPCB(int socketKernel); // Recibe PCB del Kernel para ejecutar un programa.
+void 	recibirPCB(int socketKernel, pcb* unPcb); 					// Recibe PCB del Kernel para ejecutar un programa.
 
-void concluirOperacion(pcb datosPcb, int socketKernel); // Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
+void 	concluirOperacion(int socketKernel, pcb unPcb); 			// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
 
-void finEjecucion(int socketKernel); // Indicar finalización de un proceso.
+void 	finEjecucion(int socketKernel, pcb unPcb, int codigoFin); 	// Indicar finalización de un proceso.
 
-void conectarNuevaCPU(int socketKernel); // Conectar otra CPU al sistema.
+void 	conectarNuevaCPU(int socketKernel); 						// Conectar otra CPU al sistema.
 
-void desconectarCPU(int senial, int socketKernel); // ¿Por qué no puedo poner 'ñ'?
-
+void 	desconectarCPU(int senial, int socketKernel); 				// ¿Por qué no puedo poner 'ñ'?
 
 // Con Memoria
 
-void handshakeMemoria(int socketMemoria); // Realiza handshake con Memoria.
+void 	handshakeMemoria(int socketMemoria); 													// Realiza handshake con Memoria.
 
-char* solicitarSentencia(posicionMemoria unaPos, int socketMemoria); // Solicitar sentencia en Memoria.
+char* 	solicitarSentencia(/*posicionMemoria unaPos,*/ int socketMemoria); 						// Solicitar sentencia en Memoria.
 
-char* obtenerDatos(posicionMemoria unaPos, int socketMemoria); // Obtiene información de un programa en ejecución.
+char* 	obtenerDatos(/*posicionMemoria unaPos,*/, int socketMemoria); 							// Obtiene información de un programa en ejecución.
 
-void actualizarValores(char* nuevosDatos, posicionMemoria unaPos, int socketMemoria); // Actualiza estrtucturas tras una operación.
+void 	actualizarValores(char* nuevosDatos, /*posicionMemoria unaPos,*/, int socketMemoria); 	// Actualiza estructuras tras una operación.
 
-
+int		paginaEnMemoria(int instruccion, int cantidadPaginas, int tamanioPaginas);				// Devuelve la página en Memoria donde se encuentra la instrucción.
 
 // Funciones de CPU: las clasificamos así porque son las funciones que componen al CPU para que haga su trabajo.
 
-void interpretarOperacion(); // Recibe una instrucción de un programa y la parsea.
+void 	interpretarOperacion(); 			// Recibe una instrucción de un programa y la parsea.
 
-void ejecutarOperacion(); // Ejecuta una instrucción parseada.
+void 	ejecutarOperacion(); 				// Ejecuta una instrucción parseada.
 
-void llamarFuncion(/* Stack */); // Llama a una función o procedimiento.
+void 	llamarFuncion(/* Stack */); 		// Llama a una función o procedimiento.
 
-void actualizarPC(int PC, int valor); // Incrementa el Program Counter con la próxima instrucción a ejecutar.
+void 	actualizarPC(int *PC, int valor); 	// Incrementa el Program Counter con la próxima instrucción a ejecutar.
 
-void arrojarExcepcion(/* Excepción */);
+void 	arrojarExcepcion(/* Excepción */); 	// Se explica solo.
 
+// Definiciones
 
+void recibirPCB(int socketKernel, pcb* unPcb){
+	recibirDatos(socketKernel, unPcb->pid);
 
-// Auxiliares
+	recibirDatos(socketKernel, unPcb->pc);
 
-void limpiarBuffer();
+	recibirDatos(socketKernel, unPcb->paginasUsadas);
 
+	recibirDatos(socketKernel, unPcb->indiceCodigo); 	// Para moverse entre instrucciones del índice, usar aritmética de punteros como si fuera una array.
 
-pcb recibirPCB(int socketKernel){
-	pcb datosPcb;
+	recibirDatos(socketKernel, unPcb->indiceEtiqueta);	// Por lo que entendí, este índice se recorre con una función del parser.
 
-	limpiarBuffer();
+	// Queda pendiente recibir datos del stack. Hay algo que no me cierra.
 
-	int cantidadRecibida = recv(socketKernel, buffer, SIZE_DATA, 0);
-	esErrorConSalida(cantidadRecibida, "Error al recibir PCB.");
-
-	// Acá tendría que pasar lo del buffer al PCB.
-
-	return datosPcb;
 }
 
-void concluirOperacion(pcb datosPcb, int socketKernel){
-	limpiarBuffer();
+void concluirOperacion(int socketKernel, pcb unPcb){
+	enviarDatos(socketKernel, unPcb->pid, sizeof(unPcb.pid));
 
-	// Acá debería setearse el buffer con los datos de la operación que terminó.
+	enviarDatos(socketKernel, unPcb->pc, sizeof(unPcb.pc));
 
-	send(socketKernel, buffer, SIZE_DATA, 0);
+	enviarDatos(socketKernel, unPcb->paginasUsadas, sizeof(unPcb.paginasUsadas));
+
+	enviarDatos(socketKernel, unPcb->indiceCodigo, sizeof(unPcb.indiceCodigo));
+
+	enviarDatos(socketKernel, unPcb->indiceEtiqueta, sizeof(unPcb.indiceEtiqueta));
+
+	// Queda pendiente enviar datos del stack. Hay algo que no me cierra.
+
 }
 
-void finEjecucion(int socketKernel){
-	limpiarBuffer();
+void finEjecucion(int socketKernel, pcb unPcb, int codigoFin){
+	// No sé cómo maneja el Kernel el fin de un proceso.
+	// Sé que hay que hacer una syscall para que termine, pero... Ni idea...
+	// De momento, que sepa que si le mando el exitCode, es porque terminó el proceso.
 
-	// Acá debería setearse el buffer con el Exit Code del proceso.
+	unPcb->exitCode = codigoFin;
 
-	send(socketKernel, buffer, SIZE_DATA, 0);
+	enviarDatos(socketKernel, unPcb->exitCode, sizeof(unPcb.exitCode));
 }
 
-char* solicitarSentencia(posicionMemoria unaPos, int socketMemoria){
-	char* unaSentencia;
-
-	limpiarBuffer();
-
-	// Acá debería setearse el buffer con la posición de la sentencia que se busca en Memoria.
-
-	send(socketMemoria, buffer, SIZE_DATA, 0);
-
-	int cantidadRecibida = recv(socketMemoria, buffer, SIZE_DATA, 0);
-	esErrorConSalida(cantidadRecibida, "Error al recibir sentencia.");
-
-	// Acá se devuelve la línea útil que debería ser parseada por la CPU.
-
-	return unaSentencia;
-}
-
-char* obtenerDatos(posicionMemoria unaPos, int socketMemoria){
-	char* unosDatos;
-
-	limpiarBuffer();
-
-	// Acá debería setearse el buffer con la posición del dato que se busca en Memoria.
-
-	send(socketMemoria, buffer, SIZE_DATA, 0);
-
-	int cantidadRecibida = recv(socketMemoria, buffer, SIZE_DATA, 0);
-	esErrorConSalida(cantidadRecibida, "Error al recibir sentencia.");
-
-	// Acá se devuelve dato con el que va a operar la CPU.
-
-	return unosDatos;
-}
-
-void actualizarValores(char* nuevosDatos, posicionMemoria unaPos, int socketMemoria){
-	limpiarBuffer();
-
-	// Acá se setea el buffer con la posición en Memoria que va a recibir los nuevos datos.
-
-	send(socketMemoria, buffer, SIZE_DATA, 0);
-}
-
-void actualizarPC(int PC, int valor){
-	PC = valor; // Lo único que debe funcionar correctamente XD
-}
-
-void limpiarBuffer(){
-	memset (buffer,'\0',SIZE_DATA);
+void actualizarPC(int *PC, int valor){
+	*PC = valor;
 }
 
 #endif /* OPERACIONESCPU_H_ */
