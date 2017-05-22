@@ -44,9 +44,9 @@ void retornar(t_valor_variable retorno);
 //Definiciones
 
 t_puntero definirVariable(t_nombre_variable identificador_variable){
-
+	t_puntero niIdea;
+	return niIdea; // Sory, Erik. Me rompía los huevos que me aparezca el cartelito con el signo "!" XD
 }
-
 //-----------------------------------------------------------------------------------------------------------------------
 
 //OPERACIONES DE KERNEL PARA ESTRUCTURA AnSISOP_kernel ------------------------------------------------------------------

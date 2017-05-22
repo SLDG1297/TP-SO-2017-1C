@@ -43,8 +43,8 @@ typedef struct{
 // El índice de Etiqueta del PCB para poder identificar las funciones de un programa.
 
 typedef struct{
-	t_list 			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
-	t_list 			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
+	t_list*			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+	t_list*			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
 	t_puntero 		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
 	t_intructions	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
 } indiceStack;
@@ -52,13 +52,13 @@ typedef struct{
 // El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
 
 typedef struct {
-	int 				pid; 					// Identificador de un proceso.
-	int 				pc; 					// Program counter: indica el número de la siguiente instrucción a ejecutarse.
-	int 				paginasUsadas; 			// Cantidad de páginas usadas por el programa (Desde 0).
-	indiceCodigo		indiceCodigo;			// Identifica líneas útiles de un programa
-	indiceEtiqueta		indiceEtiqueta;			// Identifica llamadas a funciones.
-	indiceStack			indiceStack; 			// Ordena valores almacenados en la pila de funciones con sus valores.
-	int 				exitCode; 				// Motivo por el cual finalizó un programa.
+	int 				pid; 				// Identificador de un proceso.
+	int 				pc; 				// Program counter: indica el número de la siguiente instrucción a ejecutarse.
+	int 				paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
+	indiceCodigo		indiceCodigo;		// Identifica líneas útiles de un programa
+	indiceEtiqueta		indiceEtiqueta;		// Identifica llamadas a funciones.
+	indiceStack			indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
+	int 				exitCode; 			// Motivo por el cual finalizó un programa.
 } pcb;
 
 // El Process Control Block que maneja el Kernel y tiene toda la información del proceso que ejecuta la CPU.
@@ -69,17 +69,17 @@ typedef struct {
 
 // Con Kernel
 
-void 	handshakeKernel(int socketKernel); 					// Realiza handshake con el Kernel.
+void 	handshakeKernel(int socketKernel); 							// Realiza handshake con el Kernel.
 
-pcb 	recibirPCB(int socketKernel); 						// Recibe PCB del Kernel para ejecutar un programa.
+void 	recibirPCB(int socketKernel, pcb* unPcb); 					// Recibe PCB del Kernel para ejecutar un programa.
 
-void 	concluirOperacion(int socketKernel, pcb datosPcb); 	// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
+void 	concluirOperacion(int socketKernel, pcb unPcb); 			// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
 
-void 	finEjecucion(int socketKernel); 					// Indicar finalización de un proceso.
+void 	finEjecucion(int socketKernel, pcb unPcb, int codigoFin); 	// Indicar finalización de un proceso.
 
-void 	conectarNuevaCPU(int socketKernel); 				// Conectar otra CPU al sistema.
+void 	conectarNuevaCPU(int socketKernel); 						// Conectar otra CPU al sistema.
 
-void 	desconectarCPU(int senial, int socketKernel); 		// ¿Por qué no puedo poner 'ñ'?
+void 	desconectarCPU(int senial, int socketKernel); 				// ¿Por qué no puedo poner 'ñ'?
 
 // Con Memoria
 
@@ -107,18 +107,44 @@ void 	arrojarExcepcion(/* Excepción */); 	// Se explica solo.
 
 // Definiciones
 
-pcb recibirPCB(int socketKernel){
-	pcb unPcb;
+void recibirPCB(int socketKernel, pcb* unPcb){
+	recibirDatos(socketKernel, unPcb->pid);
 
-	void* pcbRecibido = recibirDatos(socketKernel);
+	recibirDatos(socketKernel, unPcb->pc);
 
-	unPcb.pid = *((int*)pcbRecibido);
-	unPcb.pc = *((int*)pcbRecibido + 1);
-	unPcb.paginasUsadas = *((int*)pcbRecibido + 2);
-	// Naaa... Qué es esto??
+	recibirDatos(socketKernel, unPcb->paginasUsadas);
 
+	recibirDatos(socketKernel, unPcb->indiceCodigo); 	// Para moverse entre instrucciones del índice, usar aritmética de punteros como si fuera una array.
 
-	return unPcb;
+	recibirDatos(socketKernel, unPcb->indiceEtiqueta);	// Por lo que entendí, este índice se recorre con una función del parser.
+
+	// Queda pendiente recibir datos del stack. Hay algo que no me cierra.
+
+}
+
+void concluirOperacion(int socketKernel, pcb unPcb){
+	enviarDatos(socketKernel, unPcb->pid, sizeof(unPcb.pid));
+
+	enviarDatos(socketKernel, unPcb->pc, sizeof(unPcb.pc));
+
+	enviarDatos(socketKernel, unPcb->paginasUsadas, sizeof(unPcb.paginasUsadas));
+
+	enviarDatos(socketKernel, unPcb->indiceCodigo, sizeof(unPcb.indiceCodigo));
+
+	enviarDatos(socketKernel, unPcb->indiceEtiqueta, sizeof(unPcb.indiceEtiqueta));
+
+	// Queda pendiente enviar datos del stack. Hay algo que no me cierra.
+
+}
+
+void finEjecucion(int socketKernel, pcb unPcb, int codigoFin){
+	// No sé cómo maneja el Kernel el fin de un proceso.
+	// Sé que hay que hacer una syscall para que termine, pero... Ni idea...
+	// De momento, que sepa que si le mando el exitCode, es porque terminó el proceso.
+
+	unPcb->exitCode = codigoFin;
+
+	enviarDatos(socketKernel, unPcb->exitCode, sizeof(unPcb.exitCode));
 }
 
 void actualizarPC(int *PC, int valor){
