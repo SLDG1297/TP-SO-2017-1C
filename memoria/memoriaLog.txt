@@ -1,2 +1,42 @@
 [INFO] 10:50:11:486 Memoria/(5924:5924): El bloque de memorias administrativas ocupa 267
 [INFO] 10:50:11:495 Memoria/(5924:5924): Son 1 estructuras con un peso individual de 12
+[INFO] 22:50:37:747 Memoria/(3821:3821): El bloque de memorias administrativas ocupa 267
+[INFO] 22:50:37:777 Memoria/(3821:3821): Son 1 estructuras con un peso individual de 12
+[INFO] 22:33:18:21 Memoria/(6613:6613): El bloque de memorias administrativas ocupa 12
+[INFO] 22:33:19:35 Memoria/(6613:6613): Son 500 estructuras con un peso individual de 12
+[INFO] 22:41:16:734 Memoria/(6662:6662): El bloque de memorias administrativas ocupa 12
+[INFO] 22:41:16:747 Memoria/(6662:6662): Son 500 estructuras con un peso individual de 12
+[INFO] 22:41:43:230 Memoria/(6693:6693): El bloque de memorias administrativas ocupa 12
+[INFO] 22:41:43:249 Memoria/(6693:6693): Son 500 estructuras con un peso individual de 12
+[INFO] 22:42:22:23 Memoria/(6744:6744): El bloque de memorias administrativas ocupa 12
+[INFO] 22:42:22:30 Memoria/(6744:6744): Son 500 estructuras con un peso individual de 12
+[INFO] 23:11:27:601 Memoria/(6898:6898): El bloque de memorias administrativas ocupa 12
+[INFO] 23:11:27:603 Memoria/(6898:6898): Son 500 estructuras con un peso individual de 12
+[INFO] 23:13:23:36 Memoria/(6936:6936): El bloque de memorias administrativas ocupa 12
+[INFO] 23:13:23:54 Memoria/(6936:6936): Son 500 estructuras con un peso individual de 12
+[INFO] 23:13:43:587 Memoria/(6958:6958): El bloque de memorias administrativas ocupa 12
+[INFO] 23:13:43:594 Memoria/(6958:6958): Son 500 estructuras con un peso individual de 12
+[INFO] 23:14:17:45 Memoria/(6983:6983): El bloque de memorias administrativas ocupa 12
+[INFO] 23:14:17:65 Memoria/(6983:6983): Son 500 estructuras con un peso individual de 12
+[INFO] 23:37:24:825 Memoria/(7193:7193): El bloque de memorias administrativas ocupa 12
+[INFO] 23:37:24:844 Memoria/(7193:7193): Son 500 estructuras con un peso individual de 12
+[INFO] 23:38:34:876 Memoria/(7274:7274): El bloque de memorias administrativas ocupa 12
+[INFO] 23:38:34:889 Memoria/(7274:7274): Son 500 estructuras con un peso individual de 12
+[INFO] 00:05:29:847 Memoria/(7494:7494): El bloque de memorias administrativas ocupa 12
+[INFO] 00:05:29:854 Memoria/(7494:7494): Son 500 estructuras con un peso individual de 12
+[INFO] 00:37:32:79 Memoria/(7972:7972): El bloque de memorias administrativas ocupa 12
+[INFO] 00:37:32:96 Memoria/(7972:7972): Son 500 estructuras con un peso individual de 12
+[INFO] 00:37:37:945 Memoria/(7986:7986): El bloque de memorias administrativas ocupa 12
+[INFO] 00:37:37:967 Memoria/(7986:7986): Son 500 estructuras con un peso individual de 12
+[INFO] 00:38:15:819 Memoria/(8011:8011): El bloque de memorias administrativas ocupa 12
+[INFO] 00:38:15:826 Memoria/(8011:8011): Son 500 estructuras con un peso individual de 12
+[INFO] 00:39:38:31 Memoria/(8057:8057): El bloque de memorias administrativas ocupa 12
+[INFO] 00:39:38:35 Memoria/(8057:8057): Son 500 estructuras con un peso individual de 12
+[INFO] 12:05:06:763 Memoria/(8331:8331): El bloque de memorias administrativas ocupa 12
+[INFO] 12:05:06:766 Memoria/(8331:8331): Son 500 estructuras con un peso individual de 12
+[INFO] 12:07:14:537 Memoria/(8395:8395): El bloque de memorias administrativas ocupa 12
+[INFO] 12:07:14:591 Memoria/(8395:8395): Son 500 estructuras con un peso individual de 12
+[INFO] 12:08:43:167 Memoria/(8449:8449): El bloque de memorias administrativas ocupa 12
+[INFO] 12:08:43:184 Memoria/(8449:8449): Son 500 estructuras con un peso individual de 12
+[INFO] 12:13:55:597 Memoria/(8512:8512): El bloque de memorias administrativas ocupa 12
+[INFO] 12:13:55:609 Memoria/(8512:8512): Son 500 estructuras con un peso individual de 12
