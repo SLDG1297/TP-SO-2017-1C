@@ -63,7 +63,7 @@ t_puntero definirVariable(t_nombre_variable identificador_variable){
 
 	//nuevaPosStack.variables;
 
-	int index = list_add(PCB->indiceStack,nuevaPosStack);
+	//int index = list_add(PCB->indiceStack,nuevaPosStack);
 	t_puntero niIdea;
 	return niIdea; // Sory, Erik. Me rompía los huevos que me aparezca el cartelito con el signo "!" XD
 }

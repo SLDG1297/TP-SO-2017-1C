@@ -41,6 +41,7 @@
 #define SIZE_DATA 1024
 #define codigoCpu "2"
 
+
 int main(int argc, char *argv[]){
 //CODIGO PARA LLAMAR AL ARCHIVO
 
@@ -53,10 +54,7 @@ int main(int argc, char *argv[]){
 
 //DECLARACION DE VARIABLES PARA LA CONEXION AL KERNEL Y A LA MEMORIA
 
-	int sockKernel, sockMemoria, bytesRecibidosKernel, bytesRecibidosMemoria;
-	char datosEnviar[SIZE_DATA], datosRecibir[SIZE_DATA];
-	memset(datosEnviar, '\0', SIZE_DATA);
-	memset(datosRecibir, '\0', SIZE_DATA);
+	int sockKernel, sockMemoria;
 	struct sockaddr_in kernel_dir, memoria_dir;
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
@@ -124,20 +122,26 @@ int main(int argc, char *argv[]){
 	//---------------------------------------------------------------------------------------------------
 	//Una vez que la cpu ya está conectada, se queda esperando a que le llegue un PCB para empezar a trabajar.
 
-	pcb PCB = recibirPCB(sockKernel);
+	pcb PCB; // El registro PCB que usa la CPU para ejecutar instrucciones.
 
-	llenarPCB(&PCB);
+	while (true)
+	{
+		// Recibir PCB del Kernel para iniciar las operaciones.
 
-	char* instruccion;
-	//analizadorLinea(instruccion,);
+		recibirPCB(sockKernel, &PCB);
 
+		// Fetch stage
 
+		// Execute stage
 
-	while (1) {
-		printf("\nDatos a enviar: ");
-		//gets(datosEnviar);
-		send(sockKernel, datosEnviar, strlen(datosEnviar), 0);
-		memset(datosEnviar, '\0', SIZE_DATA);
+		/*
+		llenarPCB(&PCB);
+
+		char* instruccion;
+		analizadorLinea(instruccion,);
+		*/
+
+		// Interrupciones
 	}
 
 	return 0;

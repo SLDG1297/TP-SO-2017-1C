@@ -25,6 +25,36 @@
 
 // Estructuras de datos
 
+typedef t_puntero retPos;
+
+// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+
+typedef struct{
+	int pag;
+	int off;
+	int size;
+} retVar;
+
+// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN
+
+typedef struct{
+	int id;
+	int pag;
+	int off;
+	int size;
+} args;
+
+// Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+
+typedef struct{
+	int id;
+	int pag;
+	int off;
+	int size;
+} vars;
+
+// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
+
 typedef struct{
 	t_puntero_instruccion	primerInstruccion;	// El numero de la primera instrucción (Begin).
 	t_size					instruccionesSize;	// Cantidad de instrucciones del programa.
@@ -43,15 +73,15 @@ typedef struct{
 // El índice de Etiqueta del PCB para poder identificar las funciones de un programa.
 
 typedef struct{
-	t_list*			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
-	t_list*			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
-	t_puntero 		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
-	t_intructions	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
+	retPos 		retPos; 			// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+	retVar		retVar; 			// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
+	t_list*		listaArgumentos; 	// Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+	t_list*		listaVariables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
 } indiceStack;
 
 // El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
 
-typedef struct {
+typedef struct{
 	int 				pid; 				// Identificador de un proceso.
 	int 				pc; 				// Program counter: indica el número de la siguiente instrucción a ejecutarse.
 	int 				paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
@@ -73,9 +103,9 @@ void 	handshakeKernel(int socketKernel); 							// Realiza handshake con el Kern
 
 void 	recibirPCB(int socketKernel, pcb* unPcb); 					// Recibe PCB del Kernel para ejecutar un programa.
 
-void 	concluirOperacion(int socketKernel, pcb unPcb); 			// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
+void 	concluirOperacion(int socketKernel, pcb* unPcb); 			// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
 
-void 	finEjecucion(int socketKernel, pcb unPcb, int codigoFin); 	// Indicar finalización de un proceso.
+void 	finEjecucion(int socketKernel, pcb* unPcb, int codigoFin); 	// Indicar finalización de un proceso.
 
 void 	conectarNuevaCPU(int socketKernel); 						// Conectar otra CPU al sistema.
 
@@ -87,9 +117,9 @@ void 	handshakeMemoria(int socketMemoria); 													// Realiza handshake con
 
 char* 	solicitarSentencia(/*posicionMemoria unaPos,*/ int socketMemoria); 						// Solicitar sentencia en Memoria.
 
-char* 	obtenerDatos(/*posicionMemoria unaPos,*/, int socketMemoria); 							// Obtiene información de un programa en ejecución.
+char* 	obtenerDatos(/*posicionMemoria unaPos,*/ int socketMemoria); 							// Obtiene información de un programa en ejecución.
 
-void 	actualizarValores(char* nuevosDatos, /*posicionMemoria unaPos,*/, int socketMemoria); 	// Actualiza estructuras tras una operación.
+void 	actualizarValores(char* nuevosDatos, /*posicionMemoria unaPos,*/ int socketMemoria); 	// Actualiza estructuras tras una operación.
 
 int		paginaEnMemoria(int instruccion, int cantidadPaginas, int tamanioPaginas);				// Devuelve la página en Memoria donde se encuentra la instrucción.
 
@@ -108,43 +138,34 @@ void 	arrojarExcepcion(/* Excepción */); 	// Se explica solo.
 // Definiciones
 
 void recibirPCB(int socketKernel, pcb* unPcb){
-	recibirDatos(socketKernel, unPcb->pid);
+	unPcb->pid = *(int*)recibirDatos(socketKernel);
 
-	recibirDatos(socketKernel, unPcb->pc);
+	unPcb->pc = *(int*)recibirDatos(socketKernel);
 
-	recibirDatos(socketKernel, unPcb->paginasUsadas);
+	unPcb->paginasUsadas = *(int*)recibirDatos(socketKernel);
 
-	recibirDatos(socketKernel, unPcb->indiceCodigo); 	// Para moverse entre instrucciones del índice, usar aritmética de punteros como si fuera una array.
+	unPcb->indiceCodigo = *(indiceCodigo*)recibirDatos(socketKernel);
 
-	recibirDatos(socketKernel, unPcb->indiceEtiqueta);	// Por lo que entendí, este índice se recorre con una función del parser.
+	unPcb->indiceEtiqueta = *(indiceEtiqueta*)recibirDatos(socketKernel);
 
-	// Queda pendiente recibir datos del stack. Hay algo que no me cierra.
+	unPcb->indiceStack.retPos = *(retPos*)recibirDatos(socketKernel);
 
-}
+	unPcb->indiceStack.retVar = *(retVar*)recibirDatos(socketKernel);
 
-void concluirOperacion(int socketKernel, pcb unPcb){
-	enviarDatos(socketKernel, unPcb->pid, sizeof(unPcb.pid));
+	unPcb->indiceStack.listaArgumentos = recibirLista(socketKernel, sizeof(args), (args*)recibirDatos(socketKernel));
 
-	enviarDatos(socketKernel, unPcb->pc, sizeof(unPcb.pc));
+	unPcb->indiceStack.listaVariables = recibirLista(socketKernel, sizeof(vars), (vars*)recibirDatos(socketKernel));
 
-	enviarDatos(socketKernel, unPcb->paginasUsadas, sizeof(unPcb.paginasUsadas));
-
-	enviarDatos(socketKernel, unPcb->indiceCodigo, sizeof(unPcb.indiceCodigo));
-
-	enviarDatos(socketKernel, unPcb->indiceEtiqueta, sizeof(unPcb.indiceEtiqueta));
-
-	// Queda pendiente enviar datos del stack. Hay algo que no me cierra.
+	unPcb->exitCode = *(int*)recibirDatos(socketKernel);
 
 }
 
-void finEjecucion(int socketKernel, pcb unPcb, int codigoFin){
-	// No sé cómo maneja el Kernel el fin de un proceso.
-	// Sé que hay que hacer una syscall para que termine, pero... Ni idea...
-	// De momento, que sepa que si le mando el exitCode, es porque terminó el proceso.
+void concluirOperacion(int socketKernel, pcb* unPcb){
 
-	unPcb->exitCode = codigoFin;
+}
 
-	enviarDatos(socketKernel, unPcb->exitCode, sizeof(unPcb.exitCode));
+void finEjecucion(int socketKernel, pcb* unPcb, int codigoFin){
+
 }
 
 void actualizarPC(int *PC, int valor){
