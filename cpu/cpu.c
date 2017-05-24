@@ -135,6 +135,9 @@ int main(int argc, char *argv[]){
 		// Execute stage
 
 		/*
+		Aca se debería inicializar las dos estructuras con todos los punteros a funciones (primitivas),
+		que serían los dos punteros que recibe el analizador de linea
+
 		llenarPCB(&PCB);
 
 		char* instruccion;
