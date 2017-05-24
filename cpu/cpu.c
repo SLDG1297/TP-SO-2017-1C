@@ -128,6 +128,9 @@ int main(int argc, char *argv[]){
 
 	llenarPCB(&PCB);
 
+    //Aca se debería inicializar las dos estructuras con todos los punteros a funciones(primitivas)
+	//Que serían los dos punteros que recibe el analizador de linea
+
 	char* instruccion;
 	//analizadorLinea(instruccion,);
 

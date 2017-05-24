@@ -58,15 +58,17 @@ void retornar(t_valor_variable retorno);
 //Definiciones
 
 t_puntero definirVariable(t_nombre_variable identificador_variable){
-	//posicionMemoria posMem = solicitarEspacioAMemoria(tamañoDeVariable);
-	indiceStack nuevaPosStack;
-
-	//nuevaPosStack.variables;
-
-	int index = list_add(PCB->indiceStack,nuevaPosStack);
+	posicionMemoria posMem /*= solicitarEspacioAMemoria(tamañoDeVariable)*/;
+	variableStack nuevaVariable;
+	nuevaVariable.nombre = identificador_variable;
+	nuevaVariable.posicionMemoria = posMem;
+	//Falta poner en qué posición del stack meter la nueva variable
+	//int index = list_add(PCB->indiceStack.variables,nuevaVariable);
 	t_puntero niIdea;
-	return niIdea; // Sory, Erik. Me rompía los huevos que me aparezca el cartelito con el signo "!" XD
+	return niIdea;
 }
+
+
 //-----------------------------------------------------------------------------------------------------------------------
 
 //OPERACIONES DE KERNEL PARA ESTRUCTURA AnSISOP_kernel ------------------------------------------------------------------

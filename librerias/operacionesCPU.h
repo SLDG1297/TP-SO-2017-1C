@@ -25,6 +25,8 @@
 
 // Estructuras de datos
 
+typedef t_puntero retPos;
+
 typedef struct{
 	t_puntero_instruccion	primerInstruccion;	// El numero de la primera instrucción (Begin).
 	t_size					instruccionesSize;	// Cantidad de instrucciones del programa.
@@ -45,9 +47,22 @@ typedef struct{
 typedef struct{
 	t_list*			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
 	t_list*			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
-	t_puntero 		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
-	t_intructions	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
+	retPos		    retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+	posicionMemoria	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
 } indiceStack;
+
+//Estructura para manejar una posición de memoria
+typedef struct{
+	u_int32_t pagina;
+	u_int32_t offset;
+	u_int32_t size;
+}posicionMemoria;
+
+//Estructura de la lista de variables que hay en el stack
+typedef struct{
+	t_nombre_variable nombre;
+	posicionMemoria posicionMemoria;
+}variableStack ;
 
 // El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
 
@@ -57,7 +72,7 @@ typedef struct {
 	int 				paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
 	indiceCodigo		indiceCodigo;		// Identifica líneas útiles de un programa
 	indiceEtiqueta		indiceEtiqueta;		// Identifica llamadas a funciones.
-	indiceStack			indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
+	t_list*		        indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
 	int 				exitCode; 			// Motivo por el cual finalizó un programa.
 } pcb;
 
