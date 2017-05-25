@@ -68,10 +68,10 @@ typedef struct{
 
 typedef struct {
 	int 				pid; 				// Identificador de un proceso.
-	int 				pc; 				// Program counter: indica el número de la siguiente instrucción a ejecutarse.
+	int 				programCounter; 				// Program counter: indica el número de la siguiente instrucción a ejecutarse.
 	int 				paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
-	indiceCodigo		indiceCodigo;		// Identifica líneas útiles de un programa
-	indiceEtiqueta		indiceEtiqueta;		// Identifica llamadas a funciones.
+	t_list*		        indiceCodigo;		// Identifica líneas útiles de un programa
+	t_list*		        indiceEtiqueta;		// Identifica llamadas a funciones.
 	t_list*		        indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
 	int 				exitCode; 			// Motivo por el cual finalizó un programa.
 } pcb;
