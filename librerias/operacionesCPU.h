@@ -25,21 +25,17 @@
 
 // Estructuras de datos
 
-typedef t_puntero retPos;
-
-// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
-
 typedef struct{
-	u_int32_t pagina;
-	u_int32_t offset;
-	u_int32_t size;
+	int 					pagina;
+	t_puntero_instruccion 	offset;
+	t_size 					size;
 } posicionMemoria;
 
 //Estructura para manejar una posición de memoria.
 
 typedef struct{
-	t_nombre_variable nombre;
-	posicionMemoria posicionMemoria;
+	t_nombre_variable 	nombre;
+	posicionMemoria 	posicionMemoria;
 } variableStack ;
 
 //Estructura de la lista de variables que hay en el stack
@@ -64,7 +60,7 @@ typedef struct{
 typedef struct{
 	t_list*			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
 	t_list*			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
-	retPos		    retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+	t_puntero		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
 	posicionMemoria	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
 } indiceStack;
 
@@ -96,50 +92,52 @@ void 	concluirOperacion(int socketKernel, pcb* unPcb); 			// Notificar al Kernel
 
 void 	finEjecucion(int socketKernel, pcb* unPcb, int codigoFin); 	// Indicar finalización de un proceso.
 
-void 	conectarNuevaCPU(int socketKernel); 						// Conectar otra CPU al sistema.
+void 	conectarCPU(int socketKernel); 								// Conectar otra CPU al sistema.
 
 void 	desconectarCPU(int senial, int socketKernel); 				// ¿Por qué no puedo poner 'ñ'?
 
 // Con Memoria
 
-void 	handshakeMemoria(int socketMemoria); 													// Realiza handshake con Memoria.
+void 	handshakeMemoria(int socketMemoria, int* tamanioPaginas); 								// Realiza handshake con Memoria. Obtiene el tamaño de las páginas.
 
-char* 	solicitarSentencia(/*posicionMemoria unaPos,*/ int socketMemoria); 						// Solicitar sentencia en Memoria.
+char*	solicitarInstruccion(int socketMemoria, int tamanioPaginas, pcb* unPcb); 				// Solicitar instrucción en Memoria.
 
-char* 	obtenerDatos(/*posicionMemoria unaPos,*/ int socketMemoria); 							// Obtiene información de un programa en ejecución.
+char* 	obtenerDatos(int socketMemoria, posicionMemoria unaPos); 								// Obtiene información de un programa en ejecución.
 
-void 	actualizarValores(char* nuevosDatos, /*posicionMemoria unaPos,*/ int socketMemoria); 	// Actualiza estructuras tras una operación.
-
-int		paginaEnMemoria(int instruccion, int cantidadPaginas, int tamanioPaginas);				// Devuelve la página en Memoria donde se encuentra la instrucción.
+void 	actualizarValores(char* nuevosDatos, posicionMemoria unaPos, int socketMemoria); 		// Actualiza estructuras tras una operación.
 
 // Funciones de CPU: las clasificamos así porque son las funciones que componen al CPU para que haga su trabajo.
 
-void 	interpretarOperacion(); 			// Recibe una instrucción de un programa y la parsea.
+void 	interpretarOperacion(); 														// Recibe una instrucción de un programa y la parsea.
 
-void 	ejecutarOperacion(); 				// Ejecuta una instrucción parseada.
+void 	ejecutarOperacion(); 															// Ejecuta una instrucción parseada.
 
-void 	llamarFuncion(/* Stack */); 		// Llama a una función o procedimiento.
+void 	llamarFuncion(/* Stack */); 													// Llama a una función o procedimiento.
 
-void 	actualizarPC(int *PC, int valor); 	// Incrementa el Program Counter con la próxima instrucción a ejecutar.
+void 	actualizarPC(int *PC, int valor); 												// Incrementa el Program Counter con la próxima instrucción a ejecutar.
 
-void 	arrojarExcepcion(/* Excepción */); 	// Se explica solo.
+int		hallarPagina(t_puntero_instruccion posicionInstruccion, int tamanioPaginas);	// Encuentra la página en la que se encuentra una posición de Memoria.
+
+void 	arrojarExcepcion(/* Excepción */); 												// Se explica solo.
+
+
 
 // Definiciones
 
 void recibirPCB(int socketKernel, pcb* unPcb){
-	unPcb->pid = *(int*)recibirDatos(socketKernel);
+	unPcb->pid = *(int*)recibirMensaje(socketKernel);
 
-	unPcb->pc = *(int*)recibirDatos(socketKernel);
+	unPcb->pc = *(int*)recibirMensaje(socketKernel);
 
-	unPcb->paginasUsadas = *(int*)recibirDatos(socketKernel);
+	unPcb->paginasUsadas = *(int*)recibirMensaje(socketKernel);
 
-	unPcb->indiceCodigo = *(indiceCodigo*)recibirDatos(socketKernel);
+	unPcb->indiceCodigo = *(indiceCodigo*)recibirMensaje(socketKernel);
 
-	unPcb->indiceEtiqueta = *(indiceEtiqueta*)recibirDatos(socketKernel);
+	unPcb->indiceEtiqueta = *(indiceEtiqueta*)recibirMensaje(socketKernel);
 
-	// Falta indice de stack.
+	// Falta el indice de stack. Después lo pienso.
 
-	unPcb->exitCode = *(int*)recibirDatos(socketKernel);
+	unPcb->exitCode = *(int*)recibirMensaje(socketKernel);
 
 }
 
@@ -151,8 +149,49 @@ void finEjecucion(int socketKernel, pcb* unPcb, int codigoFin){
 
 }
 
+void handshakeMemoria(int socketMemoria, int* tamanioPaginas){
+	*tamanioPaginas = *(int*)recibirDatos(socketMemoria, sizeof(int));
+}
+
+char* solicitarInstruccion(int socketMemoria, int tamanioPaginas, pcb* unPcb){
+	int proximaInstruccion = unPcb->pc; // Indica cuál es la proxima instrucción a ejecutar.
+
+	t_intructions instruccion = unPcb->indiceCodigo.instrucciones[proximaInstruccion];		// Obtengo el la posición de inicio y fin del programa.
+	t_puntero_instruccion posicionInstruccion = proximaInstruccion * sizeof(t_intructions); // Obtengo la posición de la instrucción en bytes.
+
+	int pagina = hallarPagina(posicionInstruccion, tamanioPaginas); // Esta es la página en Memoria donde está la instrucción.
+	t_puntero_instruccion offset = instruccion.start; 				// Esto es el desplazamiento en bytes del código respecto al inicio del programa escrito.
+	t_size longitud = instruccion.offset; 							// Esto es la longitud en bytes de la instrucción respecto del offset.
+
+	int* PID = unPcb->pid;
+
+	posicionMemoria* solicitudInstruccion = malloc(sizeof(posicionMemoria));
+	solicitudInstruccion->pagina = &pagina;
+	solicitudInstruccion->offset = &offset;
+	solicitudInstruccion->size = &longitud;
+	// Creación de la estructura para enviar solicitud.
+
+	enviarMensaje(socketMemoria, PID, sizeof(int));
+	enviarMensaje(socketMemoria, solicitudInstruccion, sizeof(posicionMemoria));
+	// Envío de solicitud de instrucción a memoria. Lo hice así por comodidad XD
+
+	char* instruccionSolicitada = recibirMensaje(socketMemoria);
+	// Obtención de la solicitud.
+
+	return instruccionSolicitada;
+}
+
 void actualizarPC(int *PC, int valor){
 	*PC = valor;
+}
+
+int	hallarPagina(t_puntero_instruccion posicionInstruccion, int tamanioPaginas){
+	int pagina = 0;
+
+	while(posicionInstruccion > (pagina + 1) * tamanioPaginas)
+		pagina++;
+
+	return pagina;
 }
 
 #endif /* OPERACIONESCPU_H_ */
