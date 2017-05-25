@@ -35,8 +35,13 @@
 
 #define RUTA_ARCHIVO "./config_kernel.cfg"
 #define SIZE_DATA 1024
+#define IDCONSOLA 1
+#define IDCPU 2
 
-
+typedef int bool;
+#define true 1
+#define false 0
+int contadorPid = 1;
 
 int main(int argc, char *argv[])
 {
@@ -70,7 +75,7 @@ int main(int argc, char *argv[])
 	int longitudEstructuraSocket;
 	//*Contadores del for
 	int i, j;
-
+	int validacionDeMemoria =0;
 	char* handshake= "Kernel conectado";
 	char buffer[1024]; //Buffer de datos
 
@@ -78,9 +83,81 @@ int main(int argc, char *argv[])
 
 	struct sockaddr_in kernel_dir, cliente_dir, filesystem_dir,memoria_dir;
 	struct timeval tv;
+	
+// Estructuras de datos
+
+typedef struct{
+	int 					pagina;
+	t_puntero_instruccion 	offset;
+	t_size 					size;
+} posicionMemoria;
+
+//Estructura para manejar una posición de memoria.
+
+typedef struct{
+	t_nombre_variable 	nombre;
+	posicionMemoria 	posicionMemoria;
+} variableStack ;
+
+//Estructura de la lista de variables que hay en el stack
+
+typedef struct{
+	t_puntero_instruccion	primerInstruccion;	// El numero de la primera instrucción (Begin).
+	t_size					instruccionesSize;	// Cantidad de instrucciones del programa.
+	t_intructions*			instrucciones; 		// Instrucciones del programa.
+} indiceCodigo;
+
+// El índice de Código del PCB con las líneas útiles de código.
+
+typedef struct{
+	t_size			etiquetasSize;		// Tamaño del mapa serializado de etiquetas.
+	char*			etiquetas;			// La serializacion de las etiquetas.
+	int				cantidadFunciones;
+	int				cantidadEtiquetas;
+} indiceEtiqueta;
+
+// El índice de Etiqueta del PCB para poder identificar las funciones de un programa.
+
+typedef struct{
+	t_list*			argumentos; // Posiciones de memoria donde se almacenan las copias de los argumentos de la función.
+	t_list*			variables; 	// Identificadores y posiciones de memoria donde se almacenan las variables locales de la función.
+	t_puntero		retPos; 	// Posición del índice de código donde se debe retornar al finalizar la ejecución de la función.
+	posicionMemoria	retVar; 	// Posición de memoria donde se debe almacenar el resultado de la función provisto por la sentencia RETURN.
+} indiceStack;
+
+// El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
+
+typedef struct{
+	int 				pid; 				// Identificador de un proceso.
+	int 				programCounter; 	// Program counter: indica el número de la siguiente instrucción a ejecutarse.
+	int 				paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
+	t_list*		        indiceCodigo;		// Identifica líneas útiles de un programa
+	t_list*		        indiceEtiqueta;		// Identifica llamadas a funciones.
+	t_list*		        indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
+	int 				exitCode; 			// Motivo por el cual finalizó un programa.
+} pcb;
 
 	tv.tv_sec = 2;
 	tv.tv_usec = 500000;
+	
+t_list *consolas = list_create();
+t_list *cpus = list_create();
+t_list *pcbs = list_create();
+
+struct {
+	int socketcpu;
+	pcb pcbAsociado;
+}cpuAsociadoAPcb;
+
+struct {
+	int estado=0;
+	int socket;	
+}consola_activa;
+
+struct {
+	int estado=0;
+	int socket;
+}cpu_activo;
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 
@@ -227,37 +304,91 @@ int main(int argc, char *argv[])
 		valorRtaSelect = select(fileDescMax + 1, &socketsFiltrados, NULL, NULL, &tv);
 		esErrorConSalida(valorRtaSelect,"Error en select");
 
+		//int nroConsola=0;
 		for (i = 0; i <= fileDescMax; i++){
 
 			if(FD_ISSET(i, &socketsFiltrados)){
 
 				if(i == sockListener){
-
+					
 					longitudEstructuraSocket = sizeof(cliente_dir);
 					nuevoSocket = accept(sockListener,(struct sockaddr *) &cliente_dir,&longitudEstructuraSocket);
+					esErrorConSalida(nuevoSocket,"error en accept");
+					valorRtaRecv=recv(nuevoSocket,identificador,siseof(int),0);
+					esErrorConSalida(valorRtaRecv, "Error en recv ID");
+					
+										switch(identificador){
+											case IDCONSOLA:
+													//Si la conexion es una consola, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
+													FD_SET(nuevoSocket, &socketsRelevantes);
+													send(nuevoSocket, "Conexion aceptada. Bienvenido, proceso Consola", strlen("Conexion aceptada. Bienvenido, proceso Consola"), 0);
 
-					if (nuevoSocket == -1)
-						perror("Error en accept");
-
-					else{
-
-							printf("Accept correcto\n");
-							FD_SET(nuevoSocket, &socketsRelevantes);
-							send(nuevoSocket, "Conexion aceptada", sizeof("Conexion aceptada"), 0);
-
-							//Actualizando el maximo descriptor de fichero
-
-							if(nuevoSocket > fileDescMax)
-								  fileDescMax = nuevoSocket;
-
-							printf("%s: Nueva conexion de %s en el socket %d\n", argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
-
+													//Actualizando el maximo descriptor de fichero.
+													if(nuevoSocket > fileDescMax)
+													fileDescMax = nuevoSocket;
+													
+													agregarALista(IDCONSOLA,nuevoSocket,consolas);
+													//mensaje de nueva conexion de consola.
+													printf("%s: Nueva conexion de una consola, ip:%s en el socket %d\n",argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
+													break;
+											
+											case (IDCPU){
+												//Si la conexion es una cpu, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
+													FD_SET(nuevoSocket, &socketsRelevantes);
+													send(nuevoSocket, "Conexion aceptada. Bienvenido, proceso Cpu", strlen("Conexion aceptada. Bienvenido, proceso Cpu"), 0);
+													
+												//Actualizando el maximo descriptor de fichero.
+													if(nuevoSocket > fileDescMax)
+													fileDescMax = nuevoSocket;
+												agregarALista(IDCPU,nuevoSocket,cpus);
+												//mensaje de nueva conexion de cpu.
+													printf("%s: Nueva conexion de un cpu, ip:%s en el socket %d\n", argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
+												break;
+											default:
+												printf("Identificación incorrecta");
+												break;
 							}
 
 						}
 				else
 					{
-					longitudBytesRecibidos = recv(i, buffer, sizeof(buffer), 0);
+						t_list elemento=list_find(cpus,compararSockets);
+						//recibir pcb
+						//actualizar pcb
+						//
+						
+						if(elemento==NULL){
+							elemento=list_find(consolas,compararSockets);
+						//recibir path
+						
+						//generarLineasUtiles(Path)
+						
+						//creando pcb
+						pcb nuevoPCB;
+						nuevoPCB.pid= contadorPid;
+						incrementarcontadorPid();
+						nuevoPCB.programCounter = 0;
+						tamañoPath = calcularTamañoPath (Path);
+						nuevoPCB.paginasUsadas= tamañoPath/tamañoPagina;
+						//nuevoPCB.indiceCodigo = 
+						//nuevoPCB.indiceEtiqueta=
+						//nuevoPCB.indiceStack=
+						//nuevoPCB.exitCode=
+						
+						//solicitar memoria
+						send(sockMemoria, nuevoPCB.pid, sizeof(int), 0);
+						send(sockMemoria, nuevoPCB.paginasUsadas, sizeof(int), 0);
+						recv(sockMemoria,&validacionDeMemoria,sizeof(int),0);
+						
+						//enviar pcb mas codigo a memoria
+						
+						//elegir cpu_activa
+						//enviar a cpu_activa
+						}
+					
+					
+					
+					/*longitudBytesRecibidos = recv(i, buffer, sizeof(buffer), 0);
 
 					if(longitudBytesRecibidos<= 0){
 
@@ -281,7 +412,7 @@ int main(int argc, char *argv[])
 							   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
 								 if(j != sockListener && j != i ) {
 								   valorRtaSend = send(j, buffer, longitudBytesRecibidos, 0);
-									 esErrorSinSalida(valorRtaSend,"Error en Send");
+									 esErrorSinSalida(valorRtaSend,"Error en Send");*/
 								 	 	 	 	 	 	 	 }
 
 														}//cierra - if(FD_ISSET(j, &socketsRelevantes))
@@ -299,3 +430,25 @@ int main(int argc, char *argv[])
 		}//cierra -  while(1)
 	   return 0;
 }
+
+//Agregas un elemento a la lista segun el tipo
+void agregarALista(int tipo, int socketDato,t_list *lista){
+	
+	//si tipo igual a cero, se crea una consola
+	if(tipo==1){
+		consola_activa aux;
+	}
+	if(tipo==2){
+		cpu_activa aux;
+	}
+	aux.socket=socketDato;
+	list_add(lista,&aux);
+}
+
+void incrementarcontadorPid (contadorPid){
+	contadorPid++;
+}
+/*
+bool compararSockets(int socket1, int socket2){
+	return socket1==socket2 ? true : false
+}*/
