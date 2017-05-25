@@ -9,6 +9,22 @@
 #define CONTROLERRORES_H_
 
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+
+void esErrorSimple(int valorRtaFuncion, char* mensaje){
+	if(valorRtaFuncion<0){
+		printf(mensaje);
+		exit(EXIT_FAILURE);
+	}
+}
 
 void esErrorConSalida(int valorRtaFuncion, char* mensajeError){
 	if (valorRtaFuncion == -1){
@@ -26,7 +42,7 @@ void esErrorSinSalida(int valorRtaFuncion, char* mensajeError){
 void errorSalidaSocket(int valorRtaFuncion, char* mensajeError, int* socket){
 	if (valorRtaFuncion == -1){
 		perror(mensajeError);
-		close(socket);
+	//	close(*socket);
 		exit(EXIT_FAILURE);
 	}
 }

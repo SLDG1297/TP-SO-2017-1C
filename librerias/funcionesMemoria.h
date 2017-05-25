@@ -111,7 +111,6 @@ t_log* crearArchivo(char* ruta){
 
 void iniciarStrAdmProg(int pid, int frames, int* memoria){
 
-	strAdministrativa aux;
 
 
 
