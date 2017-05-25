@@ -103,9 +103,7 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable){
 		return &posMem;
 	}
 	//Si no estaba la variable en la lista
-	else{
-		return -1;
-	}
+    return -1;
 }
 
 t_valor_variable dereferenciar(t_puntero direccion_variable){
