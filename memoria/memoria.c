@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #include <commons/log.h>
 #include <commons/string.h>
@@ -31,44 +32,50 @@
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
 
+//***INCLUDE LIBRERIAS PROPAIS
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
 #include "../librerias/funcionesMemoria.h"
 
 
+//***DEFINE DATOS ESTATICOS
 #define RUTA_ARCHIVO "./config_memoria.cfg"
 #define SIZE_DATA 1024
 #define RUTA_LOG "./memoriaLog.txt"
 
-//DECLARACION DE VARIABLES PARA VALORES DE RESPUESTA
-
-
-
-//*Socket para entablar conexion con el kernel
+//***DATOS PARA ENTABLAR CONEXION CON EL KERNEL
 int sockAlKernel;
 int yes = 1;
 struct sockaddr_in espera, datosDelKernel;
 int socketServidor;
 
-//*Puntero a memoria contigua
+//***PUNTERO A BLOQUES DE MEMORIA
 int *ptrMemoria;
+int *ptrCache;
 
+//***ARCHIVO LOG
 t_log* archivoLog;
 
-//DECLARACION DE PROTOTIPO DE FUNCIONES
+//***SEMAFORO
+sem_t semaforo;
+
+//***DECLARACION DE PROTOTIPO DE FUNCIONES
 
 int crearSocket();
 void laConexionFueExitosa(char* handshake);
-void iniciarConexion();
+int iniciarConexion();
+void aceptarConexiones();
+void seleccionOperacionesMemoria();
 
 //************** MAIN **************//
 int main(int argc, char *argv[]) {
 
 //DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL
 
-//*Socket para entablar conexion con el kernel
+// declaramos el hilo y sus atributos
+	pthread_t idHilo;
 	char buffer[SIZE_DATA];
-//	char* handshake = "La conexion al proceso memoria fue exitosa";
+	char* handshake = "\nLa conexion al proceso memoria fue exitosa";
 	memset(buffer, '\0', SIZE_DATA);
 
 
@@ -83,21 +90,28 @@ int main(int argc, char *argv[]) {
 	inicializarStrAdm(ptrMemoria);
 	imprimirStrAdm(ptrMemoria);
 
+	//* creamos un socket con el cual vamos a manejar la conexion con el kernel
 	socketServidor=iniciarConexionServidor();
 
+	//*Creo un hilo que se encargue unicamente de manejar las conexiones a la memoria
+	// Seteamos los atributos (2do parametro) como nulo, ya que de esta manera los atributos son por defecto
 
+	// int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_routine) (void *), void *arg);
+	pthread_create(&idHilo,NULL,aceptarConexiones,NULL);
 
+	laConexionFueExitosa(handshake);
 	//*asignacion de datos al socket que espera a la conexion del kernel
 
-	//DIRECCION PARA ESPERAR A LA CONEXION CON EL KERNEL
-	/*iniciarConexion();
 
-	 laConexionFueExitosa(handshake);
 
 
 	 puts("La conexion al proceso kernel fue exitosa\n");
 	 puts("Esperando mensajes\n");
-	 */
+
+	 //int pthread_join(pthread_t thread, void **retval);
+	 //* Finalmente esperamos a que el hilo original termine
+
+	 pthread_join(idHilo,NULL);
 
 	return 0;
 
@@ -111,9 +125,9 @@ int iniciarConexionServidor() {
 
 	//Declaracion de variables para recibir valor de rta
 	int valorRtaBind = 0;
-	int valorRtaListen = 0;
+//	int valorRtaListen = 0;
 
-	int longitudEstructuraSocket = sizeof(datosDelKernel);
+//	int longitudEstructuraSocket = sizeof(datosDelKernel);
 	//DIRECCION PARA ESPERAR A LA CONEXION CON EL KERNEL
 
 	espera.sin_family = AF_INET;
@@ -129,17 +143,17 @@ int iniciarConexionServidor() {
 	printf("Bind correcto\n");
 	puts("Esperando la conexion del kernel\n");
 
-//Listen(): Marca al socket como pasivo, es decir un socket que sera utilizado para aceptar conecciones
-	valorRtaListen = listen(socketEsperaKernel, 5);
-	errorSalidaSocket(valorRtaListen, "Error en Listen", &socketEsperaKernel);
+////Listen(): Marca al socket como pasivo, es decir un socket que sera utilizado para aceptar conecciones
+//	valorRtaListen = listen(socketEsperaKernel, 5);
+//	errorSalidaSocket(valorRtaListen, "Error en Listen", &socketEsperaKernel);
+//
+////Accept(): Extrae el primer pedido de conexion de la cola de conexiones pendientes, del socket de escucha
+////crea un nuevo socket conecatado y retorna un nuevo descriptor de archivo referido a ese socket.
+//	sockAlKernel = accept(socketEsperaKernel,
+//			(struct sockaddr *) &datosDelKernel, &longitudEstructuraSocket);
+//	errorSalidaSocket(sockAlKernel, "Error en el accept", &socketEsperaKernel);
 
-//Accept(): Extrae el primer pedido de conexion de la cola de conexiones pendientes, del socket de escucha
-//crea un nuevo socket conecatado y retorna un nuevo descriptor de archivo referido a ese socket.
-	sockAlKernel = accept(socketEsperaKernel,
-			(struct sockaddr *) &datosDelKernel, &longitudEstructuraSocket);
-	errorSalidaSocket(sockAlKernel, "Error en el accept", &socketEsperaKernel);
-
-	return sockAlKernel;
+	return socketEsperaKernel;
 }
 int crearSocket() {
 	//Declaracion de variable para recibir valor de rta
@@ -158,6 +172,7 @@ int crearSocket() {
 			"Error en setSockOpt en el socket de espera", &sockDeEspera);
 	return sockDeEspera;
 }
+
 void laConexionFueExitosa(char* handshake) {
 
 	int longitudDatosEnviados;
@@ -167,7 +182,30 @@ void laConexionFueExitosa(char* handshake) {
 }
 
 
+void *aceptarConexion(){
+
+	pthread_t idHilo_OPERACIONES;
+	int valorRtaPthreadCreate;
+
+	int socketRecepcion=recibirConexion();
+	while(1){
+		sem_wait(&semaforo);
+		//Creamos un segundo hilo que se encargue de los pedidos operaciones especificas de la memoria segun pedido de cada conexion
+		valorRtaPthreadCreate=pthread_create(&idHilo_OPERACIONES,NULL,seleccionOperacionesMemoria,&socketRecepcion);
+		esErrorSimple(valorRtaPthreadCreate,"No se pudo crear el hilo, dios sabra por que?");
+	}
+
+	pthread_join(idHilo_OPERACIONES,NULL);
+
+}
+
+
 // ************************* OPERACIONES DE MEMORIA *************************************
+
+
+void *seleccionOperacionesMemoria(){
+
+}
 
 /*
  * Cuando el KRN comunique el inicio de un nuevo prog se crearan las estructuras necesarias para administrarlo correctamente. En una misma pag
