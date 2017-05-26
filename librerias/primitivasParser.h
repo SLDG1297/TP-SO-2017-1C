@@ -69,12 +69,9 @@ t_puntero definirVariable(t_nombre_variable identificador_variable){
 	nuevaVariable.nombre = identificador_variable;
 	nuevaVariable.posicionMemoria = posMem;
 	t_list* stack = PCB->indiceStack;
-	t_list* pr = stack;
-	//Recorro la lista para encontrar la ultima posicion del stack (contexto actual)
-	while(pr->head->next != NULL){
-		pr = pr->head->next;
-	}
-	indiceStack* aux= (indiceStack*)pr->head->data;
+	//Indice de la última posición para pararme en el contexto actual
+	int ultPos = (stack->elements_count) - 1;
+	indiceStack* aux = (indiceStack*)list_get(stack,ultPos);
 	int index = list_add(aux->variables,&nuevaVariable);
 	//Por ahora asumo que el puntero es a la posicion de memoria en donde se encuentra la variable junto con su
 	//correspondiente posicion en la memoria (proceso)
@@ -85,21 +82,18 @@ t_puntero definirVariable(t_nombre_variable identificador_variable){
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable){
 	t_list* stack = PCB->indiceStack;
-	t_list* pr = stack;
-	//Recorro la lista para encontrar la ultima posicion del stack (contexto actual)
-	while(pr->head->next != NULL){
-			pr = pr->head->next;
-	}
-	indiceStack* aux= (indiceStack*)pr->head->data;
+	//Indice de la última posición para pararme en el contexto actual
+	int ultPos = (stack->elements_count) - 1;
+	indiceStack* aux = (indiceStack*)list_get(stack,ultPos);
 	//Ahora tengo que recorrer la lista de variables hasta encontrar la requerida
 	t_list* listaVariables = aux->variables;
-	pr = listaVariables;
-	while(((variableStack)pr->head->data)->nombre != identificador_variable && pr->head->next != NULL){
+	t_list* pr = listaVariables;
+	while(((variableStack*)pr->head->data)->nombre != identificador_variable && pr->head->next != NULL){
 		pr = pr->head->next;
 	}
-	//Si encontró la variable devuelve la posicion de memoria en donde está la página, offset y size
-	if(((variableStack)pr->head->data)->nombre == identificador_variable){
-		posicionMemoria posMem = ((variableStack)pr->head->data)->posicionMemoria;
+	//Si encontró la variable devuelve la posición de memoria en donde está la página, offset y size
+	if(((variableStack*)pr->head->data)->nombre == identificador_variable){
+		posicionMemoria posMem = ((variableStack*)pr->head->data)->posicionMemoria;
 		return &posMem;
 	}
 	//Si no estaba la variable en la lista
