@@ -29,6 +29,9 @@
 #include <commons/collections/list.h>
 #include <commons/collections/dictionary.h>
 #include <commons/collections/queue.h>
+#include <commons/collections/node.h>
+
+#include <parser/metadata_program.h>
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
@@ -38,52 +41,9 @@
 #define IDCONSOLA 1
 #define IDCPU 2
 
-typedef int bool;
-#define true 1
-#define false 0
+int identificador;
 int contadorPid = 1;
 
-int main(int argc, char *argv[])
-{
-	//CODIGO PARA LLAMAR AL ARCHIVO
-
-		//Estructura para manejar el archivo de configuración -- t_config*
-		//Crear estructura de configuración para obtener los datos del archivo de configuración.
-
-		t_config* configuracion;
-		char* ruta = RUTA_ARCHIVO;
-		configuracion = llamarArchivo(ruta);
-
-//DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL
-
-	//*Lista completa de sockets
-	fd_set socketsRelevantes;
-	//*Sockets filtrados por el select
-	fd_set socketsFiltrados;
-	FD_ZERO(&socketsRelevantes);
-	FD_ZERO(&socketsFiltrados);
-	//*Numero del descriptor de fichero mas grande
-	int fileDescMax;
-	//*Socket para escuchar nuevas conexiones
-	int sockListener;
-	int sockMemoria;
-	int sockFileSystem;
-	//*Socket para aceptar
-	int nuevoSocket;
-	int longitudBytesRecibidos;
-	int yes = 1;
-	int longitudEstructuraSocket;
-	//*Contadores del for
-	int i, j;
-	int validacionDeMemoria =0;
-	char* handshake= "Kernel conectado";
-	char buffer[1024]; //Buffer de datos
-
-	memset (buffer,'\0',SIZE_DATA);
-
-	struct sockaddr_in kernel_dir, cliente_dir, filesystem_dir,memoria_dir;
-	struct timeval tv;
-	
 // Estructuras de datos
 
 typedef struct{
@@ -140,24 +100,69 @@ typedef struct{
 	tv.tv_sec = 2;
 	tv.tv_usec = 500000;
 	
+	typedef struct {
+		int socketcpu;
+		pcb pcbAsociado;
+	}cpuAsociadoAPcb;
+
+	typedef struct {
+		int estado =0;
+		int socket;
+	}consola_activa;
+
+	typedef struct {
+		int estado =0;
+		int socket;
+	}cpu_activo;
+
+int main(int argc, char *argv[])
+{
+	//CODIGO PARA LLAMAR AL ARCHIVO
+
+		//Estructura para manejar el archivo de configuración -- t_config*
+		//Crear estructura de configuración para obtener los datos del archivo de configuración.
+
+		t_config* configuracion;
+		char* ruta = RUTA_ARCHIVO;
+		configuracion = llamarArchivo(ruta);
+
+//DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL
+
+	//*Lista completa de sockets
+	fd_set socketsRelevantes;
+	//*Sockets filtrados por el select
+	fd_set socketsFiltrados;
+	FD_ZERO(&socketsRelevantes);
+	FD_ZERO(&socketsFiltrados);
+	//*Numero del descriptor de fichero mas grande
+	int fileDescMax;
+	//*Socket para escuchar nuevas conexiones
+	int sockListener;
+	int sockMemoria;
+	int sockFileSystem;
+	//*Socket para aceptar
+	int nuevoSocket;
+	int longitudBytesRecibidos;
+	int yes = 1;
+	int longitudEstructuraSocket;
+	//*Contadores del for
+	int i, j;
+	int validacionDeMemoria =0;
+	char* handshake= "Kernel conectado";
+	char buffer[1024]; //Buffer de datos
+	int tamanioDePagina;
+	memset (buffer,'\0',SIZE_DATA);
+
+	struct sockaddr_in kernel_dir, cliente_dir, filesystem_dir,memoria_dir;
+	struct timeval tv;
+
+
+
 t_list *consolas = list_create();
 t_list *cpus = list_create();
 t_list *pcbs = list_create();
 
-struct {
-	int socketcpu;
-	pcb pcbAsociado;
-}cpuAsociadoAPcb;
 
-struct {
-	int estado=0;
-	int socket;	
-}consola_activa;
-
-struct {
-	int estado=0;
-	int socket;
-}cpu_activo;
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 
@@ -218,7 +223,9 @@ struct {
 
 	valorRtaSend = send(sockMemoria,handshake,strlen(handshake),0);
 	esErrorConSalida(valorRtaSend,"Error en el handshake de memoria (envio)");
-
+    //obtener el tamaño de pagina
+	valorRtaRecv= recv (sockMemoria,tamanioDePagina,sizeof(int),0);
+	esErrorConSalida(valorRtaRecv,"Error al obtener el tamaño de pagina");
 
     puts(buffer);
     FD_SET(sockMemoria, &socketsRelevantes);
@@ -314,7 +321,7 @@ struct {
 					longitudEstructuraSocket = sizeof(cliente_dir);
 					nuevoSocket = accept(sockListener,(struct sockaddr *) &cliente_dir,&longitudEstructuraSocket);
 					esErrorConSalida(nuevoSocket,"error en accept");
-					valorRtaRecv=recv(nuevoSocket,identificador,siseof(int),0);
+					valorRtaRecv=recv(nuevoSocket,identificador,sizeof(int),0);
 					esErrorConSalida(valorRtaRecv, "Error en recv ID");
 					
 										switch(identificador){
@@ -352,13 +359,17 @@ struct {
 						}
 				else
 					{
-						t_list elemento=list_find(cpus,compararSockets);
+						//Si no es listener, es consola, cpu, o filesystem
+
+
+						//Si es CPU:
 						//recibir pcb
 						//actualizar pcb
 						//
 						
-						if(elemento==NULL){
-							elemento=list_find(consolas,compararSockets);
+						//Si es Consola
+							//recibir instruccion
+								//Nuevo Programa
 						//recibir path
 						
 						//generarLineasUtiles(Path)
@@ -384,35 +395,13 @@ struct {
 						
 						//elegir cpu_activa
 						//enviar a cpu_activa
+
+								//terminar programa
+
 						}
 					
 					
 					
-					/*longitudBytesRecibidos = recv(i, buffer, sizeof(buffer), 0);
-
-					if(longitudBytesRecibidos<= 0){
-
-						//Error o fin de conexion?
-
-						if(longitudBytesRecibidos == 0)
-							printf("%s: Socket %d colgado\n", argv[0], i); //Conexion cerrada
-
-						else
-							perror("Error en el recv");
-
-						//Se cierra el socket
-						close(i);
-						FD_CLR(i, &socketsRelevantes);
-						}
-						else{
-
-						puts(buffer);
-						  for(j = 0; j <= fileDescMax; j++){
-							if(FD_ISSET(j, &socketsRelevantes)){
-							   //Reenviar el mensaje a todos menos al listener y al socket que recibio el mensaje
-								 if(j != sockListener && j != i ) {
-								   valorRtaSend = send(j, buffer, longitudBytesRecibidos, 0);
-									 esErrorSinSalida(valorRtaSend,"Error en Send");*/
 								 	 	 	 	 	 	 	 }
 
 														}//cierra - if(FD_ISSET(j, &socketsRelevantes))
@@ -437,12 +426,15 @@ void agregarALista(int tipo, int socketDato,t_list *lista){
 	//si tipo igual a cero, se crea una consola
 	if(tipo==1){
 		consola_activa aux;
+		aux.socket=socketDato;
+			list_add(lista,&aux);
 	}
 	if(tipo==2){
-		cpu_activa aux;
+		cpu_activo aux;
+		aux.socket=socketDato;
+			list_add(lista,&aux);
 	}
-	aux.socket=socketDato;
-	list_add(lista,&aux);
+
 }
 
 void incrementarcontadorPid (contadorPid){
