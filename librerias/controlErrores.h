@@ -39,10 +39,10 @@ void esErrorSinSalida(int valorRtaFuncion, char* mensajeError){
 	}
 }
 
-void errorSalidaSocket(int valorRtaFuncion, char* mensajeError, int* socket){
+void errorSalidaSocket(int valorRtaFuncion, char* mensajeError, int socket){
 	if (valorRtaFuncion == -1){
 		perror(mensajeError);
-	//	close(*socket);
+		close(socket);
 		exit(EXIT_FAILURE);
 	}
 }
