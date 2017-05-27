@@ -5,6 +5,7 @@
  ============================================================================
  */
 
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -63,9 +64,10 @@ sem_t semaforo;
 
 int crearSocket();
 void laConexionFueExitosa(char* handshake);
-int iniciarConexion();
-void aceptarConexiones();
-void seleccionOperacionesMemoria();
+int iniciarConexionServidor();
+int recibirConexion();
+void *aceptarConexion();
+void *seleccionOperacionesMemoria(int *socket);
 
 //************** MAIN **************//
 int main(int argc, char *argv[]) {
@@ -97,7 +99,7 @@ int main(int argc, char *argv[]) {
 	// Seteamos los atributos (2do parametro) como nulo, ya que de esta manera los atributos son por defecto
 
 	// int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_routine) (void *), void *arg);
-	pthread_create(&idHilo,NULL,aceptarConexiones,NULL);
+	pthread_create(&idHilo,NULL,aceptarConexion,NULL);
 
 	laConexionFueExitosa(handshake);
 	//*asignacion de datos al socket que espera a la conexion del kernel
@@ -185,27 +187,43 @@ void laConexionFueExitosa(char* handshake) {
 void *aceptarConexion(){
 
 	pthread_t idHilo_OPERACIONES;
-	int valorRtaPthreadCreate;
+	int valorRtaThread;
+	int socketRecepcion;
+	socketRecepcion=recibirConexion();
 
-	int socketRecepcion=recibirConexion();
 	while(1){
 		sem_wait(&semaforo);
 		//Creamos un segundo hilo que se encargue de los pedidos operaciones especificas de la memoria segun pedido de cada conexion
-		valorRtaPthreadCreate=pthread_create(&idHilo_OPERACIONES,NULL,seleccionOperacionesMemoria,&socketRecepcion);
-		esErrorSimple(valorRtaPthreadCreate,"No se pudo crear el hilo, dios sabra por que?");
+		valorRtaThread=pthread_create(&idHilo_OPERACIONES,NULL,seleccionOperacionesMemoria,&socketRecepcion);
+		esErrorSimple(valorRtaThread,"No se pudo crear el hilo, dios sabra por que?");
 	}
 
 	pthread_join(idHilo_OPERACIONES,NULL);
 
 }
 
+void *seleccionOperacionesMemoria(int *socekt){
+
+	return 0;
+}
+int recibirConexion(int socket){
+	int valorRtaListen,conexionAceptada;
+	struct sockaddr strAddr;
+
+	valorRtaListen=listen(&socket,5);
+	esErrorSinSalida(valorRtaListen,"No se ha podido poner el socket en escucha");
+
+	conexionAceptada=accept(socket,(struct sockaddr*) &strAddr, sizeof(strAddr));
+	esErrorConSalida
+
+
+	return socket;
+}
 
 // ************************* OPERACIONES DE MEMORIA *************************************
 
 
-void *seleccionOperacionesMemoria(){
 
-}
 
 /*
  * Cuando el KRN comunique el inicio de un nuevo prog se crearan las estructuras necesarias para administrarlo correctamente. En una misma pag
