@@ -14,6 +14,7 @@
 #include <parser/sintax.h>
 #include <parser/parser.h>
 #include "../librerias/operacionesCPU.h"
+#include "../librerias/pcb.h"
 
 //Funciones generales
 
@@ -71,7 +72,7 @@ t_puntero definirVariable(t_nombre_variable identificador_variable){
 	t_list* stack = PCB->indiceStack;
 	//Indice de la última posición para pararme en el contexto actual
 	int ultPos = (stack->elements_count) - 1;
-	indiceStack* aux = (indiceStack*)list_get(stack,ultPos);
+	indiceDeStack* aux = (indiceDeStack*)list_get(stack,ultPos);
 	int index = list_add(aux->variables,&nuevaVariable);
 	//Por ahora asumo que el puntero es a la posicion de memoria en donde se encuentra la variable junto con su
 	//correspondiente posicion en la memoria (proceso)
@@ -84,7 +85,7 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable){
 	t_list* stack = PCB->indiceStack;
 	//Indice de la última posición para pararme en el contexto actual
 	int ultPos = (stack->elements_count) - 1;
-	indiceStack* aux = (indiceStack*)list_get(stack,ultPos);
+	indiceDeStack* aux = (indiceDeStack*)list_get(stack,ultPos);
 	//Ahora tengo que recorrer la lista de variables hasta encontrar la requerida
 	t_list* listaVariables = aux->variables;
 	t_list* pr = listaVariables;

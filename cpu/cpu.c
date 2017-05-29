@@ -34,6 +34,7 @@
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
 #include "../librerias/operacionesCPU.h"
+#include "../librerias/pcb.h"
 #include "../librerias/primitivasParser.h"
 #include "../librerias/serializador.h"
 

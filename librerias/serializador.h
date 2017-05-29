@@ -85,21 +85,17 @@ void* recibirMensaje(int socket){
 	return datos;
 }
 
-t_list* recibirLista(int socket, int tamanioNodo){
-	int tamanioLista = recibirTamanio(socket); 			// Este es el tamaño de lo recibido. Lo podría haber sacado del header...
-	int tamanioIndice;
-	int indice;
+t_list* recibirLista(int socket, size_t tamanioNodo, void(*enlistador)(int, t_list*)){
+	// El tercer puntero es un puntero a función: se delega la responsabilidad de crear la lista a quien la recibe, porque no tengo forma de castear los void* genéricamente.
 
-	void* listaSerializada = recibirDatos(socket, tamanioLista);
+	int tamanioLista = recibirTamanio(socket); 			// Este es el tamaño de lo recibido.
+	int tamanioIndice = tamanioLista / tamanioNodo;		// Esto es para poder recorrer la lista serializada como un array.
+	int indice;											// Para hacer un for, porque C no me deja inicializaar una variable en el prototipo del for... T_T
 
-	t_list* lista = NULL;
+	t_list* lista = NULL; 								// La lista a ser devuelta.
 
-	tamanioIndice = tamanioLista / tamanioNodo;				// Esto es para poder recorrer la lista serializada como un array.
-
-	for(indice = 0; indice < tamanioIndice; indice++)		// Esto es para crear la lista como se debe.
-		// list_add(lista, listaSerializada[indice]);		// Como es un void*, no lo puedo recorrer como array generalmente...
-
-	free(listaSerializada);
+	for(indice = 0; indice < tamanioIndice; indice++)	// Esto es para crear la lista como se debe, nodo por nodo.
+		enlistador(socket, lista);
 
 	return lista;
 }
