@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
 	pcb PCB;
 // El registro PCB que usa la CPU para ejecutar instrucciones.
 
-	int tamanioPaginas;
+	u_int32_t tamanioPaginas;
 // El tamaño de las páginas en Memoria. Se usa para calcular la página en la que se encuentra una instrucción.
 
 // CODIGO PARA LLAMAR AL ARCHIVO
@@ -152,7 +152,8 @@ int main(int argc, char *argv[]){
 		Aca se debería inicializar las dos estructuras con todos los punteros a funciones (primitivas),
 		que serían los dos punteros que recibe el analizador de linea
 
-		llenarPCB(&PCB);
+		llenarVarsPrimitivas(&PCB,&tamanioPaginas); //Sirve para que el .h disponga de las variables necesarias
+		                                            //ya que no se pueden modificar los parametros de las primitivas
 
 		char* instruccion;
 		analizadorLinea(instruccion,);

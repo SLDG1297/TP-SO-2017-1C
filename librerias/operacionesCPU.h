@@ -26,12 +26,16 @@
 // Estructuras de datos
 
 typedef struct{
-	int 					pagina;
-	t_puntero_instruccion 	offset;
-	t_size 					size;
+	u_int32_t					pagina;
+	u_int32_t 	                offset;
+	u_int32_t 					size;
 } posicionMemoria;
 
 //Estructura para manejar una posición de memoria.
+
+typedef posicionMemoria argStack;
+
+//Estructura de la lista de argumentos de una función que hay en el stack
 
 typedef struct{
 	t_nombre_variable 	nombre;

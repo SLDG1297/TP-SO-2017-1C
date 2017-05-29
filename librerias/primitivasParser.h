@@ -18,13 +18,60 @@
 //Funciones generales
 
 pcb* PCB;
+u_int32_t* TAMAÑO_PAG;
 
 //Funcion para tener cargado el pcb
-void llenarPCB(pcb* _PCB);
+void llenarVarsPrimitivas(pcb* _PCB, u_int32_t* _TAMAÑO_PAG);
 
-void llenarPCB(pcb* _PCB){
+//Funcion para calcular el t_puntero a partir de una posicion de memoria
+t_puntero calculart_puntero(posicionMemoria posMem);
+
+//Dado una dirección como numPag*TAMAÑO_PAG + offset calcula buscando en el stack(cualquier contexto) su correspondiente posicion de memoria
+posicionMemoria obtenerPosicionMemoria(t_puntero direccion);
+
+void llenarPCB(pcb* _PCB, u_int32_t* _TAMAÑO_PAG){
 	PCB = _PCB;
+	TAMAÑO_PAG = _TAMAÑO_PAG;
 }
+
+t_puntero calculart_puntero(posicionMemoria posMem){
+	return posMem.pagina*TAMAÑO_PAG + posMem.offset;
+}
+
+posicionMemoria* obtenerPosicionMemoria(t_puntero direccion){
+	t_list* stack = PCB->indiceStack;
+	int cantidadDeContextos = stack->elements_count;
+
+	//For para ir cambiando de contexto del stack
+	for(int i = 0;i < cantidadDeContextos;i++){
+    indiceStack* aux = (indiceStack*)list_get(stack,i);
+    int cantArgs = aux->argumentos->elements_count;
+    int cantVars = aux->variables->elements_count;
+
+    //For para ver lista de argumentos
+    for(int j = 0;j < cantArgs ;j++){
+    argStack* argStack = (argStack*)list_get(aux->argumentos,j);
+
+    //Si encontró la dirección correcta
+    if(direccion == calculart_puntero(*argStack)){
+    	return (posicionMemoria*)argStack;
+    }
+    }/*Fin del for de lista de argumentos*/
+
+    //For para ver lista de variables
+    for(int k = 0;k < cantVars;k++){
+    variableStack* varStack = (variableStack*)list_get(aux->variables,k);
+
+    //Si encontró la dirección correcta
+    if(direccion == calculart_puntero(*varStack)){
+        	return (posicionMemoria*)varStack;
+    }
+    }/*Fin del for de lista de variables*/
+
+	}/*Fin del for principal(el del contexto)*/
+	return NULL;
+}
+
 
 //OPERACIONES PARA ESTRUCTURA AnSISOP_funciones -----------------------------------------------------------------------
 
@@ -33,7 +80,7 @@ void llenarPCB(pcb* _PCB){
 //Reserva el espacio para una variable
 t_puntero definirVariable(t_nombre_variable identificador_variable);
 
-//Devuelve un puntero a la posicion de memoria en donde se guarda la pagina, offset y size de la variable
+//Devuelve la posicion en memoria (proceso) de la variable
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable);
 
 //Devuelve el valor asociado a la posicion de memoria(variable) alojada en direccion_variable
@@ -64,54 +111,67 @@ void retornar(t_valor_variable retorno);
 
 //-------------------------------------------------------------------------Falta considerar lo del diccionario de variables
 t_puntero definirVariable(t_nombre_variable identificador_variable){
+
 	posicionMemoria posMem /*= solicitarEspacioAMemoria(tamañoDeVariable)*/;
-	variableStack nuevaVariable;
-	nuevaVariable.nombre = identificador_variable;
-	nuevaVariable.posicionMemoria = posMem;
 	t_list* stack = PCB->indiceStack;
 	//Indice de la última posición para pararme en el contexto actual
 	int ultPos = (stack->elements_count) - 1;
 	indiceStack* aux = (indiceStack*)list_get(stack,ultPos);
-	int index = list_add(aux->variables,&nuevaVariable);
-	//Por ahora asumo que el puntero es a la posicion de memoria en donde se encuentra la variable junto con su
-	//correspondiente posicion en la memoria (proceso)
-	variableStack* punteroAVar = (variableStack*)list_get(aux->variables,index);
-	t_puntero posicion = &(punteroAVar->posicionMemoria);
-	return posicion;
+
+	//Para ver si es el argumento de una funcion
+	if (identificador_variable >= '0' && identificador_variable <= '9'){
+    argStack* nuevoArgumento;
+    *nuevoArgumento = posMem;
+    list_add(aux->argumentos,nuevoArgumento);
+	}
+
+	//En caso contrario, se trata de una variable normal
+	else{
+	variableStack* nuevaVariable;
+	nuevaVariable->nombre = identificador_variable;
+	nuevaVariable->posicionMemoria = posMem;
+	list_add(aux->variables,nuevaVariable);
+	}
+
+	return calculart_puntero(posMem);
 }
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable){
+
 	t_list* stack = PCB->indiceStack;
 	//Indice de la última posición para pararme en el contexto actual
 	int ultPos = (stack->elements_count) - 1;
 	indiceStack* aux = (indiceStack*)list_get(stack,ultPos);
+
 	//Ahora tengo que recorrer la lista de variables hasta encontrar la requerida
 	t_list* listaVariables = aux->variables;
 	t_list* pr = listaVariables;
 	while(((variableStack*)pr->head->data)->nombre != identificador_variable && pr->head->next != NULL){
 		pr = pr->head->next;
 	}
+
 	//Si encontró la variable devuelve la posición de memoria en donde está la página, offset y size
 	if(((variableStack*)pr->head->data)->nombre == identificador_variable){
 		posicionMemoria posMem = ((variableStack*)pr->head->data)->posicionMemoria;
-		return &posMem;
+		return calculart_puntero(posMem);
 	}
+
 	//Si no estaba la variable en la lista
     return -1;
 }
 
 t_valor_variable dereferenciar(t_puntero direccion_variable){
-    posicionMemoria* posMem = (posicionMemoria*)direccion_variable;
+
+	posicionMemoria* posMem = obtenerPosicionMemoria(direccion_variable);
     u_int32_t pagina = posMem->pagina;
     u_int32_t offset = posMem->offset;
     u_int32_t size = posMem->size;
-    //Se le manda la posicion de la variable para obtener su valor
     t_valor_variable valor /*= solicitarMemoria(pagina, offset, size)*/;
     return valor;
 }
 
 void asignar(t_puntero direccion_variable, t_valor_variable valor){
-	posicionMemoria* posMem = (posicionMemoria*)direccion_variable;
+	posicionMemoria* posMem = obtenerPosicionMemoria(direccion_variable);
 	u_int32_t pagina = posMem->pagina;
 	u_int32_t offset = posMem->offset;
 	u_int32_t size = posMem->size;
