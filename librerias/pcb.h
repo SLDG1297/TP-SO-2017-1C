@@ -9,7 +9,7 @@
 #define PCB_H_
 
 typedef struct{
-	int32_t		pagina; // Puede ser 0 la página. Por eso no puse u_int32_t.
+	u_int32_t	pagina;
 	u_int32_t 	offset;
 	u_int32_t 	size;
 } posicionMemoria;
@@ -17,13 +17,17 @@ typedef struct{
 // Estructura para manejar una posición de memoria.
 
 typedef struct{
-	int32_t 	pid;
-	int32_t		pagina; // Puede ser 0 la página. Por eso no puse u_int32_t.
+	u_int32_t 	pid;
+	u_int32_t	pagina;
 	u_int32_t 	offset;
 	u_int32_t 	size;
 } solicitudMemoria;
 
 // Para solicitar instrucciones en Memoria por parte de un proceso.
+
+typedef posicionMemoria argStack;
+
+// Estructura de la lista de argumentos que hay en el stack.
 
 typedef struct{
 	char 				nombre;
@@ -41,14 +45,14 @@ typedef struct{
 
 typedef struct{
 	u_int32_t	primerInstruccion;	// El numero de la primera instrucción (Begin).
-	u_int32_t	instruccionesSize;	// Cantidad de instrucciones del programa.
+	size_t		instruccionesSize;	// Cantidad de instrucciones del programa.
 	lineaUtil*	instrucciones; 		// Instrucciones del programa.
 } indiceDeCodigo;
 
 // El índice de Código del PCB con las líneas útiles de código.
 
 typedef struct{
-	t_size	etiquetasSize;	// Tamaño del mapa serializado de etiquetas.
+	size_t	etiquetasSize;	// Tamaño del mapa serializado de etiquetas.
 	char*	etiquetas;		// La serializacion de las etiquetas.
 } indiceDeEtiquetas;
 
@@ -64,17 +68,11 @@ typedef struct{
 // El índice de Stack del PCB para poder hacer llamadas a procedimientos con sus argumentos.
 
 typedef struct{
-	int32_t 			pid; 				// Identificador de un proceso.
-	int32_t 			programCounter; 	// Program counter: indica el número de la siguiente instrucción a ejecutarse.
-	int32_t 			paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
-
-	// Perdoná, Erik. Tiene que ser así. En las estructuras fijate que ya tienen sus "listas".
-
+	u_int32_t 			pid; 				// Identificador de un proceso.
+	u_int32_t 			programCounter; 	// Program counter: indica el número de la siguiente instrucción a ejecutarse.
+	u_int32_t 			paginasUsadas; 		// Cantidad de páginas usadas por el programa (Desde 0).
 	indiceDeCodigo		indiceCodigo;		// Identifica líneas útiles de un programa.
 	indiceDeEtiquetas	indiceEtiqueta;		// Identifica llamadas a funciones.
-
-	// Fin de rotura de código de Erik.
-
 	t_list*				indiceStack; 		// Ordena valores almacenados en la pila de funciones con sus valores.
 	u_int32_t 			exitCode; 			// Motivo por el cual finalizó un programa.
 } pcb;

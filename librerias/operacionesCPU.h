@@ -22,6 +22,8 @@
 #include "../librerias/pcb.h"
 #include "../librerias/serializador.h"
 
+
+
 // Declaraciones
 
 // Funciones de comunicación: las clasificamos así porque requieren de interacción entre el CPU con otros procesos.
@@ -64,11 +66,15 @@ int		hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas);	// E
 
 void 	arrojarExcepcion(/* Excepción */); 										// Se explica solo.
 
-// Auxiliares
+// Adaptadores: Funciones que castean void* y los añaden a una lista. Para recibir listas desde el serializador.
 
-void	aniadirCampoAlStack(int socket, t_list* listaCampos); 	// Añadir variables o argumentos a un índice de Stack.
+void	adaptadorArgumentoStack(int socket, t_list* listaArgumentos, void* nodo); 	// Añadir argumentos a un índice de Stack.
 
-void	apilarStack(int socket, t_list* pila);					// Armar la lista con los cambios de contexto de un proceso.
+void	adaptadorVariableStack(int socket, t_list* listaVariables, void* nodo);		// Añadir variable a un índice de Stack.
+
+void	adaptadorStack(int socket, t_list* pila, void* nodo);						// Armar un contexto de ejecución de un proceso.
+
+
 
 // Definiciones
 
@@ -83,12 +89,13 @@ void recibirPCB(int socketKernel, pcb* unPcb){
 
 	unPcb->indiceCodigo.instruccionesSize = *(u_int32_t*)recibirMensaje(socketKernel);
 
-	unPcb->indiceCodigo.instruccionesSize = *(lineaUtil*)recibirMensaje(socketKernel);
+	unPcb->indiceCodigo.instrucciones = (lineaUtil*)recibirMensaje(socketKernel);
 
 	unPcb->indiceEtiqueta.etiquetasSize = *(t_size*)recibirMensaje(socketKernel);
 
-	unPcb->indiceEtiqueta.etiquetas = *(char*)recibirMensaje(socketKernel);
+	unPcb->indiceEtiqueta.etiquetas = (char*)recibirMensaje(socketKernel);
 
+	unPcb->indiceStack = recibirLista(socketKernel, sizeof(indiceDeStack), &adaptadorStack);
 
 	unPcb->exitCode = *(u_int32_t*)recibirMensaje(socketKernel);
 
@@ -139,21 +146,26 @@ int32_t	hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas){
 	return pagina;
 }
 
-void aniadirCampoAlStack(int socket, t_list* listaCampos){
-	variableStack* campo = recibirDatos(socket);
-	list_add(listaCampos, campo);
+void adaptadorArgumentoStack(int socket, t_list* listaArgumentos, void* nodo){
+	argStack* argumento = (argStack*)nodo;
+	list_add(listaArgumentos, argumento);
 }
 
-void apilarStack(int socket, t_list* pila){
+void adaptadorVariableStack(int socket, t_list* listaVariables, void* nodo){
+	variableStack* variable = (variableStack*)nodo;
+	list_add(listaVariables, variable);
+}
+
+void adaptadorStack(int socket, t_list* pila, void* nodo){
 	indiceDeStack* unContexto = malloc(sizeof(indiceDeStack));
 
-	t_list* argumentosRecibidos = NULL;
-	t_list* variablesRecibidas = NULL;
+	void(*adaptadorArgumentos)(int, t_list*, void*) = &adaptadorArgumentoStack;
+	void(*adaptadorVariables)(int, t_list*, void*) = &adaptadorVariableStack;
 
-	unContexto->argumentos = recibirLista(socket, sizeof(variableStack), aniadirCampoAlStack(socket, argumentosRecibidos));
-	unContexto->variables = recibirLista(socket, sizeof(variableStack), aniadirCampoAlStack(socket, variablesRecibidas));
-	unContexto->retPos = recibirDatos(socket);
-	unContexto->retVar = recibirDatos(socket);
+	unContexto->argumentos = recibirLista(socket, sizeof(argStack), adaptadorArgumentos);
+	unContexto->variables = recibirLista(socket, sizeof(variableStack), adaptadorVariables);
+	unContexto->retPos = *(u_int32_t*)recibirDatos(socket, sizeof(u_int32_t));
+	unContexto->retVar = *(posicionMemoria*)recibirDatos(socket, sizeof(posicionMemoria));
 
 	list_add(pila, unContexto);
 }

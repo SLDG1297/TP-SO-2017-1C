@@ -22,19 +22,19 @@
 
 // Declaraciones
 
-void	enviarTamanio(int socket, size_t tamanioDatos); 				// Para enviar header de un mensaje.
+void	enviarTamanio(int socket, size_t tamanioDatos); 												// Para enviar header de un mensaje.
 
-void	enviarDatos(int socket, void* datos, size_t tamanioDatos); 		// Para enviar datos a otro proceso.
+void	enviarDatos(int socket, void* datos, size_t tamanioDatos); 										// Para enviar datos a otro proceso.
 
-void	enviarMensaje(int socket, void* datos, size_t tamanioDatos); 	// Para enviar header y datos a otro proceso.
+void	enviarMensaje(int socket, void* datos, size_t tamanioDatos); 									// Para enviar header y datos a otro proceso.
 
-size_t	recibirTamanio(int socket); 									// Para recibir header de un mensaje.
+size_t	recibirTamanio(int socket); 																	// Para recibir header de un mensaje.
 
-void*	recibirDatos(int socket, size_t tamanioDatos);					// Para recibir datos de otro proceso.
+void*	recibirDatos(int socket, size_t tamanioDatos);													// Para recibir datos de otro proceso.
 
-void*	recibirMensaje(int socket);										// Para recibir header y datos a otro proceso.
+void*	recibirMensaje(int socket);																		// Para recibir header y datos a otro proceso.
 
-t_list* recibirLista(int socket, int tamanioNodo);						// Para recibir listas.
+t_list* recibirLista(int socket, size_t tamanioNodo, void(*adaptador)(int socket, t_list*, void*));		// Para recibir listas.
 
 // Definiciones
 
@@ -85,17 +85,20 @@ void* recibirMensaje(int socket){
 	return datos;
 }
 
-t_list* recibirLista(int socket, size_t tamanioNodo, void(*enlistador)(int, t_list*)){
-	// El tercer puntero es un puntero a función: se delega la responsabilidad de crear la lista a quien la recibe, porque no tengo forma de castear los void* genéricamente.
+t_list* recibirLista(int socket, size_t tamanioNodo, void(*adaptador)(int socket, t_list*, void*)){
+	// En el for, se hace un recv() por cada nodo de la lista.
 
 	int tamanioLista = recibirTamanio(socket); 			// Este es el tamaño de lo recibido.
 	int tamanioIndice = tamanioLista / tamanioNodo;		// Esto es para poder recorrer la lista serializada como un array.
-	int indice;											// Para hacer un for, porque C no me deja inicializaar una variable en el prototipo del for... T_T
+	int indice;											// Para hacer un for, porque C no me deja inicializar una variable en el prototipo del for... T_T
 
-	t_list* lista = NULL; 								// La lista a ser devuelta.
+	t_list* lista = NULL; // La lista a ser devuelta.
 
-	for(indice = 0; indice < tamanioIndice; indice++)	// Esto es para crear la lista como se debe, nodo por nodo.
-		enlistador(socket, lista);
+	for(indice = 0; indice < tamanioIndice; indice++)
+	{
+		void* nodo = recibirDatos(socket, tamanioNodo);
+		adaptador(socket, lista, nodo);	// Como no puedo asignar void* como nodo y quiero tratarlos a todos los nodos polimórficamente para que sea generalizado, se lo delego a otra función para que haga el list_add.
+	}
 
 	return lista;
 }
