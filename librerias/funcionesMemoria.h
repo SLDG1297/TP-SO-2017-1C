@@ -235,5 +235,9 @@ void enviar(int* socket, char* buffer) {
 int getPuertoMemoria(){
 	return PUERTO_MEMORIA;
 }
+int getFrameSize(){
+	return FRAME_SIZE;
+}
+
 
 #endif /* FUNCIONESMEMORIA_H_ */

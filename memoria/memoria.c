@@ -101,10 +101,11 @@ int main(int argc, char *argv[]) {
 	//*Creo un hilo que se encargue unicamente de manejar las conexiones a la memoria
 	// Seteamos los atributos (2do parametro) como nulo, ya que de esta manera los atributos son por defecto
 
-	// int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_routine) (void *), void *arg);
-	if(pthread_create(&idHilo,NULL,asignarSocketAConexion,NULL)<0){
+	// int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_routine) (void *), void *arg)
+	if(pthread_create(&idHilo,NULL,asignarSocketAConexion,NULL)<0)
 		printf("No se pudo crear el hilo para asignar un socket a la conexion");
-	}
+	else
+		printf("hilo creado");
 
 
 	 //int pthread_join(pthread_t thread, void **retval);
@@ -142,16 +143,6 @@ int iniciarConexionServidor() {
 	printf("Bind correcto\n");
 	printf("Socket asignado: %d\n",socketEsperaKernel);
 	puts("Esperando la conexion del kernel\n");
-
-////Listen(): Marca al socket como pasivo, es decir un socket que sera utilizado para aceptar conecciones
-//	valorRtaListen = listen(socketEsperaKernel, 5);
-//	errorSalidaSocket(valorRtaListen, "Error en Listen", &socketEsperaKernel);
-//
-////Accept(): Extrae el primer pedido de conexion de la cola de conexiones pendientes, del socket de escucha
-////crea un nuevo socket conecatado y retorna un nuevo descriptor de archivo referido a ese socket.
-//	sockAlKernel = accept(socketEsperaKernel,
-//			(struct sockaddr *) &datosDelKernel, &longitudEstructuraSocket);
-//	errorSalidaSocket(sockAlKernel, "Error en el accept", &socketEsperaKernel);
 
 	return socketEsperaKernel;
 }
@@ -194,7 +185,11 @@ void *asignarSocketAConexion(){
 		sem_wait(&semaforo);
 		//Creamos un segundo hilo que se encargue de los pedidos operaciones especificas de la memoria segun pedido de cada conexion
 		valorRtaThread=pthread_create(&idHilo_OPERACIONES,NULL,seleccionOperacionesMemoria, &socketRecepcion);
-		esErrorSimple(valorRtaThread,"No se pudo crear el hilo, dios sabra por que?");
+		//esErrorSimple(valorRtaThread,"No se pudo crear el hilo, dios sabra por que?");
+		if(valorRtaThread==-1)
+			printf("No se pudo crear el hilo, dios sabra por que?");
+		else
+			printf("Hilo correspondiente a socket %d creado",socketRecepcion);
 	}
 
 	pthread_join(idHilo_OPERACIONES,NULL);
@@ -217,9 +212,13 @@ int ponerSocketEnEscucha_aceptarConexion(){
 	struct sockaddr strAddr;
 	socklen_t sizeStrAddr = sizeof(strAddr);
 
+	//Listen(): Marca al socket como pasivo, es decir un socket que sera utilizado para aceptar conecciones
 	valorRtaListen=listen(socketServidor,5);
 	esErrorSinSalida(valorRtaListen,"No se ha podido poner el socket en escucha");
 
+
+	//Accept(): Extrae el primer pedido de conexion de la cola de conexiones pendientes, del socket de escucha
+	//crea un nuevo socket conecatado y retorna un nuevo descriptor de archivo referido a ese socket.
 	conexionAceptada=accept(socketServidor,(struct sockaddr*) &strAddr, &sizeStrAddr);
 	esErrorSinSalida(conexionAceptada,"No se ha podido aceptar la conexion en espera");
 
