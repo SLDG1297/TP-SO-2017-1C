@@ -8,11 +8,9 @@
 #ifndef FUNCIONESMEMORIA_H_
 #define FUNCIONESMEMORIA_H_
 
-
 #include <netinet/in.h>
 #include <commons/log.h>
 #include <string.h>
-
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
 //#include "../librerias/funcionesMemoria.h"
@@ -36,10 +34,15 @@ typedef struct {
 	int pid;
 	int nroPagina;
 	int frame;
-}strAdministrativa;
+} strAdministrativa;
 
+typedef struct {
+	int pid;
+	int nroPagina;
+	void *contenido;
+} strCache;
 
-void asignarDatosDeConfiguracion(){
+void asignarDatosDeConfiguracion() {
 	t_config* configuracion;
 	char* ruta = RUTA_ARCHIVO;
 	configuracion = llamarArchivo(ruta);
@@ -53,75 +56,73 @@ void asignarDatosDeConfiguracion(){
 }
 
 //Reservo la memoria que necesito
-int* reservarMemoria(){
+int* reservarMemoria() {
 	int* memoria;
-	memoria=malloc(FRAME_SIZE * FRAMES);
+	memoria = malloc(FRAME_SIZE * FRAMES);
 	if (memoria == NULL)
-		esErrorConSalida(-1,"Error en la solicitud de bloque de memoria (Malloc)");
+		esErrorConSalida(-1,
+				"Error en la solicitud de bloque de memoria (Malloc)");
 	return memoria;
 }
 
+t_log* crearArchivo(char* ruta) {
+
+	archivoLog = log_create(ruta, "Memoria", true, LOG_LEVEL_INFO);
+	return archivoLog;
+}
+
+//  ******* FUNCIONES DE CONTROL DE STR ADMINISTRATIVA  *******
+
 //Seteo todas las estructuras con el valor predefinido PID=-14 de esta manera puedo saber que el frame no tiene un proceso asignado
-void inicializarStrAdm(int* bloqueMemoria){
+void inicializarStrAdm(int* bloqueMemoria) {
 
 	int sizeStrAdm;
 	int sizeBlockAdm;
 	int contador_frame = 0; // contador para los frames dentro del for
 	strAdministrativa auxiliar;
 
-
 	//El tamaño de la estructura por la cantidad de FRAMES 500*256B = 6000 B
 	//Si hacemos 6000/MARCO_SIZE nos da 23,43, por lo cual le sumamos un marco para que asi nos de 24.
 	//De esta manera tenemos 24 FRAMES ocupados por la memoria administrativa
 	sizeStrAdm = sizeof(strAdministrativa);
-	sizeBlockAdm = ((sizeStrAdm*FRAMES)+FRAME_SIZE)/FRAMES;
+	sizeBlockAdm = ((sizeStrAdm * FRAMES) + FRAME_SIZE) / FRAMES;
 
-	auxiliar.pid=LIBRE;
-	auxiliar.frame=contador_frame;
-	auxiliar.nroPagina=LIBRE;
+	auxiliar.pid = LIBRE;
+	auxiliar.frame = contador_frame;
+	auxiliar.nroPagina = LIBRE;
 
 	//mientras la cantidad de frames del contador sea menor a 500 (FRAMES)
-	while(contador_frame<FRAMES){
+	while (contador_frame < FRAMES) {
 		//Con este if nos aseguramos que hay 12 frames utilizados para las estructuras administrativas
 		//de esta manera cuando guardemos info no vamos a pisar nada
-		if(contador_frame>=FRAMES-sizeBlockAdm){
-			auxiliar.pid=OCUPADO_x_STR;
-			auxiliar.nroPagina=contador_frame;
-		}
-		else{
-		auxiliar.pid=LIBRE;
-		auxiliar.nroPagina=LIBRE;
+		if (contador_frame >= FRAMES - sizeBlockAdm) {
+			auxiliar.pid = OCUPADO_x_STR;
+			auxiliar.nroPagina = contador_frame;
+		} else {
+			auxiliar.pid = LIBRE;
+			auxiliar.nroPagina = LIBRE;
 		}
 		//Esta funcion copia los datos The memcpy(DEST,SRC,BYTES) function copies n bytes from memory area src to memory area dest.
-		memcpy(bloqueMemoria+contador_frame*sizeStrAdm,&auxiliar,sizeStrAdm);
+		memcpy(bloqueMemoria + contador_frame * sizeStrAdm, &auxiliar,
+				sizeStrAdm);
 		contador_frame++;
-		auxiliar.frame=contador_frame;
+		auxiliar.frame = contador_frame;
 	}
 
-	log_info(archivoLog,"El bloque de memorias administrativas ocupa %d",sizeBlockAdm);
-	log_info(archivoLog,"Son %d estructuras con un peso individual de %d",FRAMES,sizeStrAdm);
+	log_info(archivoLog, "El bloque de memorias administrativas ocupa %d",
+			sizeBlockAdm);
+	log_info(archivoLog, "Son %d estructuras con un peso individual de %d",
+			FRAMES, sizeStrAdm);
 }
 
-
-t_log* crearArchivo(char* ruta){
-
-	archivoLog = log_create(ruta,"Memoria",true,LOG_LEVEL_INFO);
-	return archivoLog;
-}
-
-void iniciarStrAdmProg(int pid, int frames, int* memoria){
-
-
-
-
-}
-
-void imprimirStrAdm(int* bloqueMemoria){
+void imprimirStrAdm(int* bloqueMemoria) {
 	strAdministrativa aux;
-	int c=0;
-	while(c<FRAMES){
-		memcpy(&aux,bloqueMemoria+c*sizeof(strAdministrativa),sizeof(strAdministrativa));
-		printf("\nPID: %d, NroPagina: %d, Frame: %d",aux.pid,aux.nroPagina,aux.frame);
+	int c = 0;
+	while (c < FRAMES) {
+		memcpy(&aux, bloqueMemoria + c * sizeof(strAdministrativa),
+				sizeof(strAdministrativa));
+		printf("\nPID: %d, NroPagina: %d, Frame: %d", aux.pid, aux.nroPagina,
+				aux.frame);
 		//log_info(archivoLog,"\n*******************************************\n");
 		//log_info(archivoLog,"PID: %d, NroPagina: %d, Frame: %d",aux.pid,aux.nroPagina,aux.frame);
 		c++;
@@ -129,83 +130,110 @@ void imprimirStrAdm(int* bloqueMemoria){
 }
 
 //La estructura se encuentra libre siempre y cuando su PID sea igual a -7
-int strLibre(int* ptr){
+int strLibre(int* ptr) {
 	strAdministrativa aux;
-	memcpy(&aux,ptr,sizeof(strAdministrativa));
-	if(aux.pid==LIBRE)
+	memcpy(&aux, ptr, sizeof(strAdministrativa));
+	if (aux.pid == LIBRE)
 		return 1;
 	else
 		return 0;
 
 }
 
-
-
-
-void liberarStrAdm(int pid,int* ptr){
-	int c=-1;
+void liberarStrAdm(int pid, int* ptr) {
+	int c = -1;
 	strAdministrativa aux;
-	do{
+	do {
 		c++;
-		memcpy(&aux,ptr+c*sizeof(strAdministrativa),sizeof(strAdministrativa));
-	}while(c<FRAMES&&aux.pid!=pid);
+		memcpy(&aux, ptr + c * sizeof(strAdministrativa),
+				sizeof(strAdministrativa));
+	} while (c < FRAMES && aux.pid != pid);
 
-	aux.pid=LIBRE;
-	aux.nroPagina=LIBRE;
-	aux.frame=c;
-	memcpy(ptr+c*sizeof(strAdministrativa),&aux,sizeof(strAdministrativa));
+	aux.pid = LIBRE;
+	aux.nroPagina = LIBRE;
+	aux.frame = c;
+	memcpy(ptr + c * sizeof(strAdministrativa), &aux,
+			sizeof(strAdministrativa));
 
 }
-int getPuertoMemoria(){
-	return PUERTO_MEMORIA;
-}
-t_log* getArchivoLog(){
-	return archivoLog;
+
+void iniciarStrAdmDeProg(int pid, int frames, int* memoria) {
+
 }
 
-int buscarPID(int pid, int* memoria){
+
+//  ******* FUNCIONES DE BUSQUEDA  *******
+
+int buscarPID(int pid, int* memoria) {
 	strAdministrativa aux;
-	int countFrame=-1;
-	do{
+	int countFrame = -1;
+	do {
 		countFrame++;
-		memcpy(&aux,memoria+countFrame*sizeof(strAdministrativa),sizeof(strAdministrativa));
-		if(aux.pid==pid)
+		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
+				sizeof(strAdministrativa));
+		if (aux.pid == pid)
 			return aux.frame;
-	}while(countFrame<FRAMES);
+	} while (countFrame < FRAMES);
 
 	return NOT_FOUND;
 }
 
-int buscarStrAdm(int pid, int* memoria){
+int buscarStrAdm(int pid, int* memoria) {
 	strAdministrativa aux;
-		int countFrame=-1;
-		do{
-			countFrame++;
-			memcpy(&aux,memoria+countFrame*sizeof(strAdministrativa),sizeof(strAdministrativa));
-			if(aux.pid==pid)
-				return countFrame;
-		}while(countFrame<FRAMES);
+	int countFrame = -1;
+	do {
+		countFrame++;
+		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
+				sizeof(strAdministrativa));
+		if (aux.pid == pid)
+			return countFrame;
+	} while (countFrame < FRAMES);
 
 	return NOT_FOUND;
 
 }
+
+
+
+//  ******* FUNCIONES DE CONSOLA DE LA MEMORIA  *******
 
 //Modificar la cantidad de tiempo que espera el proceso memoria antes de responder una solicitud
-void retardo (int tiempoEspera){}
+void retardo(int tiempoEspera) {
+	RETARDO_MEMORIA = tiempoEspera;
+}
 
 //Genera un reporte en pantalla y en un archivo en disco del estado actual del
 //cache, estructuras de memoria, contenido de memoria
-void dump (){}
+void dump() {
+
+}
 
 //Este comando debera limpiar el contenido de la cache
-void flush (int *ptrCache){}
+void flush(int *ptrCache) {
+}
 
 //MEMORY: Indicara el tamaño de la memoria en cant. de frames, la cant. de frames ocupados y los libres
 //PID: Indicara el tamaño total de un procoeso
-void size (){}
+void size() {
 
-void recibir (){}
+}
 
-void enviar (int* socket, char* buffer ){}
+//  ******* ENVIAR Y RECIBIR DATOS  *******
+int recibirSeleccionOperacion(int socket) {
+	int *operacion;
+	read(socket,operacion,sizeof(int));
+	printf("Orden de operacion recibido:  %d",*operacion);
+	return *operacion;
+}
+
+void enviar(int* socket, char* buffer) {
+
+}
+
+// ******* GETS *******
+
+int getPuertoMemoria(){
+	return PUERTO_MEMORIA;
+}
 
 #endif /* FUNCIONESMEMORIA_H_ */

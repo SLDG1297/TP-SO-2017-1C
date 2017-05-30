@@ -45,7 +45,7 @@
 #define RUTA_LOG "./memoriaLog.txt"
 
 //***DATOS PARA ENTABLAR CONEXION CON EL KERNEL
-int sockAlKernel;
+
 int yes = 1;
 struct sockaddr_in espera, datosDelKernel;
 int socketServidor;
@@ -63,10 +63,10 @@ sem_t semaforo;
 //***DECLARACION DE PROTOTIPO DE FUNCIONES
 
 int crearSocket();
-void laConexionFueExitosa(char* handshake);
+void laConexionFueExitosa(char* handshake,int *socket);
 int iniciarConexionServidor();
-int recibirConexion();
-void *aceptarConexion();
+int ponerSocketEnEscucha_aceptarConexion();
+void *asignarSocketAConexion();
 void *seleccionOperacionesMemoria(int *socket);
 
 //************** MAIN **************//
@@ -94,21 +94,18 @@ int main(int argc, char *argv[]) {
 
 	//* creamos un socket con el cual vamos a manejar la conexion con el kernel
 	socketServidor=iniciarConexionServidor();
+	//laConexionFueExitosa(handshake,&socketServidor);
+	puts("La conexion al proceso kernel fue exitosa\n");
+	puts("Esperando mensajes\n");
 
 	//*Creo un hilo que se encargue unicamente de manejar las conexiones a la memoria
 	// Seteamos los atributos (2do parametro) como nulo, ya que de esta manera los atributos son por defecto
 
 	// int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_routine) (void *), void *arg);
-	pthread_create(&idHilo,NULL,aceptarConexion,NULL);
+	if(pthread_create(&idHilo,NULL,asignarSocketAConexion,NULL)<0){
+		printf("No se pudo crear el hilo para asignar un socket a la conexion");
+	}
 
-	laConexionFueExitosa(handshake);
-	//*asignacion de datos al socket que espera a la conexion del kernel
-
-
-
-
-	 puts("La conexion al proceso kernel fue exitosa\n");
-	 puts("Esperando mensajes\n");
 
 	 //int pthread_join(pthread_t thread, void **retval);
 	 //* Finalmente esperamos a que el hilo original termine
@@ -140,9 +137,10 @@ int iniciarConexionServidor() {
 //Bind(): Asigna la direccion de addr al socket referido por el SocketEsperaKernel
 	valorRtaBind = bind(socketEsperaKernel, (struct sockaddr *) &espera,
 			sizeof(struct sockaddr));
-	errorSalidaSocket(valorRtaBind, "Error en Bind", &socketEsperaKernel);
+	errorSalidaSocket(valorRtaBind, "Error en Bind", (int *) socketEsperaKernel);
 
 	printf("Bind correcto\n");
+	printf("Socket asignado: %d\n",socketEsperaKernel);
 	puts("Esperando la conexion del kernel\n");
 
 ////Listen(): Marca al socket como pasivo, es decir un socket que sera utilizado para aceptar conecciones
@@ -175,26 +173,27 @@ int crearSocket() {
 	return sockDeEspera;
 }
 
-void laConexionFueExitosa(char* handshake) {
+void laConexionFueExitosa(char* handshake,int *socket) {
 
-	int longitudDatosEnviados;
-	longitudDatosEnviados = send(sockAlKernel, handshake, strlen(handshake), 0);
+	int longitudDatosEnviados = send(*socket, handshake, sizeof(char)*strlen(handshake), 0);
 	esErrorSinSalida(longitudDatosEnviados, "Fallo en el handshake");
 
 }
 
+//Esta funcion se encarga de asignar un socket a un conexion aceptada y crear un hilo que se encargue especificamente de esa conexion
+//para recibir las operacion de memoria que el emisor desea realizar
 
-void *aceptarConexion(){
+void *asignarSocketAConexion(){
 
 	pthread_t idHilo_OPERACIONES;
 	int valorRtaThread;
 	int socketRecepcion;
-	socketRecepcion=recibirConexion();
+	socketRecepcion=ponerSocketEnEscucha_aceptarConexion();
 
 	while(1){
 		sem_wait(&semaforo);
 		//Creamos un segundo hilo que se encargue de los pedidos operaciones especificas de la memoria segun pedido de cada conexion
-		valorRtaThread=pthread_create(&idHilo_OPERACIONES,NULL,seleccionOperacionesMemoria,&socketRecepcion);
+		valorRtaThread=pthread_create(&idHilo_OPERACIONES,NULL,seleccionOperacionesMemoria, &socketRecepcion);
 		esErrorSimple(valorRtaThread,"No se pudo crear el hilo, dios sabra por que?");
 	}
 
@@ -202,22 +201,30 @@ void *aceptarConexion(){
 
 }
 
-void *seleccionOperacionesMemoria(int *socekt){
+void *seleccionOperacionesMemoria(int *socket){
+
+//	int seleccion;
+//	seleccion=recibirSeleccionOperacion(socket);
+
 
 	return 0;
 }
-int recibirConexion(int socket){
+
+//Este metodo pone al socket en escuchar, con una lista de espera de 5 y acepta la primera conexion de la misma lista, como ultima instancia devuelve
+//el socket correspondiente a la conexion aceptada
+int ponerSocketEnEscucha_aceptarConexion(){
 	int valorRtaListen,conexionAceptada;
 	struct sockaddr strAddr;
+	socklen_t sizeStrAddr = sizeof(strAddr);
 
-	valorRtaListen=listen(&socket,5);
+	valorRtaListen=listen(socketServidor,5);
 	esErrorSinSalida(valorRtaListen,"No se ha podido poner el socket en escucha");
 
-	conexionAceptada=accept(socket,(struct sockaddr*) &strAddr, sizeof(strAddr));
-	esErrorConSalida
+	conexionAceptada=accept(socketServidor,(struct sockaddr*) &strAddr, &sizeStrAddr);
+	esErrorSinSalida(conexionAceptada,"No se ha podido aceptar la conexion en espera");
 
-
-	return socket;
+	printf("Socket asignado a conexion aceptada: %d", conexionAceptada);
+	return conexionAceptada;
 }
 
 // ************************* OPERACIONES DE MEMORIA *************************************
@@ -232,7 +239,7 @@ int recibirConexion(int socket){
 
 int inicializarPrograma(int pid, int cantPaginas){
 
-	iniciarStrAdmProg(pid, cantPaginas,ptrMemoria);
+	iniciarStrAdmDeProg(pid, cantPaginas,ptrMemoria);
 
 	return 0;
 }
