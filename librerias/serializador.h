@@ -22,40 +22,73 @@
 
 // Declaraciones
 
-void	enviarTamanio(int socket, size_t tamanioDatos); 												// Para enviar header de un mensaje.
 
-void	enviarDatos(int socket, void* datos, size_t tamanioDatos); 										// Para enviar datos a otro proceso.
 
-void	enviarMensaje(int socket, void* datos, size_t tamanioDatos); 									// Para enviar header y datos a otro proceso.
+// Funciones de envío
 
-size_t	recibirTamanio(int socket); 																	// Para recibir header de un mensaje.
+void	enviarTamanio(int socket, size_t tamanioDatos); 						// Para enviar header de un mensaje.
 
-void*	recibirDatos(int socket, size_t tamanioDatos);													// Para recibir datos de otro proceso.
+void	enviarDatos(int socket, void* datos, size_t tamanioDatos); 				// Para enviar datos a otro proceso.
 
-void*	recibirMensaje(int socket);																		// Para recibir header y datos a otro proceso.
+void	enviarMensaje(int socket, void* datos, size_t tamanioDatos); 			// Para enviar header y datos a otro proceso.
 
-t_list* recibirLista(int socket, size_t tamanioNodo, void(*adaptador)(int socket, t_list*, void*));		// Para recibir listas.
+void	enviarLista(int socket, t_list* lista, size_t tamanioNodo);				// Para enviar listas.
+
+
+
+// Funciones de recepción
+
+size_t	recibirTamanio(int socket); 											// Para recibir header de un mensaje.
+
+void 	recibirDatos(int socket, void* receptor, size_t tamanioDatos);			// Para recibir datos de otro proceso.
+
+void	recibirMensaje(int socket, void* receptor);								// Para recibir header y datos a otro proceso.
+
+void	recibirLista(int socket, t_list* receptor, size_t tamanioNodo);			// Para recibir listas.
+
+
 
 // Definiciones
 
 void enviarTamanio(int socket, size_t tamanioDatos){
 	int verificador;	// Chequea si los envíos se hicieron correctamente.
 
-	verificador = send(socket, (size_t*)tamanioDatos, sizeof(size_t), 0);
+	verificador = send(socket, &tamanioDatos, sizeof(size_t), 0);
 	esErrorConSalida(verificador, "Error al enviar el tamanio de los datos.");
 }
 
-void enviarDatos(int socket, void* datos, size_t tamanioDatos){
+void enviarDatos(int socket, void* emisor, size_t tamanioDatos){
+	// A datos hay que ponerle un '&' para pasar el puntero de los datos y se envíe tranqui.
 	int verificador;	// Chequea si los envíos se hicieron correctamente.
 
-	verificador = send(socket, datos, tamanioDatos, 0);
+	verificador = send(socket, emisor, tamanioDatos, 0);
 	esErrorConSalida(verificador, "Error al enviar datos.");
 }
 
 void enviarMensaje(int socket, void* datos, size_t tamanioDatos){
-
 	enviarTamanio(socket, tamanioDatos);
 	enviarDatos(socket, datos, tamanioDatos);
+}
+
+void enviarLista(int socket, t_list* lista, size_t tamanioNodo){
+	// En el for, se hace un send() por cada nodo de la lista.
+
+	int tamanioLista = list_size(lista); 				// Este es el tamaño de lo recibido.
+	int tamanioIndice = tamanioLista / tamanioNodo;		// Esto es para poder recorrer la lista serializada como un array y obtener sus nodos.
+	int indice;											// Para hacer un for, porque C no me deja inicializar una variable en el prototipo del for... T_T
+
+	void* nodo = malloc(tamanioNodo);					// Para enviar los nodos de la lista.
+
+	enviarTamanio(socket, tamanioLista);				// Enviar el tamaño total de la lista.
+
+	for(indice = 0; indice < tamanioIndice; indice++)	// Recorro la lista como un Array.
+	{
+		nodo = list_get(lista, indice);					// Obtengo el nodo de la lista
+		enviarDatos(socket, nodo, tamanioNodo);			// Lo envío.
+	}
+
+	free(nodo);
+
 }
 
 size_t recibirTamanio(int socket){
@@ -68,39 +101,35 @@ size_t recibirTamanio(int socket){
 	return *tamanio;
 }
 
-void* recibirDatos(int socket, size_t tamanioDatos){
-	int verificador; 						// Chequea si los recibos se hicieron correctamente.
-	void* datos  = malloc(tamanioDatos);	// Los datos que se esperan recibir.
+void recibirDatos(int socket, void* receptor, size_t tamanioDatos){
+	// A receptor hay que ponerle un '&' para que se almacene lo que se ubique en el buffer de recv.
+	int verificador; 	// Chequea si los recibos se hicieron correctamente.
 
-	verificador = recv(socket, datos, tamanioDatos, 0);
+	verificador = recv(socket, receptor, tamanioDatos, 0);
 	esErrorConSalida(verificador, "Error al recibir datos.");
-
-	return datos;
 }
 
-void* recibirMensaje(int socket){
+void recibirMensaje(int socket, void* receptor){
 	size_t tamanio = recibirTamanio(socket);
-	void* datos = recibirDatos(socket, tamanio);
-
-	return datos;
+	recibirDatos(socket, receptor, tamanio);
 }
 
-t_list* recibirLista(int socket, size_t tamanioNodo, void(*adaptador)(int socket, t_list*, void*)){
+void recibirLista(int socket, t_list* receptor, size_t tamanioNodo){
 	// En el for, se hace un recv() por cada nodo de la lista.
 
 	int tamanioLista = recibirTamanio(socket); 			// Este es el tamaño de lo recibido.
 	int tamanioIndice = tamanioLista / tamanioNodo;		// Esto es para poder recorrer la lista serializada como un array.
 	int indice;											// Para hacer un for, porque C no me deja inicializar una variable en el prototipo del for... T_T
 
-	t_list* lista = NULL; // La lista a ser devuelta.
+	void* nodo = malloc(tamanioNodo);					// Para recibir los nodos de la lista.
 
-	for(indice = 0; indice < tamanioIndice; indice++)
+	for(indice = 0; indice < tamanioIndice; indice++)	// Recorrer lista como un Array.
 	{
-		void* nodo = recibirDatos(socket, tamanioNodo);
-		adaptador(socket, lista, nodo);	// Como no puedo asignar void* como nodo y quiero tratarlos a todos los nodos polimórficamente para que sea generalizado, se lo delego a otra función para que haga el list_add.
+		recibirDatos(socket, nodo, tamanioNodo);		// Recibir nodos de la lista.
+		list_add(receptor, nodo);						// Añadir a la lista.
 	}
 
-	return lista;
+	free(nodo);
 }
 
 #endif /* SERIALIZADOR_H_ */
