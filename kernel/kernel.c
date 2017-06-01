@@ -1,4 +1,4 @@
-/*
+	/*
  ============================================================================
  Name        : kernel.c
  Author      : Zero Gravity
@@ -40,8 +40,16 @@
 #define SIZE_DATA 1024
 #define IDCONSOLA 1
 #define IDCPU 2
+#define INICIAR_PROGRAMA 51
+#define SOLICITAR_BYTES_PAG 52
+#define ALMACENAR_BYTES_PAG 53
+#define ASIGNAR_PAGINAS_PRC 54
+#define FINALIZAR_PRG 55
+
 
 int ordenDeConsola;
+int ordenDeConsolaParaProceso;
+int ordenDeHeap;
 int identificador;
 int contadorPid = 1;
 
@@ -307,7 +315,48 @@ t_list *pcbs = list_create();
 //hilos
 //hilo de interfaz de consola
 generarMenu();
-
+obtenerOrden(&ordenDeConsola);
+switch (ordenDeConsola){
+	case 1:
+	//mostrar listado de procesos del sistema\n
+	case 2:
+		generarMenuDeProceso();
+		
+		obtenerOrden(&ordenDeConsolaParaProceso);
+			switch (ordenDeConsolaParaProceso);
+				case 1:
+				//mostrar cantidad de rafagas ejecutadas
+				case 2:
+				//mostrar cantidad de operaciones provilegiadas ejecutadas
+				case 3:
+				//obtener la tabla de archivos abiertos
+				case 4:
+				//cantidad de paginas de heap
+					generarMenuDeHeap();
+					obtenerOrden(&ordenDeHeap);
+					if (ordenDeHeap==1){
+						//mostrar cantidad de acciones alojar ejecutadas por el proceso
+					}
+					else{
+						//mostrar cantidad de acciones Liberar ejecutadas por el proceso
+					}
+					
+					case 5:
+					//mostrar cantidad de syscalls ejecutadas
+					break
+}
+	case 3:
+	//mostrar tabla global de archivos
+	case 4:
+	//modificar grado de multiprogramacion
+	case 5:
+	//finalizar un proceso
+	case 6:
+	//detener la planificacion
+	default:
+	mensajeDeError(&ordenDeConsola);
+}
+	
 
 printf ("Consola de kernel"/n);
 
@@ -465,6 +514,12 @@ void generarMenuDeProceso(void){
 		printf ("5-Cantidad de Syscalls ejecutadas\n");
 		}
 		
+void generarMenuDeHeap(void){
+	printf ("1- cantidad de acciones alojar realizadas\n");
+	printf ("2- cantidad de acciones liberar realizadas\n");
+}
+
+	
 void obtenerOrden(int* orden){
 		printf("Elija una opcion\n");
 		scanf("%d",orden);
@@ -473,7 +528,12 @@ void obtenerOrden(int* orden){
 void incrementarcontadorPid (contadorPid){
 	contadorPid++;
 }
+
+void mensajeDeError (int* orden){
+	printf("%d no es una orden valida\n", orden);
+}
 /*
 bool compararSockets(int socket1, int socket2){
 	return socket1==socket2 ? true : false
 }*/
+	
