@@ -41,6 +41,7 @@
 #define IDCONSOLA 1
 #define IDCPU 2
 
+int ordenDeConsola;
 int identificador;
 int contadorPid = 1;
 
@@ -303,7 +304,15 @@ t_list *pcbs = list_create();
 	//*Se agregan el listener a los sockets relevantes y se lo asigna como maximo por ser el unico en la lista en este momento
 	FD_SET(sockListener, &socketsRelevantes);
 	fileDescMax = sockListener;
+//hilos
+//hilo de interfaz de consola
+generarMenu();
 
+
+printf ("Consola de kernel"/n);
+
+
+//hilo de escucha 
 	while (1){
 		memset(buffer,'\0',SIZE_DATA);
 		socketsFiltrados = socketsRelevantes;
@@ -339,7 +348,7 @@ t_list *pcbs = list_create();
 													printf("%s: Nueva conexion de una consola, ip:%s en el socket %d\n",argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
 													break;
 											
-											case (IDCPU){
+											case IDCPU{
 												//Si la conexion es una cpu, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
 													FD_SET(nuevoSocket, &socketsRelevantes);
 													send(nuevoSocket, "Conexion aceptada. Bienvenido, proceso Cpu", strlen("Conexion aceptada. Bienvenido, proceso Cpu"), 0);
@@ -436,6 +445,30 @@ void agregarALista(int tipo, int socketDato,t_list *lista){
 	}
 
 }
+void generarMenu(void){
+	//Borrarpantalla clear??
+	printf ("consola del kernel\n");
+	printf ("1-Listado de procesos en el sistema\n");
+	printf ("2-Acciones para un proceso determinado\n");
+	printf ("3-Tabla global de archivos\n");
+	printf ("4- Modificar grado de multiprogramacion\n");
+	printf ("5-Finalizar un proceso\n");
+	printf ("6-Detener la planificacion\n");
+	}
+
+void generarMenuDeProceso(void){
+		printf ("Elija una accion\n");
+		printf ("1- Cantidad de rafagas ejecutadas\n");
+		printf ("2-Cantidad de operaciones privilegiadas ejecutadas\n");
+		printf ("3-Tabla de archivos abiertos por el proceso\n");
+		printf ("4-Cantidad de paginas del heap utilizadas\n");
+		printf ("5-Cantidad de Syscalls ejecutadas\n");
+		}
+		
+void obtenerOrden(int* orden){
+		printf("Elija una opcion\n");
+		scanf("%d",orden);
+		}
 
 void incrementarcontadorPid (contadorPid){
 	contadorPid++;
