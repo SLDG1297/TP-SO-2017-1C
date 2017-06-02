@@ -20,6 +20,7 @@
 #define OCUPADO_x_STR -14
 #define NOT_FOUND -28
 
+
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 int PUERTO_MEMORIA;
 int FRAME_SIZE;
@@ -41,6 +42,26 @@ typedef struct {
 	int nroPagina;
 	void *contenido;
 } strCache;
+
+//  ******* DECLARACION DE FUNCIONES  *******
+//estoy podrida de los warnings
+
+void asignarDatosDeConfiguracion();
+int* reservarMemoria();
+t_log* crearArchivo(char* ruta);
+void inicializarStrAdm(int* bloqueMemoria);
+void imprimirStrAdm(int* bloqueMemoria);
+int strLibre(int* ptr);
+void liberarStrAdm(int pid, int* ptr);
+int iniciarStrAdmDePrc(int pid, int frame, int* ptr);
+int espacioDisponible(int* ptr);
+int asignacionDePaginas(int cantPaginas,int pid,int *ptr);
+int paginasPrc(int pid, int*ptr);
+int compararPID(strAdministrativa aux,int pid);
+int paginasLibresEnMemoria(int *ptr);
+int strVacia(int *ptr);
+
+// ******* INICIO DE CODIGO  *******
 
 void asignarDatosDeConfiguracion() {
 	t_config* configuracion;
@@ -121,10 +142,9 @@ void imprimirStrAdm(int* bloqueMemoria) {
 	while (c < FRAMES) {
 		memcpy(&aux, bloqueMemoria + c * sizeof(strAdministrativa),
 				sizeof(strAdministrativa));
-		printf("\nPID: %d, NroPagina: %d, Frame: %d", aux.pid, aux.nroPagina,
-				aux.frame);
-		//log_info(archivoLog,"\n*******************************************\n");
-		//log_info(archivoLog,"PID: %d, NroPagina: %d, Frame: %d",aux.pid,aux.nroPagina,aux.frame);
+		//printf("\nPID: %d, NroPagina: %d, Frame: %d", aux.pid, aux.nroPagina,	aux.frame);
+		log_info(archivoLog,"\n*******************************************\n");
+		log_info(archivoLog,"PID: %d, NroPagina: %d, Frame: %d",aux.pid,aux.nroPagina,aux.frame);
 		c++;
 	}
 }
@@ -157,41 +177,115 @@ void liberarStrAdm(int pid, int* ptr) {
 
 }
 
-void iniciarStrAdmDeProg(int pid, int frames, int* memoria) {
 
+int iniciarStrAdmDePrc(int pid, int frame, int* ptr) {
+
+	strAdministrativa aux;
+	aux.pid=pid;
+	aux.nroPagina = paginasPrc(pid, ptr);
+	aux.frame = frame ;
+	memcpy(ptr+frame*sizeof(strAdministrativa),&aux,sizeof(strAdministrativa));
+
+ return 1;
 }
+int espacioDisponible(int* ptr){
 
+	int c=0;
+	int libre=0;
+	int movimiento=c*sizeof(strAdministrativa);
+	while(c<FRAMES){
+		if(strLibre(ptr+movimiento)==1){
+			libre++;
+		}
+		c++;
+	}
+	return libre;
+}
+//  ******* FUNCIONES DE ASIGNACION  *******
+
+
+//Esta funcion asigna las paginas una por una, busca la primera estructura vacia y le asigna los datos, asi sucesivamente hasta que llega todas las paginas requeridas
+int asignacionDePaginas(int cantPaginas,int pid,int *ptr){
+	int c,paginasAsignadas=0,iniciarPrograma,movimiento;
+	while(paginasAsignadas!=cantPaginas){
+		movimiento=c*sizeof(strAdministrativa);
+		if(strVacia(ptr+movimiento)){
+			iniciarPrograma=0;
+			//Se le envia a iniciar... el nro de pid, el nro de frame con el que trabajara, y el puntero al frame vacio de la strAdm,
+			//devuelve un 1 en caso de que la operacion haya podido realizarse y un 0 en caso contrario
+			iniciarPrograma=iniciarStrAdmDePrc(pid,c,ptr+movimiento);
+			if(iniciarPrograma)
+				paginasAsignadas++;
+		}//Cierro If Frame Vacio
+		c++;
+	}
+	return paginasAsignadas;
+}
 
 //  ******* FUNCIONES DE BUSQUEDA  *******
 
-int buscarPID(int pid, int* memoria) {
-	strAdministrativa aux;
-	int countFrame = -1;
-	do {
-		countFrame++;
-		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
-				sizeof(strAdministrativa));
-		if (aux.pid == pid)
-			return aux.frame;
-	} while (countFrame < FRAMES);
+int compararPID(strAdministrativa aux,int pid){
 
-	return NOT_FOUND;
-}
-
-int buscarStrAdm(int pid, int* memoria) {
-	strAdministrativa aux;
-	int countFrame = -1;
-	do {
-		countFrame++;
-		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
-				sizeof(strAdministrativa));
-		if (aux.pid == pid)
-			return countFrame;
-	} while (countFrame < FRAMES);
-
-	return NOT_FOUND;
+	if(aux.pid==pid)
+		return 1;
+	else
+		return 0;
 
 }
+
+//Cuenta la cantidad de paginas que tiene asignado un proceso en memoria
+int paginasPrc(int pid, int*ptr){
+	int paginasPrc=0,c=0;
+	strAdministrativa aux;
+	size_t size=sizeof(strAdministrativa);
+	while(c<FRAMES){
+
+		memcpy(&aux,ptr+c*sizeof(strAdministrativa),size);
+		if(compararPID(aux,pid)){
+			paginasPrc++;
+		}
+		c++;
+
+	}
+
+	return paginasPrc;
+}
+//Devuelve la cantidad de paginas libres que hay en toda la memoria
+int paginasLibresEnMemoria(int *ptr){
+
+		int c=0, paginasLibres=0,frame=-1;
+		size_t size=sizeof(strAdministrativa);
+		strAdministrativa aux;
+		while(c<FRAMES){
+			memcpy(&aux, ptr+c*sizeof(strAdministrativa),size);
+			if(compararPID(aux,LIBRE)){
+				paginasLibres++;
+			}
+			c++;
+		}
+
+		return paginasLibres;
+
+}
+
+int strVacia(int *ptr){
+
+	//C hace referencia a la posicion en la que se encuentra el frame vacio
+	int c=0;
+	int frameLibre=NOT_FOUND;
+	strAdministrativa aux;
+	size_t size=sizeof(strAdministrativa);
+	while(c<FRAMES){
+		memcpy(&aux, ptr+c*sizeof(strAdministrativa),size);
+		if(compararPID(aux,LIBRE)){
+			frameLibre=c;
+		}
+		c++;
+	}
+	return frameLibre;
+}
+
+
 
 
 
@@ -216,6 +310,7 @@ void flush(int *ptrCache) {
 //PID: Indicara el tamaño total de un procoeso
 void size() {
 
+
 }
 
 //  ******* ENVIAR Y RECIBIR DATOS  *******
@@ -226,9 +321,7 @@ int recibirSeleccionOperacion(int socket) {
 	return *operacion;
 }
 
-void enviar(int* socket, char* buffer) {
 
-}
 
 // ******* GETS *******
 
@@ -238,6 +331,44 @@ int getPuertoMemoria(){
 int getFrameSize(){
 	return FRAME_SIZE;
 }
+
+int getSizeStrAdm(){
+	return sizeof(strAdministrativa);
+}
+
+
+/*
+ int* buscarPtrPID(int pid, int* memoria) {
+	strAdministrativa aux;
+	int countFrame = -1;
+	do {
+		countFrame++;
+		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
+				sizeof(strAdministrativa));
+
+		if (aux.pid == pid)
+			return aux.frame;
+	} while (countFrame < FRAMES);
+
+	return NOT_FOUND;
+}
+
+int buscarStrAdm(int pid, int* memoria) {
+	strAdministrativa aux;
+	int countFrame = -1;
+	do {
+		countFrame++;
+		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
+				sizeof(strAdministrativa));
+		if (aux.pid == pid)
+			return countFrame;
+	} while (countFrame < FRAMES);
+
+	return NOT_FOUND;
+
+}
+
+  */
 
 
 #endif /* FUNCIONESMEMORIA_H_ */

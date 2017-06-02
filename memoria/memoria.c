@@ -37,12 +37,18 @@
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
 #include "../librerias/funcionesMemoria.h"
-
+#include "../librerias/serializador.h"
 
 //***DEFINE DATOS ESTATICOS
 #define RUTA_ARCHIVO "./config_memoria.cfg"
 #define SIZE_DATA 1024
 #define RUTA_LOG "./memoriaLog.txt"
+
+#define INICIAR_PROGRAMA 	51
+#define SOLICITAR_BYTES_PAG 52
+#define ALMACENAR_BYTES_PAG 53
+#define ASIGNAR_PAGINAS_PRC 54
+#define FINALIZAR_PRG 		55
 
 //***DATOS PARA ENTABLAR CONEXION CON EL KERNEL
 
@@ -63,11 +69,11 @@ sem_t semaforo;
 //***DECLARACION DE PROTOTIPO DE FUNCIONES
 
 int crearSocket();
-void laConexionFueExitosa(char* handshake,int *socket);
+char* laConexionFueExitosa(int *socket);
 int iniciarConexionServidor();
 int ponerSocketEnEscucha_aceptarConexion();
 void *asignarSocketAConexion();
-void *seleccionOperacionesMemoria(int *socket);
+void seleccionOperacionesMemoria(int socket);
 
 //************** MAIN **************//
 int main(int argc, char *argv[]) {
@@ -76,11 +82,6 @@ int main(int argc, char *argv[]) {
 
 // declaramos el hilo y sus atributos
 	pthread_t idHilo;
-	char buffer[SIZE_DATA];
-	char* handshake = "\nLa conexion al proceso memoria fue exitosa";
-	memset(buffer, '\0', SIZE_DATA);
-
-
 
 // CODIGO PRINCIPAL DE LA CONSOLA
 	//*solicitud de bloque de memoria contigua
@@ -94,7 +95,8 @@ int main(int argc, char *argv[]) {
 
 	//* creamos un socket con el cual vamos a manejar la conexion con el kernel
 	socketServidor=iniciarConexionServidor();
-	//laConexionFueExitosa(handshake,&socketServidor);
+	laConexionFueExitosa(&socketServidor);
+
 	puts("La conexion al proceso kernel fue exitosa\n");
 	puts("Esperando mensajes\n");
 
@@ -164,11 +166,21 @@ int crearSocket() {
 	return sockDeEspera;
 }
 
-void laConexionFueExitosa(char* handshake,int *socket) {
+char* laConexionFueExitosa(int *socket) {
 
-	int longitudDatosEnviados = send(*socket, handshake, sizeof(char)*strlen(handshake), 0);
-	esErrorSinSalida(longitudDatosEnviados, "Fallo en el handshake");
+	int datosEnviados,datosRecibidos;
+	size_t tamanio=sizeof(int);
+	datosEnviados=send(*socket,getFrameSize(),tamanio,0);
+	esErrorConSalida(datosEnviados,"Error en el envio de datos: FRAME_SIZE");
 
+	void* datos = malloc(SIZE_DATA);
+	tamanio=sizeof(datos);
+	datosRecibidos=recv(*socket, datos, tamanio, 0);
+	esErrorConSalida(datosRecibidos,"Error en la recepcion de datos: HANDSHAKE");
+	char* buffer= *(char*) datos;
+	free(datos);
+
+	return buffer;
 }
 
 //Esta funcion se encarga de asignar un socket a un conexion aceptada y crear un hilo que se encargue especificamente de esa conexion
@@ -195,14 +207,36 @@ void *asignarSocketAConexion(){
 	pthread_join(idHilo_OPERACIONES,NULL);
 
 }
+//Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
+void seleccionOperacionesMemoria(int socket){
 
-void *seleccionOperacionesMemoria(int *socket){
+	int seleccion,pid,paginas;
+	size_t size=sizeof(int);
+	seleccion=recibirSeleccionOperacion(socket);
+	switch (seleccion){
+		case 'INICIAR_PROGRAMA':
+			pid = *(int *) recibirDatos(socket,size);
+			paginas = *(int *) recibirDatos(socket,size);
+			inicializarPrograma(pid,paginas);
+			break;
+		/*
+		case 'SOLICITAR_BYTES_PAG':
+			int a ;
+			break;
+		case 'ALMACENAR_BYTES_PAG':
+			float b;
+			break;
+		case 'ASIGNAR_PAGINAS_PRC':
+			break;
+		case 'FINALIZAR_PRG':
+			break;
+		*/
+		default:
+			break;
 
-//	int seleccion;
-//	seleccion=recibirSeleccionOperacion(socket);
+	}
 
 
-	return 0;
 }
 
 //Este metodo pone al socket en escuchar, con una lista de espera de 5 y acepta la primera conexion de la misma lista, como ultima instancia devuelve
@@ -237,10 +271,18 @@ int ponerSocketEnEscucha_aceptarConexion(){
  */
 
 int inicializarPrograma(int pid, int cantPaginas){
+	int asignacion;
+	int pagLibreMemoria=paginasLibresEnMemoria(ptrMemoria);
+	if(pagLibreMemoria>=cantPaginas){
+		asignacion=asignacionDePaginas(cantPaginas,pid,ptrMemoria);
+		if(asignacion>=cantPaginas)
+			log_info(archivoLog,"Se han asignado %d paginas, al PID %d en las estructuras administrativas",pid,cantPaginas);
+	}//Cierro if que evaluas las paginas libres contra las paginas libres de memoria
+	else{
+		log_info(archivoLog, "No hay paginas disponibles, PAGINAS LIBRES ACTUALES: %d", pagLibreMemoria);
+	}
 
-	iniciarStrAdmDeProg(pid, cantPaginas,ptrMemoria);
-
-	return 0;
+	return 1;
 }
 
 
