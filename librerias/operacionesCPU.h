@@ -34,6 +34,12 @@ void 	handshakeKernel(int socketKernel); 								// Realiza handshake con el Ker
 
 void 	recibirPCB(int socketKernel, pcb* unPcb); 						// Recibe PCB del Kernel para ejecutar un programa.
 
+int		calcularTamanioStack(t_list* indiceStack);						// Calcula el tamaño de una lista de Stacks.
+
+void	enviarStack(int socketKernel, indiceDeStack* unStack);			// Envía un contexto local de un proceso.
+
+void	recibirStack(int socketKernel, indiceDeStack* unStack);			// Recibe un contexto local de un proceso.
+
 void 	concluirOperacion(int socketKernel, pcb* unPcb); 				// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
 
 void 	finEjecucion(int socketKernel, pcb* unPcb, int32_t codigoFin); 	// Indicar finalización de un proceso.
@@ -66,43 +72,69 @@ int		hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas);	// E
 
 void 	arrojarExcepcion(/* Excepción */); 										// Se explica solo.
 
-// Adaptadores: Funciones que castean void* y los añaden a una lista. Para recibir listas desde el serializador.
-
-void	adaptadorArgumentoStack(int socket, t_list* listaArgumentos, void* nodo); 	// Añadir argumentos a un índice de Stack.
-
-void	adaptadorVariableStack(int socket, t_list* listaVariables, void* nodo);		// Añadir variable a un índice de Stack.
-
-void	adaptadorStack(int socket, t_list* pila, void* nodo);						// Armar un contexto de ejecución de un proceso.
-
 
 
 // Definiciones
 
 void recibirPCB(int socketKernel, pcb* unPcb){
-	unPcb->pid = *(int32_t*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->pid);
 
-	unPcb->programCounter = *(int32_t*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->programCounter);
 
-	unPcb->paginasUsadas = *(int32_t*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->paginasUsadas);
 
-	unPcb->indiceCodigo.primerInstruccion = *(u_int32_t*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->indiceCodigo.primerInstruccion);
 
-	unPcb->indiceCodigo.instruccionesSize = *(u_int32_t*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->indiceCodigo.instruccionesSize);
 
-	unPcb->indiceCodigo.instrucciones = (lineaUtil*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->indiceCodigo.instrucciones);
 
-	unPcb->indiceEtiqueta.etiquetasSize = *(t_size*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->indiceEtiqueta.etiquetasSize);
 
-	unPcb->indiceEtiqueta.etiquetas = (char*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->indiceEtiqueta.etiquetas);
 
-	unPcb->indiceStack = recibirLista(socketKernel, sizeof(indiceDeStack), &adaptadorStack);
+	// Recibir Stack
 
-	unPcb->exitCode = *(u_int32_t*)recibirMensaje(socketKernel);
+	recibirMensaje(socketKernel, &unPcb->exitCode);
 
 }
 
+int calcularTamanioStack(t_list* indiceStack){
+	int posicion = 0;
+	int tamanioStack = 0;
+	int ultimoIndice = list_size(indiceStack);
+
+	indiceDeStack nodo;
+
+	for(posicion = 0, posicion < ultimoIndice, posicion++)
+	{
+		nodo = *(indiceStack*)list_get(indiceStack, posicion);
+		// Ir sumando los tamaños de las listas.
+	}
+
+	return tamanioStack;
+}
+
+void enviarStack(int socket, t_list* indiceStack){
+	/*
+	enviarLista(socket, &unStack->argumentos, sizeof(argStack));
+	enviarLista(socket, &unStack->variables, sizeof(variableStack));
+	enviarDatos(socket, &unStack->retPos, sizeof(u_int32_t));
+	enviarDatos(socket, &unStack->retVar, sizeof(posicionMemoria));
+	*/
+}
+
+void recibirStack(int socket, indiceDeStack* unStack){
+	/*
+	recibirLista(socket, &unStack->argumentos, sizeof(argStack));
+	recibirLista(socket, &unStack->variables, sizeof(variableStack));
+	recibirDatos(socket, &unStack->retPos, sizeof(u_int32_t));
+	recibirDatos(socket, &unStack->retVar, sizeof(posicionMemoria));
+	*/
+}
+
 void handshakeMemoria(int socketMemoria, u_int32_t* tamanioPaginas){
-	*tamanioPaginas = *(u_int32_t*)recibirDatos(socketMemoria, sizeof(u_int32_t));
+	recibirDatos(socketMemoria, tamanioPaginas, sizeof(u_int32_t));
 }
 
 char* solicitarInstruccion(int socketMemoria, u_int32_t tamanioPaginas, pcb* unPcb){
@@ -127,7 +159,8 @@ char* solicitarInstruccion(int socketMemoria, u_int32_t tamanioPaginas, pcb* unP
 	free(solicitudInstruccion);
 	// Envío de solicitud de instrucción a memoria.
 
-	char* instruccionSolicitada = recibirMensaje(socketMemoria);
+	char* instruccionSolicitada;
+	recibirMensaje(socketMemoria, instruccionSolicitada);
 	// Obtención de la solicitud.
 
 	return instruccionSolicitada;
@@ -144,30 +177,6 @@ int32_t	hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas){
 		pagina++;
 
 	return pagina;
-}
-
-void adaptadorArgumentoStack(int socket, t_list* listaArgumentos, void* nodo){
-	argStack* argumento = (argStack*)nodo;
-	list_add(listaArgumentos, argumento);
-}
-
-void adaptadorVariableStack(int socket, t_list* listaVariables, void* nodo){
-	variableStack* variable = (variableStack*)nodo;
-	list_add(listaVariables, variable);
-}
-
-void adaptadorStack(int socket, t_list* pila, void* nodo){
-	indiceDeStack* unContexto = malloc(sizeof(indiceDeStack));
-
-	void(*adaptadorArgumentos)(int, t_list*, void*) = &adaptadorArgumentoStack;
-	void(*adaptadorVariables)(int, t_list*, void*) = &adaptadorVariableStack;
-
-	unContexto->argumentos = recibirLista(socket, sizeof(argStack), adaptadorArgumentos);
-	unContexto->variables = recibirLista(socket, sizeof(variableStack), adaptadorVariables);
-	unContexto->retPos = *(u_int32_t*)recibirDatos(socket, sizeof(u_int32_t));
-	unContexto->retVar = *(posicionMemoria*)recibirDatos(socket, sizeof(posicionMemoria));
-
-	list_add(pila, unContexto);
 }
 
 #endif /* OPERACIONESCPU_H_ */

@@ -1,4 +1,4 @@
-/*
+	/*
  ============================================================================
  Name        : kernel.c
  Author      : Zero Gravity
@@ -40,7 +40,16 @@
 #define SIZE_DATA 1024
 #define IDCONSOLA 1
 #define IDCPU 2
+#define INICIAR_PROGRAMA 51
+#define SOLICITAR_BYTES_PAG 52
+#define ALMACENAR_BYTES_PAG 53
+#define ASIGNAR_PAGINAS_PRC 54
+#define FINALIZAR_PRG 55
 
+
+int ordenDeConsola;
+int ordenDeConsolaParaProceso;
+int ordenDeHeap;
 int identificador;
 int contadorPid = 1;
 
@@ -303,7 +312,56 @@ t_list *pcbs = list_create();
 	//*Se agregan el listener a los sockets relevantes y se lo asigna como maximo por ser el unico en la lista en este momento
 	FD_SET(sockListener, &socketsRelevantes);
 	fileDescMax = sockListener;
+//hilos
+//hilo de interfaz de consola
+generarMenu();
+obtenerOrden(&ordenDeConsola);
+switch (ordenDeConsola){
+	case 1:
+	//mostrar listado de procesos del sistema\n
+	case 2:
+		generarMenuDeProceso();
+		
+		obtenerOrden(&ordenDeConsolaParaProceso);
+			switch (ordenDeConsolaParaProceso);
+				case 1:
+				//mostrar cantidad de rafagas ejecutadas
+				case 2:
+				//mostrar cantidad de operaciones provilegiadas ejecutadas
+				case 3:
+				//obtener la tabla de archivos abiertos
+				case 4:
+				//cantidad de paginas de heap
+					generarMenuDeHeap();
+					obtenerOrden(&ordenDeHeap);
+					if (ordenDeHeap==1){
+						//mostrar cantidad de acciones alojar ejecutadas por el proceso
+					}
+					else{
+						//mostrar cantidad de acciones Liberar ejecutadas por el proceso
+					}
+					
+					case 5:
+					//mostrar cantidad de syscalls ejecutadas
+					break
+}
+	case 3:
+	//mostrar tabla global de archivos
+	case 4:
+	//modificar grado de multiprogramacion
+	case 5:
+	//finalizar un proceso
+	case 6:
+	//detener la planificacion
+	default:
+	mensajeDeError(&ordenDeConsola);
+}
+	
 
+printf ("Consola de kernel"/n);
+
+
+//hilo de escucha 
 	while (1){
 		memset(buffer,'\0',SIZE_DATA);
 		socketsFiltrados = socketsRelevantes;
@@ -339,7 +397,7 @@ t_list *pcbs = list_create();
 													printf("%s: Nueva conexion de una consola, ip:%s en el socket %d\n",argv[0], inet_ntoa(cliente_dir.sin_addr), nuevoSocket);
 													break;
 											
-											case (IDCPU){
+											case IDCPU{
 												//Si la conexion es una cpu, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
 													FD_SET(nuevoSocket, &socketsRelevantes);
 													send(nuevoSocket, "Conexion aceptada. Bienvenido, proceso Cpu", strlen("Conexion aceptada. Bienvenido, proceso Cpu"), 0);
@@ -436,11 +494,46 @@ void agregarALista(int tipo, int socketDato,t_list *lista){
 	}
 
 }
+void generarMenu(void){
+	//Borrarpantalla clear??
+	printf ("consola del kernel\n");
+	printf ("1-Listado de procesos en el sistema\n");
+	printf ("2-Acciones para un proceso determinado\n");
+	printf ("3-Tabla global de archivos\n");
+	printf ("4- Modificar grado de multiprogramacion\n");
+	printf ("5-Finalizar un proceso\n");
+	printf ("6-Detener la planificacion\n");
+	}
+
+void generarMenuDeProceso(void){
+		printf ("Elija una accion\n");
+		printf ("1- Cantidad de rafagas ejecutadas\n");
+		printf ("2-Cantidad de operaciones privilegiadas ejecutadas\n");
+		printf ("3-Tabla de archivos abiertos por el proceso\n");
+		printf ("4-Cantidad de paginas del heap utilizadas\n");
+		printf ("5-Cantidad de Syscalls ejecutadas\n");
+		}
+		
+void generarMenuDeHeap(void){
+	printf ("1- cantidad de acciones alojar realizadas\n");
+	printf ("2- cantidad de acciones liberar realizadas\n");
+}
+
+	
+void obtenerOrden(int* orden){
+		printf("Elija una opcion\n");
+		scanf("%d",orden);
+		}
 
 void incrementarcontadorPid (contadorPid){
 	contadorPid++;
+}
+
+void mensajeDeError (int* orden){
+	printf("%d no es una orden valida\n", orden);
 }
 /*
 bool compararSockets(int socket1, int socket2){
 	return socket1==socket2 ? true : false
 }*/
+	
