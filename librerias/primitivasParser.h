@@ -13,7 +13,7 @@
 #include <parser/metadata_program.h>
 #include <parser/sintax.h>
 #include <parser/parser.h>
-#include "../librerias/operacionesCPU.h"
+#include "../librerias/funcionesCPU.h"
 #include "../librerias/pcb.h"
 
 //Funciones generales
