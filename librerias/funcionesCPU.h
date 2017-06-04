@@ -93,7 +93,7 @@ char* solicitarInstruccion(int socketMemoria, u_int32_t tamanioPaginas, pcb* unP
 	// Envío de solicitud de instrucción a memoria.
 
 	char* instruccionSolicitada;
-	recibirMensaje(socketMemoria, instruccionSolicitada);
+	//recibirMensaje(socketMemoria, instruccionSolicitada);
 	// Obtención de la solicitud.
 
 	return instruccionSolicitada;
