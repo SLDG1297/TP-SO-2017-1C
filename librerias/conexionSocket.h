@@ -29,6 +29,7 @@ typedef struct sockaddr_in dirSock;
 // Me tiene re podrido poner struct sockaddr_in. Es una estructura con la dirección de IP asociada a un socket.
 
 
+
 // Declaraciones
 
 // Funciones necesarias para conectarse
@@ -129,8 +130,8 @@ void conectarSocket(int socketAConectar, dirSock direccionAConectar){
 void cerrarSocket(int socketACerrar){
 	int verificador;
 
-	close(socketACerrar);
-	esErrorConSalida(verificador, "Error en la cerrar el socket.");
+	verificador = close(socketACerrar);
+	esErrorConSalida(verificador, "Error en cerrar el socket.");
 
 	printf("El socket de escucha cumplió su función y se cerró.");
 }
@@ -142,17 +143,17 @@ int servir(int puertoCliente){
 	int socketCliente;
 	dirSock direccionCliente;
 
-	socketServidor = crearSocket();									// Llamar a socket().
-	configurarSocket(socketServidor);								// Llamar a setsockopt().
-	direccionServidor = crearDireccion(INADDR_ANY, puertoCliente);	// Asignar estructura de dirección.
+	socketServidor = crearSocket();											// Llamar a socket().
+	configurarSocket(socketServidor);										// Llamar a setsockopt().
+	direccionServidor = crearDireccion(INADDR_ANY, puertoCliente);			// Asignar estructura de dirección.
 
-	asociarDireccion(socketServidor, direccionServidor);			// Llamar a bind().
+	asociarDireccion(socketServidor, direccionServidor);					// Llamar a bind().
 
-	esperarConexion(socketServidor);								// Llamar a listen().
+	esperarConexion(socketServidor);										// Llamar a listen().
 
-	aceptarConexion(socketServidor, direccionCliente);				// Llamar a accept().
+	socketCliente = aceptarConexion(socketServidor, direccionCliente);		// Llamar a accept().
 
-	cerrarSocket(socketServidor);									// Llamar a close().
+	cerrarSocket(socketServidor);											// Llamar a close().
 
 	return socketCliente;
 }
