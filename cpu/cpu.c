@@ -31,7 +31,7 @@
 //https://github.com/sisoputnfrba/ansisop-parser
 #include <parser/metadata_program.h>
 
-#include "../librerias/conexionSimple.h"
+#include "../librerias/conexionSocket.h"
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
 #include "../librerias/funcionesCPU.h"
