@@ -30,7 +30,7 @@
 
 // Con Kernel
 
-void 	handshakeKernel(int socketKernel); 								// Realiza handshake con el Kernel.
+void 	handshakeKernel(int socketKernel, u_int32_t codigoCPU); 		// Realiza handshake con el Kernel.
 
 void 	concluirOperacion(int socketKernel, pcb* unPcb); 				// Notificar al Kernel que se terminó la ejecución de una operación para que la pueda seguir otra CPU de ser necesario.
 
@@ -42,31 +42,38 @@ void 	desconectarCPU(int socketKernel, int senial); 					// ¿Por qué no puedo 
 
 // Con Memoria
 
-void 		handshakeMemoria(int socketMemoria, u_int32_t* tamanioPaginas); 					// Realiza handshake con Memoria. Obtiene el tamaño de las páginas.
+void 		handshakeMemoria(int socketMemoria, u_int32_t codigoCPU, u_int32_t* tamanioPaginas); 		// Realiza handshake con Memoria. Obtiene el tamaño de las páginas.
 
-char*		solicitarInstruccion(int socketMemoria, u_int32_t tamanioPaginas, pcb* unPcb); 		// Solicitar instrucción en Memoria.
+char*		solicitarInstruccion(int socketMemoria, u_int32_t tamanioPaginas, pcb* unPcb); 				// Solicitar instrucción en Memoria.
 
-char* 		obtenerDatos(int socketMemoria, posicionMemoria unaPos); 							// Obtiene información de un programa en ejecución.
+char* 		obtenerDatos(int socketMemoria, posicionMemoria unaPos); 									// Obtiene información de un programa en ejecución.
 
-u_int32_t	hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas);				// Actualiza estructuras tras una operación.
+u_int32_t	hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas);						// Actualiza estructuras tras una operación.
 
 // Funciones de CPU: las clasificamos así porque son las funciones que componen al CPU para que haga su trabajo.
 
-void 	interpretarOperacion(); 					// Recibe una instrucción de un programa y la parsea.
+void	handshake(int socket, u_int32_t codigoCPU);		// Base para todos los handshakes.
 
-void 	ejecutarOperacion(); 						// Ejecuta una instrucción parseada.
+void 	interpretarOperacion(); 						// Recibe una instrucción de un programa y la parsea.
 
-void 	llamarFuncion(/* Stack */); 				// Llama a una función o procedimiento.
+void 	ejecutarOperacion(); 							// Ejecuta una instrucción parseada.
 
-void 	actualizarPC(int *PC, int32_t valor); 		// Incrementa el Program Counter con la próxima instrucción a ejecutar.
+void 	llamarFuncion(/* Stack */); 					// Llama a una función o procedimiento.
 
-void 	arrojarExcepcion(/* Excepción */); 			// Se explica solo.
+void 	actualizarPC(int *PC, u_int32_t valor); 		// Incrementa el Program Counter con la próxima instrucción a ejecutar.
+
+void 	arrojarExcepcion(/* Excepción */); 				// Se explica solo.
 
 
 
 // Definiciones
 
-void handshakeMemoria(int socketMemoria, u_int32_t* tamanioPaginas){
+void handshakeKernel(int socketKernel, u_int32_t codigoCPU){
+	handshakeKernel(socketKernel, codigoCPU);
+}
+
+void handshakeMemoria(int socketMemoria, u_int32_t codigoCPU, u_int32_t* tamanioPaginas){
+	handshake(socketMemoria, codigoCPU);
 	recibirDatos(socketMemoria, tamanioPaginas, sizeof(u_int32_t));
 }
 
@@ -99,10 +106,6 @@ char* solicitarInstruccion(int socketMemoria, u_int32_t tamanioPaginas, pcb* unP
 	return instruccionSolicitada;
 }
 
-void actualizarPC(int *PC, int32_t valor){
-	*PC = valor;
-}
-
 u_int32_t hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas){
 	u_int32_t pagina = 0;
 
@@ -110,6 +113,23 @@ u_int32_t hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas){
 		pagina++;
 
 	return pagina;
+}
+
+void handshake(int socket, u_int32_t codigoCPU){
+	int bytesRecibidos;
+
+	char datosEnviar[1024], datosRecibir[1024];
+	memset(datosEnviar, '\0', 1024);
+	memset(datosRecibir, '\0', 1024);
+
+	send(socket, &codigoCPU, sizeof(u_int32_t), 0);
+	bytesRecibidos = recv(socket, datosRecibir, 1024, 0);
+
+	datosRecibir[bytesRecibidos] = '\0';
+}
+
+void actualizarPC(int *PC, u_int32_t valor){
+	*PC = valor;
 }
 
 #endif /* FUNCIONESCPU_H_ */
