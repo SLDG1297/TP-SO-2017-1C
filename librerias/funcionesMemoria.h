@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
-//#include "../librerias/funcionesMemoria.h"
+#include "../librerias/serializador.h"
 
 #define RUTA_ARCHIVO "./config_memoria.cfg"
 #define LIBRE -7
@@ -29,7 +29,8 @@ int ENTRADAS_CACHE;
 int CACHE_X_PROC;
 int RETARDO_MEMORIA;
 
-t_log *archivoLog;
+t_log *archivoLog,*archivoSP;
+
 
 typedef struct {
 	int pid;
@@ -48,7 +49,7 @@ typedef struct {
 
 void asignarDatosDeConfiguracion();
 int* reservarMemoria();
-t_log* crearArchivo(char* ruta);
+void  crearArchivo(char* ruta);
 void inicializarStrAdm(int* bloqueMemoria);
 void imprimirStrAdm(int* bloqueMemoria);
 int strLibre(int* ptr);
@@ -60,6 +61,8 @@ int paginasPrc(int pid, int*ptr);
 int compararPID(strAdministrativa aux,int pid);
 int paginasLibresEnMemoria(int *ptr);
 int strVacia(int *ptr);
+
+int getSizeStrAdm();
 
 // ******* INICIO DE CODIGO  *******
 
@@ -86,10 +89,20 @@ int* reservarMemoria() {
 	return memoria;
 }
 
-t_log* crearArchivo(char* ruta) {
+//  ******* FUNCIONES DE ARCHIVO LOG  *******
 
-	archivoLog = log_create(ruta, "Memoria", true, LOG_LEVEL_INFO);
+void crearArchivo(char* ruta) {
+
+	archivoLog= log_create(ruta, "Memoria", true, LOG_LEVEL_INFO);
+	archivoSP= log_create(ruta, "Memoria", false, LOG_LEVEL_INFO);
+}
+
+t_log* getArchivoLog(){
 	return archivoLog;
+}
+
+t_log* getArchivoSP(){
+	return archivoSP;
 }
 
 //  ******* FUNCIONES DE CONTROL DE STR ADMINISTRATIVA  *******
@@ -114,6 +127,7 @@ void inicializarStrAdm(int* bloqueMemoria) {
 
 	//mientras la cantidad de frames del contador sea menor a 500 (FRAMES)
 	while (contador_frame < FRAMES) {
+
 		//Con este if nos aseguramos que hay 12 frames utilizados para las estructuras administrativas
 		//de esta manera cuando guardemos info no vamos a pisar nada
 		if (contador_frame >= FRAMES - sizeBlockAdm) {
@@ -206,21 +220,24 @@ int espacioDisponible(int* ptr){
 
 //Esta funcion asigna las paginas una por una, busca la primera estructura vacia y le asigna los datos, asi sucesivamente hasta que llega todas las paginas requeridas
 int asignacionDePaginas(int cantPaginas,int pid,int *ptr){
-	int c,paginasAsignadas=0,iniciarPrograma,movimiento;
-	while(paginasAsignadas!=cantPaginas){
-		movimiento=c*sizeof(strAdministrativa);
-		if(strVacia(ptr+movimiento)){
+	int c,paginasAsignadas=0,iniciarPrograma;
+	//1ro. Mientras las pag Asignadas sean menos que las pag que necesito se repite el ciclo
+	while(paginasAsignadas<cantPaginas){
+		//2do. Si el frame al que apunto esta vacio entonces asigno los datos
+		if(strVacia(ptr+c*sizeof(strAdministrativa))){
 			iniciarPrograma=0;
 			//Se le envia a iniciar... el nro de pid, el nro de frame con el que trabajara, y el puntero al frame vacio de la strAdm,
 			//devuelve un 1 en caso de que la operacion haya podido realizarse y un 0 en caso contrario
-			iniciarPrograma=iniciarStrAdmDePrc(pid,c,ptr+movimiento);
+			iniciarPrograma=iniciarStrAdmDePrc(pid,c,ptr+c*sizeof(strAdministrativa));
 			if(iniciarPrograma)
 				paginasAsignadas++;
 		}//Cierro If Frame Vacio
+		//3ro. Me muevo hacia la siguiente str Adm. y vuelvo a hacer los controles 1 y 2
 		c++;
 	}
 	return paginasAsignadas;
 }
+
 
 //  ******* FUNCIONES DE BUSQUEDA  *******
 
@@ -285,7 +302,33 @@ int strVacia(int *ptr){
 	return frameLibre;
 }
 
+int buscarFrame(int pid, int *ptr){
+	int c=0;
+	strAdministrativa aux;
+	while(c<FRAMES){
+		memcpy(&aux,ptr+c*getSizeStrAdm(),getSizeStrAdm());
+		if(compararPID(aux, pid))
+			return aux.frame;
+		c++;
+	}
 
+	return NOT_FOUND;
+}
+
+int buscarFrameDePagina(int pid, int *ptr, int pagina){
+	int contador;
+	strAdministrativa aux;
+
+	while (contador<FRAMES){
+
+		memcpy(&aux, ptr+contador*sizeof(strAdministrativa),sizeof(strAdministrativa));
+		if(compararPID(aux,pid)&&aux.nroPagina==pagina){
+			return aux.frame;
+		}
+		contador++;
+	}
+	return NOT_FOUND;
+}
 
 
 
@@ -336,39 +379,11 @@ int getSizeStrAdm(){
 	return sizeof(strAdministrativa);
 }
 
-
-/*
- int* buscarPtrPID(int pid, int* memoria) {
-	strAdministrativa aux;
-	int countFrame = -1;
-	do {
-		countFrame++;
-		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
-				sizeof(strAdministrativa));
-
-		if (aux.pid == pid)
-			return aux.frame;
-	} while (countFrame < FRAMES);
-
-	return NOT_FOUND;
+int getRetardo(){
+	return RETARDO_MEMORIA;
 }
 
-int buscarStrAdm(int pid, int* memoria) {
-	strAdministrativa aux;
-	int countFrame = -1;
-	do {
-		countFrame++;
-		memcpy(&aux, memoria + countFrame * sizeof(strAdministrativa),
-				sizeof(strAdministrativa));
-		if (aux.pid == pid)
-			return countFrame;
-	} while (countFrame < FRAMES);
 
-	return NOT_FOUND;
-
-}
-
-  */
 
 
 #endif /* FUNCIONESMEMORIA_H_ */
