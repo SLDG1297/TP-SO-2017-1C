@@ -227,7 +227,7 @@ void seleccionOperacionesMemoria(int socket) {
 		paginas = recibirTamanio(socket);
 		rtaFuncion = inicializarPrograma(pid, paginas);
 		sleep(getRetardo());
-		mensajeRta(socket, rtaFuncion);
+		enviarTamanio(socket, rtaFuncion);
 		break;
 
 	case SOLICITAR_BYTES_PAG:
@@ -422,6 +422,6 @@ int finalizarPrograma(int pid) {
 
 	liberarStrAdm(pid, ptrMemoria);
 	printf("\nEl programa %d ha finalizado", pid);
-	return 0;
+	return 1;
 }
 

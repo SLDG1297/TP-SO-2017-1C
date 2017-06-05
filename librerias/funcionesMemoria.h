@@ -55,7 +55,7 @@ void imprimirStrAdm(int* bloqueMemoria);
 int strLibre(int* ptr);
 void liberarStrAdm(int pid, int* ptr);
 int iniciarStrAdmDePrc(int pid, int frame, int* ptr);
-int espacioDisponible(int* ptr);
+
 int asignacionDePaginas(int cantPaginas,int pid,int *ptr);
 int paginasPrc(int pid, int*ptr);
 int compararPID(strAdministrativa aux,int pid);
@@ -110,16 +110,17 @@ t_log* getArchivoSP(){
 //Seteo todas las estructuras con el valor predefinido PID=-14 de esta manera puedo saber que el frame no tiene un proceso asignado
 void inicializarStrAdm(int* bloqueMemoria) {
 
+	int paginaOcupada=0;
 	int sizeStrAdm;
 	int sizeBlockAdm;
 	int contador_frame = 0; // contador para los frames dentro del for
 	strAdministrativa auxiliar;
 
 	//El tamaño de la estructura por la cantidad de FRAMES 500*256B = 6000 B
-	//Si hacemos 6000/MARCO_SIZE nos da 23,43, por lo cual le sumamos un marco para que asi nos de 24.
-	//De esta manera tenemos 24 FRAMES ocupados por la memoria administrativa
+	//Si hacemos 6000/FRAMES nos da 12, por lo cual le sumamos dos marcos 6.512
+	// y le restamos 12 para que al dividirlo nos de 13 marcos
 	sizeStrAdm = sizeof(strAdministrativa);
-	sizeBlockAdm = ((sizeStrAdm * FRAMES) + FRAME_SIZE) / FRAMES;
+	sizeBlockAdm = ((sizeStrAdm * FRAMES) + FRAME_SIZE*2-12) / FRAMES;
 
 	auxiliar.pid = LIBRE;
 	auxiliar.frame = contador_frame;
@@ -132,7 +133,8 @@ void inicializarStrAdm(int* bloqueMemoria) {
 		//de esta manera cuando guardemos info no vamos a pisar nada
 		if (contador_frame >= FRAMES - sizeBlockAdm) {
 			auxiliar.pid = OCUPADO_x_STR;
-			auxiliar.nroPagina = contador_frame;
+			auxiliar.nroPagina = paginaOcupada;
+			paginaOcupada++;
 		} else {
 			auxiliar.pid = LIBRE;
 			auxiliar.nroPagina = LIBRE;
@@ -144,23 +146,27 @@ void inicializarStrAdm(int* bloqueMemoria) {
 		auxiliar.frame = contador_frame;
 	}
 
-	log_info(archivoLog, "El bloque de memorias administrativas ocupa %d",
+	log_info(archivoLog, "El bloque de memorias administrativas ocupa %d frames",
 			sizeBlockAdm);
-	log_info(archivoLog, "Son %d estructuras con un peso individual de %d",
+	log_info(archivoLog, "Son %d estructuras con un peso individual de %d Bytes\n*******************************************",
 			FRAMES, sizeStrAdm);
+	log_info(archivoLog,"");
 }
 
+//Como su nombre lo indica imprime todas las estructuras adm en pantalla
 void imprimirStrAdm(int* bloqueMemoria) {
 	strAdministrativa aux;
 	int c = 0;
+	log_info(archivoLog,"*******************************************");
 	while (c < FRAMES) {
 		memcpy(&aux, bloqueMemoria + c * sizeof(strAdministrativa),
 				sizeof(strAdministrativa));
 		//printf("\nPID: %d, NroPagina: %d, Frame: %d", aux.pid, aux.nroPagina,	aux.frame);
-		log_info(archivoLog,"\n*******************************************\n");
-		log_info(archivoLog,"PID: %d, NroPagina: %d, Frame: %d",aux.pid,aux.nroPagina,aux.frame);
+
+		log_info(archivoLog,"PID: %d, NroPagina: %d, Frame: %d\n-----------------------------------------------------------------------------------------",aux.pid,aux.nroPagina,aux.frame);
 		c++;
 	}
+	log_info(archivoLog,"*******************************************");
 }
 
 //La estructura se encuentra libre siempre y cuando su PID sea igual a -7
@@ -174,64 +180,79 @@ int strLibre(int* ptr) {
 
 }
 
+//Al liberar una estructura administrativa se le asigna al pid y al nro pagina el nro -7
 void liberarStrAdm(int pid, int* ptr) {
-	int c = -1;
+	int c=0;
 	strAdministrativa aux;
-	do {
-		c++;
-		memcpy(&aux, ptr + c * sizeof(strAdministrativa),
-				sizeof(strAdministrativa));
-	} while (c < FRAMES && aux.pid != pid);
 
-	aux.pid = LIBRE;
-	aux.nroPagina = LIBRE;
-	aux.frame = c;
-	memcpy(ptr + c * sizeof(strAdministrativa), &aux,
-			sizeof(strAdministrativa));
+	//Mientras contador sea menor a la cant de frames,
+	//el ptero se sigue moviendo de a una estructura adm
+	while(c<FRAMES){
+
+		//Copio los datos apuntos en la direccion de memoria a un auxiliar de estructura
+		memcpy(&aux, ptr + c * sizeof(strAdministrativa),sizeof(strAdministrativa));
+
+		//Si el pid de la estructura apuntada es el indicado, seteo los datos de aux
+		//para que su pid y nro de pagina sean -7 indicador de la str libre
+		//el nro de frame lo dejo intacto por que no es necesario modificarlo
+
+		if(compararPID(aux,pid)){
+		aux.pid = LIBRE;
+		aux.nroPagina = LIBRE;
+
+		//copio los nuevos datos a la direccion de memoria
+		memcpy(ptr + c * sizeof(strAdministrativa), &aux,sizeof(strAdministrativa));
+		}
+
+		// sumo uno para encontrar todos las str con el pid necesario
+		c++;
+	}
+
+
 
 }
 
 
-int iniciarStrAdmDePrc(int pid, int frame, int* ptr) {
+//Inicia la str adm de un proceso, con un pid indicado en un determinado frame
+int iniciarStrAdmDePrc(int pid, int c, int* ptr) {
 
 	strAdministrativa aux;
 	aux.pid=pid;
+
+	//Se fija la cantidad de paginas que tiene el proceso en todo la EA (estructura Adm)
 	aux.nroPagina = paginasPrc(pid, ptr);
-	aux.frame = frame ;
-	memcpy(ptr+frame*sizeof(strAdministrativa),&aux,sizeof(strAdministrativa));
+
+	aux.frame = c ;
+	memcpy(ptr,&aux,sizeof(strAdministrativa));
 
  return 1;
 }
-int espacioDisponible(int* ptr){
 
-	int c=0;
-	int libre=0;
-	int movimiento=c*sizeof(strAdministrativa);
-	while(c<FRAMES){
-		if(strLibre(ptr+movimiento)==1){
-			libre++;
-		}
-		c++;
-	}
-	return libre;
-}
+
 //  ******* FUNCIONES DE ASIGNACION  *******
 
 
 //Esta funcion asigna las paginas una por una, busca la primera estructura vacia y le asigna los datos, asi sucesivamente hasta que llega todas las paginas requeridas
 int asignacionDePaginas(int cantPaginas,int pid,int *ptr){
-	int c,paginasAsignadas=0,iniciarPrograma;
+
+	int c=0,paginasAsignadas=0,iniciarPrograma;
+
 	//1ro. Mientras las pag Asignadas sean menos que las pag que necesito se repite el ciclo
 	while(paginasAsignadas<cantPaginas){
+
 		//2do. Si el frame al que apunto esta vacio entonces asigno los datos
 		if(strVacia(ptr+c*sizeof(strAdministrativa))){
 			iniciarPrograma=0;
+
 			//Se le envia a iniciar... el nro de pid, el nro de frame con el que trabajara, y el puntero al frame vacio de la strAdm,
 			//devuelve un 1 en caso de que la operacion haya podido realizarse y un 0 en caso contrario
 			iniciarPrograma=iniciarStrAdmDePrc(pid,c,ptr+c*sizeof(strAdministrativa));
+
 			if(iniciarPrograma)
 				paginasAsignadas++;
+
 		}//Cierro If Frame Vacio
+
 		//3ro. Me muevo hacia la siguiente str Adm. y vuelvo a hacer los controles 1 y 2
 		c++;
 	}
@@ -241,6 +262,7 @@ int asignacionDePaginas(int cantPaginas,int pid,int *ptr){
 
 //  ******* FUNCIONES DE BUSQUEDA  *******
 
+//Compara dos pid, el de una EA aux y el pid que le pasa
 int compararPID(strAdministrativa aux,int pid){
 
 	if(aux.pid==pid)
@@ -285,6 +307,7 @@ int paginasLibresEnMemoria(int *ptr){
 
 }
 
+//Controla si una estructura administrativa esta vacia, no tiene asignada ningun proceso
 int strVacia(int *ptr){
 
 	//C hace referencia a la posicion en la que se encuentra el frame vacio
@@ -302,6 +325,7 @@ int strVacia(int *ptr){
 	return frameLibre;
 }
 
+//Buscar el frame correspondiente a un pid
 int buscarFrame(int pid, int *ptr){
 	int c=0;
 	strAdministrativa aux;
