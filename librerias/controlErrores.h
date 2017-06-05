@@ -21,7 +21,7 @@
 
 void esErrorSimple(int valorRtaFuncion, char* mensaje){
 	if(valorRtaFuncion<0){
-		printf(mensaje);
+		perror(mensaje);
 		exit(EXIT_FAILURE);
 	}
 }
