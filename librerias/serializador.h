@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <commons/collections/list.h>
+
 #include "../librerias/controlErrores.h"
 
 // Separé las funciones para enviar tamaños y datos por separado si necesitan alguna en particular.
