@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <parser/metadata_program.h>
+
 #include "../librerias/serializador.h"
 
 
@@ -77,11 +79,11 @@ typedef struct{
 	u_int32_t 			pid; 						// Identificador de un proceso.
 	u_int32_t 			programCounter; 			// Program counter: indica el número de la siguiente instrucción a ejecutarse.
 	u_int32_t 			paginasUsadas; 				// Cantidad de páginas usadas por el programa (Desde 0).
-	size_t				cantidadInstrucciones;		// Tamaño en bytes del ínidce de código.
+	size_t				cantidadInstrucciones;		// Cantidad de instrucciones del ínidce de código.
 	lineaUtil*			indiceCodigo;				// Identifica líneas útiles de un programa.
-	size_t				cantidadEtiquetas;			// Tamaño en bytes del índice de etiquetas.
+	size_t				cantidadEtiquetas;			// Cantidad de etiquetas en el índice de etiquetas.
 	char*				indiceEtiqueta;				// Identifica llamadas a funciones.
-	size_t				cantidadStack;				// Tamaño en bytes del índice de stack.
+	size_t				cantidadStack;				// Cantidad de contextos del índice de stack.
 	t_list*				indiceStack; 				// Ordena valores almacenados en la pila de funciones con sus valores.
 	u_int32_t 			exitCode; 					// Motivo por el cual finalizó un programa.
 
@@ -96,20 +98,40 @@ pcb;
 
 // Declaraciones
 
-void	enviarPCB(int socket, pcb* unPcb);		// Enviar PCB (Guau...)
+void	enviarPCB(int socket, pcb* unPcb);				// Enviar PCB (Guau...)
 
-void 	recibirPCB(int socket, pcb* unPcb);		// Recibe PCB (NO ME DIGAS!!)
+void 	recibirPCB(int socket, pcb* unPcb);				// Recibe PCB (NO ME DIGAS!!)
+
+void	preprocesador(char* programa, pcb* unPcb);		// Preprocesador de código
 
 
 
 // Definiciones
 
 void enviarPCB(int socket, pcb* unPcb){
-
+		// TODO: Serializar
 }
 
 void recibirPCB(int socket, pcb* unPcb){
+		// TODO: Serializar
+}
 
+void preprocesador(char* programa, pcb* unPcb){
+	size_t tamanio;														// Para calcular tamaños de datos serializados.
+	t_metadata_program* codigo = metadata_desde_literal(programa);		// Para generar el índice de código a partir de un script.
+
+	// Asignaciones de datos al PCB.
+	unPcb->programCounter = codigo->instruccion_inicio;							// Asigna el Program Counter con la primer instrucción a ejecutar.
+
+	unPcb->cantidadInstrucciones = codigo->instrucciones_size;					// Asigna la cantidad de instrucciones del programa.
+	tamanio = unPcb->cantidadInstrucciones * sizeof(lineaUtil);					// Asigna el tamaño en bytes de la lista de instrucciones serializada: BYTES = CANTIDAD * 2 * INT
+	memcpy(&unPcb->indiceCodigo, codigo->instrucciones_serializado, tamanio);	// Copia la lista serializada en el PCB.
+
+	unPcb->cantidadEtiquetas = codigo->etiquetas_size;							// Asigna la cantidad de etiquetas de instrucciones del programa.
+	tamanio = unPcb->cantidadEtiquetas * sizeof(char);							// Asigna el tamaño en bytes de la lista serializada de etiquetas.
+	memcpy(&unPcb->indiceEtiqueta, codigo->etiquetas, tamanio);					// Copia la lista serializada en el PCB.
+
+	metadata_destruir(codigo);
 }
 
 #endif /* PCB_H_ */

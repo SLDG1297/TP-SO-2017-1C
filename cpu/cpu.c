@@ -88,11 +88,12 @@ int main(int argc, char *argv[]){
 	{
 		// Espera a la recepción del PCB del Kernel para iniciar las operaciones.
 
-		recibirPCB(socketKernel, &PCB);
+		// TODO: Recibir PCB del Kernel.
 
 		// Fetch stage
 
-		// Solicitar Instrucción en Memoria.
+		solicitudMemoria peticion = generarSolicitudMemoria(&PCB, tamanioPaginas);
+		char* instruccion = fetchInstruction(socketMemoria, peticion);
 
 		// Execute stage
 
