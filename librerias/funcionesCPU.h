@@ -22,7 +22,11 @@
 #include "../librerias/pcb.h"
 #include "../librerias/serializador.h"
 
-
+// Protocolo de comunicación de CPU
+#define FIN_OPERACION 	1297
+#define	FIN_PROGRAMA	1298
+#define	EXCEPCION		1299
+#define DESCONECTAR 	1300
 
 // Declaraciones
 

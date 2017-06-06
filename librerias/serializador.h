@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <commons/string.h>
 #include <commons/collections/list.h>
 
 #include "../librerias/controlErrores.h"
@@ -93,9 +94,9 @@ void destruirPaquete(void* paquete){
 	free(paquete);
 }
 
-void empaquetar(void* mensaje, void* datos, size_t tamanioDato){
-	memcpy(mensaje, datos, tamanioDato);	// Empaqueta el dato copiándolo en un mensaje.
-	mensaje += tamanioDato;					// Desplaza el puntero para poder poner el dato que siga a continuación.
+void empaquetar(void* envio, void* datos, size_t tamanioDato){
+	memcpy(envio, datos, tamanioDato);		// Empaqueta el dato copiándolo en un mensaje.
+	envio += tamanioDato;					// Desplaza el puntero para poder poner el dato que siga a continuación.
 }
 
 void desempaquetar(void* datos, void* mensaje, size_t tamanioDato){

@@ -7,6 +7,8 @@
 
 #include "../librerias/conexionSocket.h"
 
+// gcc conexionSimpleServidor.c -o conexionSimpleServidor -lcommons
+
 int main(){
 	int puertoServidor = 5100;
 

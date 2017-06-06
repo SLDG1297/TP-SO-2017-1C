@@ -7,6 +7,8 @@
 
 #include "../librerias/conexionSocket.h"
 
+// gcc conexionSimpleCliente.c -o conexionSimpleCliente -lcommons
+
 int main(){
 	char* ipServidor = "127.0.0.1";
 	int puertoServidor = 5100;
