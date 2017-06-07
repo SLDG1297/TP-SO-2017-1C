@@ -6,6 +6,7 @@
  */
 
 #include "../librerias/conexionSocket.h"
+#include "../librerias/serializador.h"
 
 // Línea para compilar:
 // gcc conexionSimpleCliente.c -o conexionSimpleCliente -lcommons
@@ -14,6 +15,8 @@
 
 
 // Estructuras de datos
+
+typedef void** paquete;
 
 struct estructura{
 	u_int32_t numero;
@@ -30,6 +33,15 @@ int puertoServidor = 5100;
 
 int socketServidor;
 
+int testCliente = 0;
+
+
+
+// Para incrementar tests
+
+void proximoTest();
+
+
 
 
 // Tests
@@ -43,17 +55,23 @@ void serializar();
 // Implementación de tests
 
 void pruebaConexion(){
-	printf("\nPrueba de conexion\n");
+	proximoTest();
+	printf("Prueba de conexion\n\n");
 
 	u_int32_t datoAEnviar = 4;
 
 	send(socketServidor, &datoAEnviar, sizeof(u_int32_t), 0);
 
-	printf("Se pudo enviar el mensaje correctamente.\n");
+
+
+	// Aserciones
+
+	printf("Se pudo enviar el mensaje correctamente.\n\n");
 }
 
 void serializar(){
-	printf("\nPrueba de serializador\n");
+	proximoTest();
+	printf("Prueba de serializador\n\n");
 
 	// Contexto del emisor:
 
@@ -63,28 +81,47 @@ void serializar(){
 
 	u_int32_t tamanioEnvio = sizeof(struct estructura);
 
-	// Serialización
+	// Serialización (Los comentarios debajo de las funciones indican qué está pasando ahí atrás)
 
 	// Creación de paquete
-	void* envio = malloc(tamanioEnvio);
-	u_int32_t desplazamientoEnvio = 0;
+
+	paquete envio = crearPaquete(tamanioEnvio);
+
+	// void* envio = malloc(tamanioEnvio);
 
 	// Empaquetado
-	memcpy(envio + desplazamientoEnvio, &emisor.numero, sizeof(u_int32_t));
-	desplazamientoEnvio += sizeof(u_int32_t);
 
-	memcpy(envio + desplazamientoEnvio, &emisor.letra, sizeof(char));
-	desplazamientoEnvio += sizeof(char);
+	empaquetar(envio, &emisor.numero, sizeof(u_int32_t));
+
+	// memcpy(envio, &emisor.numero, sizeof(u_int32_t));
+	// envio += sizeof(u_int32_t);
+
+	empaquetar(envio, &emisor.letra, sizeof(char));
+
+	// memcpy(envio, &emisor.letra, sizeof(char));
+	// envio += sizeof(char);
 
 	// >>Envío
-	send(socketServidor, envio, tamanioEnvio, 0);
+
+	enviarPaquete(socketServidor, envio, tamanioEnvio);
+
+	// *envio -= tamanioEnvio;
+	// send(socketServidor, *envio, tamanioEnvio, 0);
 
 	// Destrucción del envío
-	free(envio);
+	// free(*envio);*/
 
-	printf("\nSe pudo serializar la estructura (int = 5, char ='b') correctamente.\n");
+
+
+	// Aserciones
+
+	printf("Se pudo serializar la estructura (int = 5, char ='b') correctamente.\n\n");
 }
 
+void proximoTest(){
+	testCliente++;
+	printf("\n\nTest %d\n\n", testCliente);
+}
 
 
 // Resultados de las pruebas

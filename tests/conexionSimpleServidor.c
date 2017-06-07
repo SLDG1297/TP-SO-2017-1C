@@ -6,6 +6,7 @@
  */
 
 #include "../librerias/conexionSocket.h"
+#include "../librerias/serializador.h"
 
 // Línea para compilar:
 // gcc conexionSimpleServidor.c -o conexionSimpleServidor -lcommons
@@ -28,6 +29,14 @@ int puertoServidor = 5100;
 
 int socketCliente;
 
+int testServidor = 0;
+
+
+
+// Para incrementar tests
+
+void proximoTest();
+
 
 
 // Tests
@@ -41,56 +50,50 @@ void deserializar();
 // Implementación de tests
 
 void pruebaServidor(){
-	printf("\nPrueba de servidor\n");
+	proximoTest();
+	printf("Prueba de servidor\n");
 
 	u_int32_t datoRecibido;
 
 	recv(socketCliente, &datoRecibido, sizeof(u_int32_t), 0);
 
 	if(datoRecibido == 4)
-		printf("Se recibió el dato correctamente.\n");
+		printf("\nSe recibió el dato correctamente.\n");
 	else
-		printf("Que en paz descanses...\n");
+		printf("\nQue en paz descanses...\n");
 }
 
 void deserializar(){
-	printf("\nPrueba de deserializador\n");
+	proximoTest();
+	printf("Prueba de deserializador\n");
 	// Contexto del receptor:
 
 	struct estructura receptor;
-
-	u_int32_t tamanioRecibo = sizeof(struct estructura);
 
 	// Deserialización
 
 	// <<Recibo
 
-	void* recibo = malloc(tamanioRecibo);
-	u_int32_t desplazamientoRecibo = 0;
+	recibirPaquete(socketCliente, &receptor.numero, sizeof(receptor.numero));
 
-	recv(socketCliente, recibo, tamanioRecibo, 0);
+	recibirPaquete(socketCliente, &receptor.letra, sizeof(receptor.letra));
 
-	// Desempaquetado
-	memcpy(&receptor.numero, recibo + desplazamientoRecibo, sizeof(u_int32_t));
-	desplazamientoRecibo += sizeof(u_int32_t);
-
-	memcpy(&receptor.letra, recibo + desplazamientoRecibo, sizeof(char));
-	desplazamientoRecibo += sizeof(char);
-
-	free(recibo);
 
 	if(receptor.numero == 5)
-		printf("\nSe obtuvo el número correcto. (5)\n");
+		printf("Se obtuvo el número correcto 5.\n");
 	else
-		printf("\nSe esperaba 5 y obtuviste %d", receptor.numero);
+		printf("Se esperaba 5 y obtuviste %d\n", receptor.numero);
 
 	if(receptor.letra == 'b')
-		printf("\nSe obtuvo la letra correcta. (b)\n");
+		printf("Se obtuvo la letra correcta 'b'.\n\n");
 	else
-		printf("\nSe esperaba b y obtuviste %c\n", receptor.letra);
+		printf("Se esperaba b y obtuviste %c.\n\n", receptor.letra);
 }
 
-
+void proximoTest(){
+	testServidor++;
+	printf("\n\nTest %d\n\n", testServidor);
+}
 
 // Resultado de las pruebas
 
