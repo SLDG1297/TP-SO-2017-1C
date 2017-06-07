@@ -34,9 +34,9 @@
 #include "../librerias/conexionSocket.h"
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
-#include "../librerias/funcionesCPU.h"
+#include "../librerias/cpu/funcionesCPU.h"
 #include "../librerias/pcb.h"
-#include "../librerias/primitivasParser.h"
+#include "../librerias/cpu/primitivasParser.h"
 #include "../librerias/serializador.h"
 
 // Ruta del archivo de configuración.

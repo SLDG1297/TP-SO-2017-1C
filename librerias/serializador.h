@@ -51,7 +51,6 @@ void	desempaquetarLista(t_list* lista, void* mensaje, size_t tamanioNodos);	// P
 void	referenciarInicio(void* mensaje, size_t tamanioMensaje);				// Para volver a referenciar al inicio de un mensaje.
 
 
-
 // Funciones para envío de paquetes serializados
 
 void	enviarDatos(int socket, void* datos, size_t tamanioDatos); 		// Para enviar datos a otro proceso.
