@@ -42,9 +42,11 @@ typedef void** paquete;
 
 // Funciones para calcular tamaños en bytes comunes (Agreguen alguno de ser necesario)
 
+size_t 	tamanioEnBytesVariables(u_int32_t cantidadDatosVariables);	// Tamaño producido por necesitar enviar un dato de tamaño variable.
+
 size_t	tamanioEnBytesString(char* string);							// Cálculo del tamaño en bytes de char* punteros.
 
-size_t	tamanioEnBytesLista(t_list* lista, size_t tamanioNodo);		// Cálculo del tamaño en bytes de una lista.
+size_t	tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo);	// Cálculo del tamaño en bytes de una lista con nodos de tamaño fijo.
 
 
 
@@ -64,6 +66,8 @@ void 	destruirPaquete(paquete unPaquete);										// Free del paquete creado.
 
 void 	empaquetar(paquete envio, void* datos, size_t tamanioDato);				// Para añadir una estructura a un mensaje.
 
+void	empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato);	// Para añadir una estructura de tamaño variable, como un char*.
+
 void	empaquetarLista(void* mensaje, t_list* lista, size_t tamanioNodos);		// TODO: Para serializar listas.
 
 void 	enviarPaquete(int socket, paquete unPaquete, size_t tamanioEnvio);		// Send del paquete armado.
@@ -73,6 +77,8 @@ void 	enviarPaquete(int socket, paquete unPaquete, size_t tamanioEnvio);		// Sen
 // Funciones para deserializar
 
 void 	recibirPaquete(int socket, void* receptor, size_t tamanioRecibo);		// Recv del paquete que llega por socket.
+
+void	recibirPaqueteVariable(int socket, void* receptor);						// Recv de un paquete con tamño de datos variable.
 
 void	desempaquetarLista(t_list* lista, void* mensaje, size_t tamanioNodos);	// TODO: Para deserializar listas.
 
@@ -87,13 +93,17 @@ size_t	recibirTamanio(int socket); 									// Para recibir header de un mensaje
 
 // Definiciones
 
-size_t	tamanioEnBytesString(char* string){
+size_t tamanioEnBytesVariables(u_int32_t cantidadDatosVariables){
+	return cantidadDatosVariables * sizeof(size_t);						// Para calcular el tamaño del envío de datos variables, que necesitan un header con su tamaño.
+}
+
+size_t tamanioEnBytesString(char* string){
 	size_t tamanio = string_length(string) + 1;
 
 	return tamanio;
 }
 
-size_t	tamanioEnBytesLista(t_list* lista, size_t tamanioNodo){
+size_t tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo){
 	size_t tamanio = list_size(lista) * tamanioNodo;
 
 	return tamanio;
@@ -113,9 +123,9 @@ void recibirDato(int socket, void* datos, size_t tamanioDato){
 	esErrorConSalida(verificador, "\nNo se pudo recibir el paquete.\n");
 }
 
-paquete crearPaquete(size_t tamanioPaquete){
+paquete crearPaquete(size_t tamanio){
 	paquete unPaquete;
-	*unPaquete = malloc(tamanioPaquete);
+	*unPaquete = malloc(tamanio);
 
 	return unPaquete;
 }
@@ -129,6 +139,13 @@ void empaquetar(paquete unPaquete, void* datos, size_t tamanioDato){
 	*unPaquete += tamanioDato;					// Desplaza el puntero para poder poner el dato que siga a continuación.
 }
 
+void empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato){
+	empaquetar(*unPaquete, &tamanioDato, sizeof(size_t));
+	printf("Se pudo empaquetar tamaño.\n");
+	empaquetar(*unPaquete, datos, tamanioDato);
+	printf("Se pudo empaquetar dato.\n");
+}
+
 void enviarPaquete(int socket, paquete paqueteEnvio, size_t tamanioEnvio){
 	int verificador;														// Para verificar que el envío fue correcto.
 	*paqueteEnvio -= tamanioEnvio;											// Reubica el puntero del paquete para referenciar a inicio y enviarlo correctamente.
@@ -137,11 +154,21 @@ void enviarPaquete(int socket, paquete paqueteEnvio, size_t tamanioEnvio){
 
 	esErrorConSalida(verificador, "\nNo se pudo enviar el paquete.\n");
 
-	free(*paqueteEnvio);													// Libera el paquete.
+	destruirPaquete(paqueteEnvio);											// Libera el paquete.
 }
 
 void recibirPaquete(int socket, void* receptor, size_t tamanioRecibo){
 	recibirDato(socket, receptor, tamanioRecibo);	// Re parásito XD
+}
+
+void recibirPaqueteVariable(int socket, void* receptor){
+	size_t* tamanio;
+
+	recibirDato(socket, tamanio, sizeof(size_t));
+
+	receptor = malloc(*tamanio);
+
+	recibirDato(socket, receptor, *tamanio);
 }
 
 void enviarTamanio(int socket, size_t tamanio){

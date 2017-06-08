@@ -1,0 +1,4 @@
+#!/bin/bash
+gcc conexionSimpleCliente.c -o conexionSimpleCliente -lcommons
+./conexionSimpleCliente
+rm conexionSimpleCliente

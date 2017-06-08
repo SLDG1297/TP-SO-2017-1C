@@ -18,7 +18,6 @@
 
 #include <parser/metadata_program.h>
 
-#include "../librerias/controlErrores.h"
 #include "../librerias/pcb.h"
 #include "../librerias/serializador.h"
 

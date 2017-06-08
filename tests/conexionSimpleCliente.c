@@ -10,7 +10,7 @@
 
 // Línea para compilar:
 // gcc conexionSimpleCliente.c -o conexionSimpleCliente -lcommons
-// ./conexionSimpleCliente.c
+// ./conexionSimpleCliente
 
 
 
@@ -21,7 +21,7 @@ typedef void** paquete;
 struct estructura{
 	u_int32_t numero;
 	char letra;
-} __attribute__((packed));
+};
 
 
 
@@ -39,8 +39,7 @@ int testCliente = 0;
 
 // Para incrementar tests
 
-void proximoTest();
-
+void proximoTest(char* enunciado);
 
 
 
@@ -50,14 +49,16 @@ void pruebaConexion();
 
 void serializar();
 
+void serializarPorLasDudas();
+
+void serializarTamanioVariableFeo();
+
+void serializarTamanioVariable();
 
 
 // Implementación de tests
 
 void pruebaConexion(){
-	proximoTest();
-	printf("Prueba de conexion\n\n");
-
 	u_int32_t datoAEnviar = 4;
 
 	send(socketServidor, &datoAEnviar, sizeof(u_int32_t), 0);
@@ -66,35 +67,29 @@ void pruebaConexion(){
 
 	// Aserciones
 
-	printf("Se pudo enviar el mensaje correctamente.\n\n");
+	printf("Se pudo enviar el número 4 correctamente.\n\n");
 }
 
 void serializar(){
-	proximoTest();
-	printf("Prueba de serializador\n\n");
-
-	// Contexto del emisor:
-
 	struct estructura emisor;
 	emisor.numero = 5;
 	emisor.letra = 'b';
 
-	u_int32_t tamanioEnvio = sizeof(struct estructura);
-
-	// Serialización (Los comentarios debajo de las funciones indican qué está pasando ahí atrás)
+	size_t tamanioEnvio = sizeof(struct estructura);
+	printf("Tamanio de envío = %d\n", tamanioEnvio);
+	// Serialización (Los comentarios debajo de las funciones indican masomenos qué está pasando ahí atrás)
 
 	// Creación de paquete
-
 	paquete envio = crearPaquete(tamanioEnvio);
 
 	// void* envio = malloc(tamanioEnvio);
 
 	// Empaquetado
 
-	empaquetar(envio, &emisor.numero, sizeof(u_int32_t));
+	empaquetar(envio, &emisor.numero, sizeof(size_t));
 
-	// memcpy(envio, &emisor.numero, sizeof(u_int32_t));
-	// envio += sizeof(u_int32_t);
+	// memcpy(envio, &emisor.numero, sizeof(size_t));
+	// envio += sizeof(size_t);
 
 	empaquetar(envio, &emisor.letra, sizeof(char));
 
@@ -109,7 +104,7 @@ void serializar(){
 	// send(socketServidor, *envio, tamanioEnvio, 0);
 
 	// Destrucción del envío
-	// free(*envio);*/
+	// free(*envio);
 
 
 
@@ -118,10 +113,71 @@ void serializar(){
 	printf("Se pudo serializar la estructura (int = 5, char ='b') correctamente.\n\n");
 }
 
-void proximoTest(){
+void serializarPorLasDudas(){
+	float numero = 30.0;
+
+	paquete envio = crearPaquete(sizeof(float));
+
+	empaquetar(envio, &numero, sizeof(float));
+
+	enviarPaquete(socketServidor, envio, sizeof(float));
+
+
+
+	// Aserciones
+
+	printf("Se envió el flotante 30.0 correctamente.\n\n");
+}
+
+void serializarTamanioVariableFeo(){
+	u_int32_t* vector = calloc(2, sizeof(u_int32_t));
+	size_t tamanio = 2 * sizeof(u_int32_t);
+
+	vector[0] = 300;
+	vector[1] = 500;
+
+	paquete envio = crearPaquete(sizeof(size_t) + tamanio);
+
+	empaquetar(envio, &tamanio, sizeof(size_t));
+
+	empaquetar(envio, vector, tamanio);
+
+	enviarPaquete(socketServidor, envio, sizeof(size_t) + tamanio);
+
+
+
+	// Aserciones
+
+	printf("Se pudo enviar el vector (300, 500) correctamente.\n");
+}
+
+void serializarTamanioVariable(){
+	char* cadena = "Ripeando Ando";
+	printf("Cadena %s creada.\n", cadena);
+
+	size_t tamanioCadena = tamanioEnBytesString(cadena);
+	printf("Tamanio Cadena = %d\n", tamanioCadena);
+
+	size_t tamanioReal = tamanioEnBytesVariables(1) + tamanioCadena;
+	printf("Tamanio Envío = %d\n", tamanioReal);
+	printf("Ok");
+	paquete envio = crearPaquete(tamanioReal);
+	printf("Paquete creado\n");
+
+	empaquetarVariable(envio, cadena, tamanioCadena);
+	printf("Cadena empaquetada\n");
+
+	enviarPaquete(socketServidor, envio, tamanioReal);
+	printf("Se pudo enviar el paquete correctamente.\n");
+
+}
+
+void proximoTest(char* enunciado){
 	testCliente++;
 	printf("\n\nTest %d\n\n", testCliente);
+	printf("%s\n\n", enunciado);
 }
+
 
 
 // Resultados de las pruebas
@@ -129,8 +185,19 @@ void proximoTest(){
 int main(){
 	socketServidor = conectar(ipServidor, puertoServidor);
 
-	pruebaConexion();	// Que se pueda mandar el número 4 por socket.
+	proximoTest("Que se pueda mandar el número 4 por socket.");
+	pruebaConexion();
 
-	serializar();		// Que se pueda serializar la estructura compuesta (int = 5, char ='b').
+	proximoTest("Que se pueda serializar la estructura compuesta (int = 5, char ='b').");
+	//serializar();
+
+	proximoTest("Para que vean que no mandé fruta con el tema de enviar paquetes, envío el flotante 30.0");
+	//serializarPorLasDudas();
+
+	proximoTest("Que se serialice el vector (300, 500) codeando feo.");
+	serializarTamanioVariableFeo();
+
+	proximoTest("Que se pueda serializar el string Ripeando Ando.");
+	serializarTamanioVariable();
 
 }

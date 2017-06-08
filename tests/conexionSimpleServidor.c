@@ -16,6 +16,8 @@
 
 // Estructuras de datos
 
+typedef void** paquete;
+
 struct estructura{
 	u_int32_t numero;
 	char letra;
@@ -35,7 +37,7 @@ int testServidor = 0;
 
 // Para incrementar tests
 
-void proximoTest();
+void proximoTest(char* enunciado);
 
 
 
@@ -45,29 +47,27 @@ void pruebaServidor();
 
 void deserializar();
 
+void deserializarPorLasDudas();
+
+void deserializarTamanioVariableFeo();
+
+void deserializarTamanioVariable();
 
 
 // Implementación de tests
 
 void pruebaServidor(){
-	proximoTest();
-	printf("Prueba de servidor\n");
-
 	u_int32_t datoRecibido;
 
 	recv(socketCliente, &datoRecibido, sizeof(u_int32_t), 0);
 
 	if(datoRecibido == 4)
-		printf("\nSe recibió el dato correctamente.\n");
+		printf("\nSe recibió el número 4 correctamente.\n");
 	else
 		printf("\nQue en paz descanses...\n");
 }
 
 void deserializar(){
-	proximoTest();
-	printf("Prueba de deserializador\n");
-	// Contexto del receptor:
-
 	struct estructura receptor;
 
 	// Deserialización
@@ -78,6 +78,9 @@ void deserializar(){
 
 	recibirPaquete(socketCliente, &receptor.letra, sizeof(receptor.letra));
 
+
+
+	// Aserciones
 
 	if(receptor.numero == 5)
 		printf("Se obtuvo el número correcto 5.\n");
@@ -90,18 +93,77 @@ void deserializar(){
 		printf("Se esperaba b y obtuviste %c.\n\n", receptor.letra);
 }
 
-void proximoTest(){
+void deserializarPorLasDudas(){
+	float numero;
+
+	recibirPaquete(socketCliente, &numero, sizeof(float));
+
+
+
+	// Aserciones
+
+	if(numero == 30.0)
+		printf("Se obtuvo el número correcto 30.0.\n");
+	else
+		printf("Se esperaba 30.0 y obtuviste %f\n", numero);
+}
+
+void deserializarTamanioVariableFeo(){
+	u_int32_t* vector;
+	size_t tamanio;
+
+	recibirPaquete(socketCliente, &tamanio, sizeof(size_t));
+
+	vector = malloc(tamanio);
+	recibirPaquete(socketCliente, vector, tamanio);
+
+
+
+	// Aserciones
+
+	if(vector[0] == 300 && vector[1] == 500)
+		printf("Se obtuvo el vector correcto (300, 500).\n\n");
+	else
+		printf("Se esperaba el vector (300, 500) y obtuviste (%d, %d).\n\n", vector[0], vector[1]);
+
+}
+
+void deserializarTamanioVariable(){
+	char* recibo;
+
+	recibirPaqueteVariable(socketCliente, recibo);
+
+	if(recibo == "Ripeando Ando")
+		printf("Se obtuvo la cadena correcta 'Ripeando Ando'.\n\n");
+	else
+		printf("Se esperaba 'Ripeando ando' y obtuviste %s.\n\n", recibo);
+}
+
+void proximoTest(char* enunciado){
 	testServidor++;
 	printf("\n\nTest %d\n\n", testServidor);
+	printf("%s\n\n", enunciado);
 }
+
+
 
 // Resultado de las pruebas
 
 int main(){
 	socketCliente = servir(puertoServidor);
 
-	pruebaServidor();	// Que se pueda recibir el número 4 por socket.
+	proximoTest("Que se pueda recibir el número 4 por socket.");
+	pruebaServidor();
 
-	deserializar();		// Que se pueda deserializar la estructura compuesta (int = 5, char ='b').
+	proximoTest("Que se pueda deserializar la estructura compuesta (int = 5, char ='b').");
+	//deserializar();
 
+	proximoTest("Para que vean que no mandé fruta con el tema de recibir paquetes.");
+	//deserializarPorLasDudas();
+
+	proximoTest("Para deserializar el vector (300, 500) de manera fea.");
+	deserializarTamanioVariableFeo();
+
+	proximoTest("Que se pueda serializar el string Ripeando Ando.");
+	deserializarTamanioVariable("Que se pueda serializar el string Ripeando Ando.");
 }

@@ -1,0 +1,4 @@
+#!/bin/bash
+gcc conexionSimpleServidor.c -o conexionSimpleServidor -lcommons
+./conexionSimpleServidor
+rm conexionSimpleServidor
