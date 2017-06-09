@@ -27,6 +27,9 @@ typedef void** paquete;
 
 // Menos pregunta a Dios y perdona...
 
+// TODO: IMPORTANTE: Esta estructura no funciona bien... Sigan empaquetando con void* paquete = malloc(suTamanio).
+// Leer el choclo de abajo por si te interesa saber qué es lo que debería abstraer.
+
 // Para empaquetar, tengo que correr la dirección del puntero para que no se me pisen las cosas.
 // Pero necesito hacer una asignación destructiva del puntero adentro de la función empaquetar para hacer la interfaz más sencilla.
 // Entonces tengo que pasar la dirección de un puntero a la función.
@@ -37,17 +40,6 @@ typedef void** paquete;
 
 
 // Declaraciones
-
-
-
-// Funciones para calcular tamaños en bytes comunes (Agreguen alguno de ser necesario)
-
-size_t 	tamanioEnBytesVariables(u_int32_t cantidadDatosVariables);	// Tamaño producido por necesitar enviar un dato de tamaño variable.
-
-size_t	tamanioEnBytesString(char* string);							// Cálculo del tamaño en bytes de char* punteros.
-
-size_t	tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo);	// Cálculo del tamaño en bytes de una lista con nodos de tamaño fijo.
-
 
 
 // Funciones para enviar y recibir datos (abstracciones de send y recv)
@@ -68,7 +60,9 @@ void 	empaquetar(paquete envio, void* datos, size_t tamanioDato);				// Para añ
 
 void	empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato);	// Para añadir una estructura de tamaño variable, como un char*.
 
-void	empaquetarLista(void* mensaje, t_list* lista, size_t tamanioNodos);		// TODO: Para serializar listas.
+void 	empaquetarLista(paquete unPaquete, t_list* lista, size_t tamanioNodo);	// Para serializar listas con nodos de tamaño fijo.
+
+void	empaquetarListaVariable(paquete unPaquete, t_list* lista);				// TODO: Para empaquetar listas con nodos de tamaño variables, como si tuvieran un char* en su nodo.
 
 void 	enviarPaquete(int socket, paquete unPaquete, size_t tamanioEnvio);		// Send del paquete armado.
 
@@ -80,34 +74,33 @@ void 	recibirPaquete(int socket, void* receptor, size_t tamanioRecibo);		// Recv
 
 void	recibirPaqueteVariable(int socket, void** receptor);					// Recv de un paquete con tamño de datos variable.
 
-void	desempaquetarLista(t_list* lista, void* mensaje, size_t tamanioNodos);	// TODO: Para deserializar listas.
+void	recibirLista(int socket, t_list* lista, size_t tamanioNodo);			// Para deserializar listas.
+
+void	recibirListaVariable(int socket, t_list* lista);						// TODO: Para deserializar listas con char* y esas cosas turbias.
 
 
 
-// Funciones que me pidieron que deje.
+// Funciones de envío/recibo que me pidieron que deje.
 
-void	enviarTamanio(int socket, size_t tamanioDatos); 				// Para enviar header/tamanio de un mensaje/dato.
+void	enviarTamanio(int socket, size_t tamanioDatos); 						// Para enviar tamaño de un dato.
 
-size_t	recibirTamanio(int socket); 									// Para recibir header de un mensaje.
+size_t	recibirTamanio(int socket); 											// Para recibir tamaño de un mensaje.
+
+
+
+// Funciones para calcular tamaños en bytes comunes (Agreguen alguno de ser necesario)
+
+size_t 	tamanioEnBytesVariables(u_int32_t cantidadDatosVariables);				// Tamaño extra producido por necesitar enviar un dato de tamaño variable.
+
+size_t	tamanioEnBytesString(char* string);										// Cálculo del tamaño en bytes de char* punteros.
+
+size_t	tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo);				// Cálculo del tamaño en bytes de una lista con nodos de tamaño fijo.
+
 
 
 // Definiciones
 
-size_t tamanioEnBytesVariables(u_int32_t cantidadDatosVariables){
-	return cantidadDatosVariables * sizeof(size_t);						// Para calcular el tamaño del envío de datos variables, que necesitan un header con su tamaño.
-}
 
-size_t tamanioEnBytesString(char* string){
-	size_t tamanio = string_length(string) + 1;
-
-	return tamanio;
-}
-
-size_t tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo){
-	size_t tamanio = list_size(lista) * tamanioNodo;
-
-	return tamanio;
-}
 
 void enviarDato(int socket, void* dato, size_t tamanioDato){
 	int verificador;													// Chequea que el envío sea correcto.
@@ -145,6 +138,18 @@ void empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato){
 	empaquetar(unPaquete, datos, tamanioDato);
 }
 
+void empaquetarLista(paquete unPaquete, t_list* lista, size_t tamanioNodo){
+	u_int32_t indice;													// Para recorrer la lista como un array.
+	u_int32_t cantidadElementos = list_size(lista);						// Para saber cuántos elementos enviar.
+
+	empaquetar(unPaquete, &cantidadElementos, sizeof(u_int32_t));		// Para que el receptor sepa cuántos nodos va a tener la lista.
+
+	for(indice = 0; indice < cantidadElementos; indice++)
+	{
+		empaquetar(unPaquete, list_get(lista, indice), tamanioNodo);	// Lo empaqueto para el send().
+	}
+}
+
 void enviarPaquete(int socket, paquete paqueteEnvio, size_t tamanioEnvio){
 	int verificador;														// Para verificar que el envío fue correcto.
 	*paqueteEnvio -= tamanioEnvio;											// Reubica el puntero del paquete para referenciar a inicio y enviarlo correctamente.
@@ -170,6 +175,21 @@ void recibirPaqueteVariable(int socket, void** receptor){
 	recibirDato(socket, *receptor, tamanio);
 }
 
+void recibirLista(int socket, t_list* lista, size_t tamanioNodo){
+	u_int32_t indice;				// Para agregar nodos a la lista como un array.
+	u_int32_t cantidadElementos;	// Para saber el tope de la lista y cuando parar de añadir objetos a la misma.
+
+	recibirPaquete(socket, &cantidadElementos, sizeof(size_t));	// Recibe el tamaño de la lista.
+
+	for(indice = 0; indice < cantidadElementos; indice++)
+	{
+		void* nodo = malloc(tamanioNodo);			// Aloco memoria para un nodo.
+
+		recibirPaquete(socket, nodo, tamanioNodo);	// Recibo el nodo.
+		list_add(lista, nodo);						// Lo añado a la lista.
+	}
+}
+
 void enviarTamanio(int socket, size_t tamanio){
 	enviarDato(socket, &tamanio, sizeof(size_t));
 }
@@ -177,6 +197,22 @@ void enviarTamanio(int socket, size_t tamanio){
 size_t recibirTamanio(int socket){
 	size_t tamanio;
 	recibirDato(socket, &tamanio, sizeof(size_t));
+
+	return tamanio;
+}
+
+size_t tamanioEnBytesVariables(u_int32_t cantidadDatosVariables){
+	return cantidadDatosVariables * sizeof(size_t);
+}
+
+size_t tamanioEnBytesString(char* string){
+	size_t tamanio = string_length(string) + 1;
+
+	return tamanio;
+}
+
+size_t tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo){
+	size_t tamanio = list_size(lista) * tamanioNodo;
 
 	return tamanio;
 }

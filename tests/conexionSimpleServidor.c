@@ -14,9 +14,17 @@
 
 
 
+// Estructuras de datos
+
 struct estructura{
 	u_int32_t numero;
 	char letra;
+};
+
+struct nodoFijo{
+	char letra;
+	u_int32_t entero;
+	float flotante;
 } __attribute__((packed));
 
 
@@ -48,6 +56,8 @@ void deserializarPorLasDudas();
 void deserializarTamanioVariableFeo();
 
 void deserializarTamanioVariable();
+
+void deserializarListaFija();
 
 
 // Implementación de tests
@@ -136,6 +146,57 @@ void deserializarTamanioVariable(){
 		printf("Se esperaba Ripinpin y obtuviste %s.\n\n", recibo);
 }
 
+void deserializarListaFija(){
+	struct nodoFijo obtenido1;
+	struct nodoFijo obtenido2;
+	struct nodoFijo obtenido3;
+
+	size_t tamanioNodo = sizeof(struct nodoFijo);
+
+	t_list* lista = list_create();
+
+	recibirLista(socketCliente, lista, tamanioNodo);
+
+	obtenido1 = *(struct nodoFijo*)list_get(lista, 0);
+	obtenido2 = *(struct nodoFijo*)list_get(lista, 1);
+	obtenido3 = *(struct nodoFijo*)list_get(lista, 2);
+
+
+
+	// Aserciones
+
+	// Nodos esperados
+
+	struct nodoFijo elemento1;
+	elemento1.letra = 'a';
+	elemento1.entero = 1;
+	elemento1.flotante = 30.0;
+
+	int proposicion1 = elemento1.letra == obtenido1.letra && elemento1.entero == obtenido1.entero && elemento1.flotante == obtenido1.flotante;
+
+	struct nodoFijo elemento2;
+	elemento2.letra = 'b';
+	elemento2.entero = 500;
+	elemento2.flotante = 0.5;
+
+	int proposicion2 = elemento2.letra == obtenido2.letra && elemento2.entero == obtenido2.entero && elemento2.flotante == obtenido2.flotante;
+
+	struct nodoFijo elemento3;
+	elemento3.letra = 'z';
+	elemento3.entero = 666;
+	elemento3.flotante = 676.1;
+
+	int proposicion3 = elemento3.letra == obtenido3.letra && elemento3.entero == obtenido3.entero && elemento3.flotante == obtenido3.flotante;
+
+	int veredicto = proposicion1 && proposicion2 && proposicion3;
+
+	if(veredicto)
+		printf("Se obtuvo la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)]\n\n");
+	else
+		printf("Jaja saludos. Ni en pedo te hago un printf con lo que te tuvo que haber dado.\n\n");
+
+}
+
 void proximoTest(char* enunciado){
 	testServidor++;
 	printf("\n\nTest %d\n\n", testServidor);
@@ -161,6 +222,9 @@ int main(){
 	proximoTest("Para deserializar el vector (300, 500) de manera fea.");
 	deserializarTamanioVariableFeo();
 
-	proximoTest("Que se pueda serializar el string Ripinpin.");
+	proximoTest("Que se pueda deserializar el string Ripinpin.");
 	deserializarTamanioVariable();
+
+	proximoTest("Que se pueda deserializar la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)].");
+	deserializarListaFija();
 }

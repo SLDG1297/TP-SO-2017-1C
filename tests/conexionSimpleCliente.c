@@ -14,11 +14,18 @@
 
 
 
+// Estructuras de datos
+
 struct estructura{
 	u_int32_t numero;
 	char letra;
 };
 
+struct nodoFijo{
+	char letra;
+	u_int32_t entero;
+	float flotante;
+} __attribute__((packed));
 
 
 // Variables globales
@@ -50,6 +57,8 @@ void serializarPorLasDudas();
 void serializarTamanioVariableFeo();
 
 void serializarTamanioVariable();
+
+void serializarListaFija();
 
 
 // Implementación de tests
@@ -133,14 +142,59 @@ void serializarTamanioVariable(){
 
 	size_t tamanioReal = tamanioEnBytesVariables(1) + tamanioCadena;
 
-	paquete envio = crearPaquete(tamanioReal);
+	void* envio = malloc(tamanioReal);
 
-	empaquetarVariable(envio, cadena, tamanioCadena);
+	empaquetarVariable(&envio, cadena, tamanioCadena);
 
-	enviarPaquete(socketServidor, envio, tamanioReal);
+	enviarPaquete(socketServidor, &envio, tamanioReal);
 
 	printf("Se pudo enviar el paquete correctamente.\n");
 
+}
+
+void serializarListaFija(){
+	// Guarda. Si van a enviar el nodo, tiene que estar con __attribute__((packed)). Sino, va a haber padding.
+
+	struct nodoFijo elemento1;
+	elemento1.letra = 'a';
+	elemento1.entero = 1;
+	elemento1.flotante = 30.0;
+
+	struct nodoFijo elemento2;
+	elemento2.letra = 'b';
+	elemento2.entero = 500;
+	elemento2.flotante = 0.5;
+
+	struct nodoFijo elemento3;
+	elemento3.letra = 'z';
+	elemento3.entero = 666;
+	elemento3.flotante = 676.1;
+
+	size_t tamanioNodo = sizeof(struct nodoFijo);
+
+	t_list* lista = list_create();
+
+	list_add(lista, &elemento1);
+	list_add(lista, &elemento2);
+	list_add(lista, &elemento3);
+
+	size_t tamanioLista = tamanioEnBytesListaFija(lista, tamanioNodo);
+
+	size_t tamanioEnvio = sizeof(u_int32_t) + tamanioLista;
+
+	void* envio = malloc(tamanioEnvio);
+
+	empaquetarLista(&envio, lista, tamanioNodo);
+
+	enviarPaquete(socketServidor, &envio, tamanioEnvio);
+
+	list_destroy(lista);
+
+
+
+	// Aserciones
+
+	printf("Se pudo empaquetar la lista correctamente.\n");
 }
 
 void proximoTest(char* enunciado){
@@ -171,4 +225,6 @@ int main(){
 	proximoTest("Que se pueda deserializar el string Ripinpin.");
 	serializarTamanioVariable();
 
+	proximoTest("Que se pueda serializar la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)].");
+	serializarListaFija();
 }
