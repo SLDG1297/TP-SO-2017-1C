@@ -38,10 +38,10 @@
 
 #include "../controlArchivosDeConfiguracion.h"
 #include "../controlErrores.h"
-#include "../cpu/pcb.h"
+#include "../pcb.h"
 #include "../conexionSocket.h"
 
-#define RUTA_ARCHIVO "../../kernel/config_kernel.cfg"
+
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 
@@ -65,10 +65,19 @@ char* SHARED_VARS[3];
 int frameSize;
 
 //DECLARACION DE FUNCIONES
-void handshake(int sock);
-void consolaKernel();
-int obtenerOrden();
+void iniciarConfiguraciones(char* ruta);
+int asignarSocketFS();
+int asignarSocketMemoria();
+int asignarSocketListener();
+void agregarALista(int tipo, int socketDato, t_list *lista);
+void *consolaOperaciones();
 void operacionesParaProceso();
+int obtenerTamanioPagina(int sock);
+void handshake(int sock);
+void setFrameSize(int tamanio);
+int obtenerOrden();
+void incrementarContadorPid(int *contadorPid);
+void mensajeDeError(int orden);
 
 // DECLARACION DE TIPOS
 typedef struct {
@@ -87,12 +96,12 @@ typedef struct {
 } cpu_activo;
 
 
-void iniciarConfiguraciones() {
+void iniciarConfiguraciones(char* ruta) {
 	//CODIGO PARA LLAMAR AL ARCHIVO
 
 	//Estructura para manejar el archivo de configuración -- t_config*
 	//Crear estructura de configuración para obtener los datos del archivo de configuración.
-	char* ruta = RUTA_ARCHIVO;
+
 	t_config* configuracion = llamarArchivo(ruta);
 
 	PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
@@ -115,19 +124,12 @@ void iniciarConfiguraciones() {
 // ************** ASIGNACION SOCKETS ***********
 int asignarSocketMemoria() {
 
-	int sockMemoria;
-
-	sockMemoria = conectar(IP_MEMORIA, PUERTO_MEMORIA);
-
-	return sockMemoria;
+	return conectar(IP_MEMORIA, PUERTO_MEMORIA);
 }
 
 int asignarSocketFS() {
-	int sockFS;
+	return conectar(IP_FS, PUERTO_FS);
 
-	sockFS = conectar(IP_FS, PUERTO_FS);
-
-	return sockFS;
 }
 
 int asignarSocketListener() {
@@ -149,7 +151,7 @@ void agregarALista(int tipo, int socketDato, t_list *lista) {
 	case 1:
 
 		consola.socket = socketDato;
-		lista_add(lista,&consola);
+		list_add(lista,&consola);
 		break;
 	case 2:
 
@@ -164,17 +166,19 @@ void agregarALista(int tipo, int socketDato, t_list *lista) {
 	}
 
 }
-void consolaKernel() {
+void *consolaOperaciones() {
 
 
 	//hilo de interfaz de consola
 	generarMenu();
-
-	switch (obtenerOrden()) {
+	int ordenDeConsola = obtenerOrden();
+	switch (ordenDeConsola) {
 		case 1:
 								//mostrar listado de procesos del sistema\n
+			break;
 		case 2:
 			operacionesParaProceso();
+			break;
 		case 3:
 								//mostrar tabla global de archivos
 			break;
@@ -188,9 +192,10 @@ void consolaKernel() {
 								//detener la planificacion
 			break;
 		default:
-			mensajeDeError(&ordenDeConsola);
+			mensajeDeError(ordenDeConsola);
 			break;
 	}
+	return 0;
 
 }
 
@@ -255,12 +260,12 @@ int obtenerOrden() {
 	return orden;
 }
 
-void incrementarcontadorPid( int contadorPid) {
-	contadorPid++;
+void incrementarContadorPid( int* contadorPid) {
+	*contadorPid++;
 }
 
-void mensajeDeError(int* orden) {
-	printf("%d no es una orden valida\n", *orden);
+void mensajeDeError(int orden) {
+	printf("%d no es una orden valida\n", orden);
 }
 
 #endif /* FUNCIONESKERNEL_H_ */
