@@ -14,10 +14,6 @@
 
 
 
-// Estructuras de datos
-
-typedef void** paquete;
-
 struct estructura{
 	u_int32_t numero;
 	char letra;
@@ -69,10 +65,6 @@ void pruebaServidor(){
 
 void deserializar(){
 	struct estructura receptor;
-
-	// Deserialización
-
-	// <<Recibo
 
 	recibirPaquete(socketCliente, &receptor.numero, sizeof(receptor.numero));
 
@@ -130,13 +122,18 @@ void deserializarTamanioVariableFeo(){
 
 void deserializarTamanioVariable(){
 	char* recibo;
+	char* cadenaEsperada = "Ripinpin";
 
-	recibirPaqueteVariable(socketCliente, recibo);
+	recibirPaqueteVariable(socketCliente, &recibo);
 
-	if(recibo == "Ripeando Ando")
-		printf("Se obtuvo la cadena correcta 'Ripeando Ando'.\n\n");
+
+
+	// Aserciones
+
+	if(strcmp(recibo, cadenaEsperada) == 0)
+		printf("Se obtuvo la cadena correcta %s.\n\n", cadenaEsperada);
 	else
-		printf("Se esperaba 'Ripeando ando' y obtuviste %s.\n\n", recibo);
+		printf("Se esperaba Ripinpin y obtuviste %s.\n\n", recibo);
 }
 
 void proximoTest(char* enunciado){
@@ -156,14 +153,14 @@ int main(){
 	pruebaServidor();
 
 	proximoTest("Que se pueda deserializar la estructura compuesta (int = 5, char ='b').");
-	//deserializar();
+	deserializar();
 
 	proximoTest("Para que vean que no mandé fruta con el tema de recibir paquetes.");
-	//deserializarPorLasDudas();
+	deserializarPorLasDudas();
 
 	proximoTest("Para deserializar el vector (300, 500) de manera fea.");
 	deserializarTamanioVariableFeo();
 
-	proximoTest("Que se pueda serializar el string Ripeando Ando.");
-	deserializarTamanioVariable("Que se pueda serializar el string Ripeando Ando.");
+	proximoTest("Que se pueda serializar el string Ripinpin.");
+	deserializarTamanioVariable();
 }

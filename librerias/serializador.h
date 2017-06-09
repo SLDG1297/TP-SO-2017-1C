@@ -78,7 +78,7 @@ void 	enviarPaquete(int socket, paquete unPaquete, size_t tamanioEnvio);		// Sen
 
 void 	recibirPaquete(int socket, void* receptor, size_t tamanioRecibo);		// Recv del paquete que llega por socket.
 
-void	recibirPaqueteVariable(int socket, void* receptor);						// Recv de un paquete con tamño de datos variable.
+void	recibirPaqueteVariable(int socket, void** receptor);					// Recv de un paquete con tamño de datos variable.
 
 void	desempaquetarLista(t_list* lista, void* mensaje, size_t tamanioNodos);	// TODO: Para deserializar listas.
 
@@ -140,10 +140,9 @@ void empaquetar(paquete unPaquete, void* datos, size_t tamanioDato){
 }
 
 void empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato){
-	empaquetar(*unPaquete, &tamanioDato, sizeof(size_t));
-	printf("Se pudo empaquetar tamaño.\n");
-	empaquetar(*unPaquete, datos, tamanioDato);
-	printf("Se pudo empaquetar dato.\n");
+	empaquetar(unPaquete, &tamanioDato, sizeof(size_t));
+
+	empaquetar(unPaquete, datos, tamanioDato);
 }
 
 void enviarPaquete(int socket, paquete paqueteEnvio, size_t tamanioEnvio){
@@ -161,14 +160,14 @@ void recibirPaquete(int socket, void* receptor, size_t tamanioRecibo){
 	recibirDato(socket, receptor, tamanioRecibo);	// Re parásito XD
 }
 
-void recibirPaqueteVariable(int socket, void* receptor){
-	size_t* tamanio;
+void recibirPaqueteVariable(int socket, void** receptor){
+	size_t tamanio;
 
-	recibirDato(socket, tamanio, sizeof(size_t));
+	recibirDato(socket, &tamanio, sizeof(size_t));
 
-	receptor = malloc(*tamanio);
+	*receptor = malloc(tamanio);
 
-	recibirDato(socket, receptor, *tamanio);
+	recibirDato(socket, *receptor, tamanio);
 }
 
 void enviarTamanio(int socket, size_t tamanio){

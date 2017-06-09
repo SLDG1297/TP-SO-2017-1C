@@ -151,6 +151,7 @@ int main(int argc, char *argv[]) {
 	char* buffer;
 //hilo de escucha 
 	while (1) {
+		memset(buffer, '\0', SIZE_DATA);
 		socketsFiltrados = socketsRelevantes;
 		valorRtaSelect = select(fileDescMax + 1, &socketsFiltrados, NULL, NULL,
 				&tv);

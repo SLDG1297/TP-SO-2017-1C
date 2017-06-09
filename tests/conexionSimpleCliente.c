@@ -14,10 +14,6 @@
 
 
 
-// Estructuras de datos
-
-typedef void** paquete;
-
 struct estructura{
 	u_int32_t numero;
 	char letra;
@@ -75,36 +71,15 @@ void serializar(){
 	emisor.numero = 5;
 	emisor.letra = 'b';
 
-	size_t tamanioEnvio = sizeof(struct estructura);
-	printf("Tamanio de envío = %d\n", tamanioEnvio);
-	// Serialización (Los comentarios debajo de las funciones indican masomenos qué está pasando ahí atrás)
+	size_t tamanioEnvio = sizeof(u_int32_t) + sizeof(char);
 
-	// Creación de paquete
-	paquete envio = crearPaquete(tamanioEnvio);
+	void* envio = malloc(tamanioEnvio);
 
-	// void* envio = malloc(tamanioEnvio);
+	empaquetar(&envio, &emisor.numero, sizeof(size_t));
 
-	// Empaquetado
+	empaquetar(&envio, &emisor.letra, sizeof(char));
 
-	empaquetar(envio, &emisor.numero, sizeof(size_t));
-
-	// memcpy(envio, &emisor.numero, sizeof(size_t));
-	// envio += sizeof(size_t);
-
-	empaquetar(envio, &emisor.letra, sizeof(char));
-
-	// memcpy(envio, &emisor.letra, sizeof(char));
-	// envio += sizeof(char);
-
-	// >>Envío
-
-	enviarPaquete(socketServidor, envio, tamanioEnvio);
-
-	// *envio -= tamanioEnvio;
-	// send(socketServidor, *envio, tamanioEnvio, 0);
-
-	// Destrucción del envío
-	// free(*envio);
+	enviarPaquete(socketServidor, &envio, tamanioEnvio);
 
 
 
@@ -116,11 +91,11 @@ void serializar(){
 void serializarPorLasDudas(){
 	float numero = 30.0;
 
-	paquete envio = crearPaquete(sizeof(float));
+	void* envio = malloc(sizeof(float));
 
-	empaquetar(envio, &numero, sizeof(float));
+	empaquetar(&envio, &numero, sizeof(float));
 
-	enviarPaquete(socketServidor, envio, sizeof(float));
+	enviarPaquete(socketServidor, &envio, sizeof(float));
 
 
 
@@ -152,22 +127,18 @@ void serializarTamanioVariableFeo(){
 }
 
 void serializarTamanioVariable(){
-	char* cadena = "Ripeando Ando";
-	printf("Cadena %s creada.\n", cadena);
+	char* cadena = "Ripinpin";
 
 	size_t tamanioCadena = tamanioEnBytesString(cadena);
-	printf("Tamanio Cadena = %d\n", tamanioCadena);
 
 	size_t tamanioReal = tamanioEnBytesVariables(1) + tamanioCadena;
-	printf("Tamanio Envío = %d\n", tamanioReal);
-	printf("Ok");
+
 	paquete envio = crearPaquete(tamanioReal);
-	printf("Paquete creado\n");
 
 	empaquetarVariable(envio, cadena, tamanioCadena);
-	printf("Cadena empaquetada\n");
 
 	enviarPaquete(socketServidor, envio, tamanioReal);
+
 	printf("Se pudo enviar el paquete correctamente.\n");
 
 }
@@ -189,15 +160,15 @@ int main(){
 	pruebaConexion();
 
 	proximoTest("Que se pueda serializar la estructura compuesta (int = 5, char ='b').");
-	//serializar();
+	serializar();
 
 	proximoTest("Para que vean que no mandé fruta con el tema de enviar paquetes, envío el flotante 30.0");
-	//serializarPorLasDudas();
+	serializarPorLasDudas();
 
 	proximoTest("Que se serialice el vector (300, 500) codeando feo.");
 	serializarTamanioVariableFeo();
 
-	proximoTest("Que se pueda serializar el string Ripeando Ando.");
+	proximoTest("Que se pueda deserializar el string Ripinpin.");
 	serializarTamanioVariable();
 
 }
