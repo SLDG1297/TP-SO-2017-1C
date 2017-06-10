@@ -18,14 +18,14 @@
 
 #include <parser/metadata_program.h>
 
-#include "../librerias/pcb.h"
 #include "../librerias/serializador.h"
 
 // Protocolo de comunicación de CPU
-#define FIN_OPERACION 	1297
-#define	FIN_PROGRAMA	1298
-#define	EXCEPCION		1299
-#define DESCONECTAR 	1300
+#define	HANDSHAKE_CPU	1297
+#define FIN_OPERACION 	1298
+#define	FIN_PROGRAMA	1299
+#define	EXCEPCION		1300
+#define DESCONECTAR 	1301
 
 // Declaraciones
 
@@ -79,7 +79,7 @@ void handshakeKernel(int socketKernel, u_int32_t codigoCPU){
 
 void handshakeMemoria(int socketMemoria, u_int32_t codigoCPU, u_int32_t* tamanioPaginas){
 	handshake(socketMemoria, codigoCPU);
-	recibirDatos(socketMemoria, tamanioPaginas, sizeof(u_int32_t));
+	// TODO: Recibir tamanioPaginas
 }
 
 char* fetchInstruction(int socketMemoria, solicitudMemoria instruccion){
@@ -98,7 +98,7 @@ solicitudMemoria generarSolicitudMemoria(pcb* unPcb, u_int32_t tamanioPaginas){
 	int proximaInstruccion = unPcb->programCounter; 								// Indica cuál es la proxima instrucción a ejecutar.
 
 	lineaUtil instruccion = unPcb->indiceCodigo[proximaInstruccion];				// Obtengo el la posición de inicio y fin del programa.
-	u_int32_t posicionInstruccion = proximaInstruccion * 2 * sizeof(u_int32_t); 	// Obtengo la posición de la instrucción en bytes.
+	u_int32_t posicionInstruccion = proximaInstruccion * sizeof(lineaUtil); 		// Obtengo la posición de la instrucción en bytes.
 
 	u_int32_t pagina = hallarPagina(posicionInstruccion, tamanioPaginas); 			// Esta es la página en Memoria donde está la instrucción.
 	u_int32_t offset = instruccion.offset; 											// Esto es el desplazamiento en bytes del código respecto al inicio del programa escrito.

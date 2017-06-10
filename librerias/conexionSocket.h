@@ -54,9 +54,9 @@ void		cerrarSocket(int socketACerrar);										// Cierra la conexión del socke
 
 // Funciones de conexión integradas
 
-int		servir(int puertoCliente);							// Generar un socket que admite conexión de otro proceso (Sólo 1).
+int			servir(int puertoCliente);												// Generar un socket que admite conexión de otro proceso (Sólo 1).
 
-int		conectar(char* ipServidor, int puertoServidor);		// Genera un socket para la conexión de un cliente a un servidor.
+int			conectar(char* ipServidor, int puertoServidor);							// Genera un socket para la conexión de un cliente a un servidor.
 
 // Definiciones
 

@@ -33,6 +33,7 @@ struct nodoFijo{
 } __attribute__((packed));
 
 
+
 // Variables globales
 
 char* ipServidor = "127.0.0.1";
@@ -66,6 +67,7 @@ void serializarTamanioVariable();
 void serializarTamanioVariableQueNoEsString();
 
 void serializarListaFija();
+
 
 
 // Implementación de tests
@@ -106,8 +108,9 @@ void serializar(){
 
 void serializarPorLasDudas(){
 	float numero = 30.0;
+	u_int32_t accion = 3;
 
-	paquete* envio = crearPaquete(sizeof(float));
+	paquete* envio = crearHeader(sizeof(float), accion);
 
 	empaquetar(envio, &numero, sizeof(float));
 
@@ -117,7 +120,7 @@ void serializarPorLasDudas(){
 
 	// Aserciones
 
-	printf("Se envió el flotante 30.0 correctamente.\n\n");
+	printf("Se envió el flotante 30.0 correctamente para realizar la operación 3.\n\n");
 }
 
 void serializarTamanioVariableFeo(){
@@ -139,7 +142,7 @@ void serializarTamanioVariableFeo(){
 
 	// Aserciones
 
-	printf("Se pudo enviar el vector (300, 500) correctamente.\n");
+	printf("Se pudo enviar el vector (300, 500) correctamente.\n\n");
 }
 
 void serializarTamanioVariable(){
@@ -154,7 +157,7 @@ void serializarTamanioVariable(){
 
 	enviarPaquete(socketServidor, envio);
 
-	printf("Se pudo enviar el paquete correctamente.\n");
+	printf("Se pudo enviar el paquete correctamente.\n\n");
 
 }
 
@@ -179,7 +182,7 @@ void serializarTamanioVariableQueNoEsString(){
 
 	// Aserciones
 
-	printf("Se pudo enviar el vector correctamente.\n");
+	printf("Se pudo enviar el vector correctamente.\n\n");
 
 }
 
@@ -225,7 +228,7 @@ void serializarListaFija(){
 
 	// Aserciones
 
-	printf("Se pudo empaquetar la lista correctamente.\n");
+	printf("Se pudo empaquetar la lista correctamente.\n\n");
 }
 
 void proximoTest(char* enunciado){
@@ -247,7 +250,7 @@ int main(){
 	proximoTest("Que se pueda serializar la estructura compuesta (int = 5, char ='b').");
 	serializar();
 
-	proximoTest("Para que vean que no mandé fruta con el tema de enviar paquetes, envío el flotante 30.0");
+	proximoTest("Que se envíe el flotante 30.0 solicitando realizar la operación 3.");
 	serializarPorLasDudas();
 
 	proximoTest("Que se serialice el vector (300, 500) codeando feo.");

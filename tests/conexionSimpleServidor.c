@@ -92,9 +92,9 @@ void deserializar(){
 	// Aserciones
 
 	if(receptor.numero == 5)
-		printf("Se obtuvo el número correcto 5.\n");
+		printf("Se obtuvo el número correcto 5.\n\n");
 	else
-		printf("Se esperaba 5 y obtuviste %d\n", receptor.numero);
+		printf("Se esperaba 5 y obtuviste %d\n\n", receptor.numero);
 
 	if(receptor.letra == 'b')
 		printf("Se obtuvo la letra correcta 'b'.\n\n");
@@ -105,16 +105,18 @@ void deserializar(){
 void deserializarPorLasDudas(){
 	float numero;
 
+	u_int32_t accion = recibirHeader(socketCliente);
+
 	recibirPaquete(socketCliente, &numero, sizeof(float));
 
 
 
 	// Aserciones
 
-	if(numero == 30.0)
-		printf("Se obtuvo el número correcto 30.0.\n");
+	if(numero == 30.0 && accion == 3)
+		printf("Se obtuvo el número correcto 30.0 tras realizar la acción %d.\n\n", accion);
 	else
-		printf("Se esperaba 30.0 y obtuviste %f\n", numero);
+		printf("Se esperaba 30.0 y obtuviste %f, realizando la operacion %d.\n\n", numero, accion);
 }
 
 void deserializarTamanioVariableFeo(){
@@ -155,8 +157,9 @@ void deserializarTamanioVariable(){
 
 void deserializarTamanioVariableQueNoEsString(){
 	struct parOrdenado* vector;
+	size_t tamanio;
 
-	recibirPaqueteVariable(socketCliente, &vector);
+	tamanio = recibirPaqueteVariable(socketCliente, &vector);
 
 
 
@@ -173,10 +176,10 @@ void deserializarTamanioVariableQueNoEsString(){
 	esperado[1].y = 999.99;
 
 	// Resultado
-	if(esperado[0].x == vector[0].x && esperado[0].y == vector[0].y && esperado[1].x == vector[1].x && esperado[1].y == vector[1].y)
-		printf("Obtuviste el vector ((500.30, 200.25), (666.66, 999.99)).\n");
+	if(tamanio == tamanioVector && esperado[0].x == vector[0].x && esperado[0].y == vector[0].y && esperado[1].x == vector[1].x && esperado[1].y == vector[1].y)
+		printf("Obtuviste el vector ((500.30, 200.25), (666.66, 999.99)) de tamanio %d.\n\n", tamanio);
 	else
-		printf("Ripeaste...\n");
+		printf("Ripeaste...\n\n");
 
 }
 
@@ -252,7 +255,7 @@ int main(){
 	proximoTest("Que se pueda deserializar la estructura compuesta (int = 5, char ='b').");
 	deserializar();
 
-	proximoTest("Para que vean que no mandé fruta con el tema de recibir paquetes.");
+	proximoTest("Recibo el flotante 30.0 y ejecuto el servicio 3.");
 	deserializarPorLasDudas();
 
 	proximoTest("Para deserializar el vector (300, 500) de manera fea.");

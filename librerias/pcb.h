@@ -47,15 +47,15 @@ typedef posicionMemoria argStack;
 
 typedef struct{
 	char 				nombre;
-	posicionMemoria 	posicionMemoria; // Dice Scarcella que poner estructuras anidadas es un mal diseño... Lo cambiaría, pero denme el OK.
+	posicionMemoria 	posicionMemoria; 	// Dice Scarcella que poner estructuras anidadas es un mal diseño... Lo cambiaría, pero denme el OK.
 } __attribute__((packed))
 variableStack;
 
 // Estructura de la lista de variables que hay en el stack.
 
 typedef struct{
-	u_int32_t offset;	// Desplazamiento de la instrucción respecto del inicio del programa.
-	u_int32_t longitud;	// Tamaño en bytes de la instrucción.
+	u_int32_t offset;		// Desplazamiento de la instrucción respecto del inicio del programa.
+	u_int32_t longitud;		// Tamaño en bytes de la instrucción.
 } __attribute__((packed))
 lineaUtil;
 
@@ -81,7 +81,7 @@ typedef struct{
 	u_int32_t 			paginasUsadas; 				// Cantidad de páginas usadas por el programa (Desde 0).
 	size_t				cantidadInstrucciones;		// Cantidad de instrucciones del ínidce de código.
 	lineaUtil*			indiceCodigo;				// Identifica líneas útiles de un programa.
-	size_t				cantidadEtiquetas;			// Cantidad de etiquetas en el índice de etiquetas.
+	size_t				bytesEtiquetas;				// Tamaño en bytes índice de etiquetas.
 	char*				indiceEtiqueta;				// Identifica llamadas a funciones.
 	size_t				cantidadStack;				// Cantidad de contextos del índice de stack.
 	t_list*				indiceStack; 				// Ordena valores almacenados en la pila de funciones con sus valores.
@@ -98,27 +98,67 @@ pcb;
 
 // Declaraciones
 
-void	enviarPCB(int socket, pcb* unPcb);				// Enviar PCB (Guau...)
+size_t	calcularTamanioPCB(pcb* unPcb);									// Es obvio XD
 
-void 	recibirPCB(int socket, pcb* unPcb);				// Recibe PCB (NO ME DIGAS!!)
+size_t	calcularTamanioStack(t_list* pila, size_t cantidadDeContextos);	// Este también XD
 
-void	preprocesador(char* programa, pcb* unPcb);		// Preprocesador de código
+void	serializarPCB(int socket, paquete* envio, pcb* unPcb);			// Enviar PCB (Guau...)
+
+pcb* 	deserializarPCB(int socket);									// Recibe PCB (NO ME DIGAS!!)
+
+void	preprocesador(char* programa, pcb* unPcb);						// Preprocesador de código para generar el índice de código del PCB
 
 
 
 // Definiciones
 
-void enviarPCB(int socket, pcb* unPcb){
-		// TODO: Serializar
+size_t calcularTamanioPCB(pcb* unPcb){
+	size_t tamanio;
+
+	tamanio 	= 	sizeof(u_int32_t)													// PID
+				+	sizeof(u_int32_t)													// Program Counter
+				+	sizeof(u_int32_t)													// Cantidad de páginas
+				+	sizeof(size_t)														// Cantidad de instrucciones
+				+	unPcb->cantidadInstrucciones * sizeof(lineaUtil)					// Índice de Eódigo
+				+	sizeof(size_t)														// Tamaño etiquetas
+				+	unPcb->bytesEtiquetas												// Índice de Etiquetas
+				+	sizeof(size_t)														// Cantidad de contextos
+				+	calcularTamanioStack(unPcb->indiceStack, unPcb->cantidadStack)		// Índice de Stack
+				+	sizeof(u_int32_t);													// Exit Code
+
+	return tamanio;
 }
 
-void recibirPCB(int socket, pcb* unPcb){
-		// TODO: Serializar
+size_t calcularTamanioStack(t_list* pila, size_t cantidadDeContextos){
+	size_t tamanio;
+	int indice;
+
+	for(indice = 0; indice < cantidadDeContextos; indice++)
+	{
+		indiceDeStack* contexto = (indiceDeStack*) list_get(pila, indice);
+
+		tamanio +=	contexto->cantidadArgumentos * sizeof(argStack)
+				+	contexto->cantidadVariables * sizeof(variableStack)
+				+ 	sizeof(u_int32_t)
+				+ 	sizeof(posicionMemoria);
+	}
+
+	return tamanio;
+}
+
+void serializarPCB(int socket, paquete* envio, pcb* unPcb){
+	// TODO: Serializar
+}
+
+pcb* deserializarPCB(int socket){
+	pcb* unPcb;
+	// TODO: Serializar
+	return unPcb;
 }
 
 void preprocesador(char* programa, pcb* unPcb){
-	size_t tamanio;														// Para calcular tamaños de datos serializados.
-	t_metadata_program* codigo = metadata_desde_literal(programa);		// Para generar el índice de código a partir de un script.
+	size_t tamanio;																// Para calcular tamaños de datos serializados.
+	t_metadata_program* codigo = metadata_desde_literal(programa);				// Para generar el índice de código a partir de un script.
 
 	// Asignaciones de datos al PCB.
 	unPcb->programCounter = codigo->instruccion_inicio;							// Asigna el Program Counter con la primer instrucción a ejecutar.
@@ -127,8 +167,8 @@ void preprocesador(char* programa, pcb* unPcb){
 	tamanio = unPcb->cantidadInstrucciones * sizeof(lineaUtil);					// Asigna el tamaño en bytes de la lista de instrucciones serializada: BYTES = CANTIDAD * 2 * INT
 	memcpy(&unPcb->indiceCodigo, codigo->instrucciones_serializado, tamanio);	// Copia la lista serializada en el PCB.
 
-	unPcb->cantidadEtiquetas = codigo->etiquetas_size;							// Asigna la cantidad de etiquetas de instrucciones del programa.
-	tamanio = unPcb->cantidadEtiquetas * sizeof(char);							// Asigna el tamaño en bytes de la lista serializada de etiquetas.
+	unPcb->bytesEtiquetas = codigo->etiquetas_size;								// Asigna la cantidad de etiquetas de instrucciones del programa.
+	tamanio = unPcb->bytesEtiquetas;											// Asigna el tamaño en bytes de la lista serializada de etiquetas.
 	memcpy(&unPcb->indiceEtiqueta, codigo->etiquetas, tamanio);					// Copia la lista serializada en el PCB.
 
 	metadata_destruir(codigo);
