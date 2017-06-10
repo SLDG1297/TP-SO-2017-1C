@@ -21,6 +21,11 @@ struct estructura{
 	char letra;
 };
 
+struct parOrdenado{
+	float x;
+	float y;
+} __attribute__((packed));
+
 struct nodoFijo{
 	char letra;
 	u_int32_t entero;
@@ -58,6 +63,8 @@ void serializarTamanioVariableFeo();
 
 void serializarTamanioVariable();
 
+void serializarTamanioVariableQueNoEsString();
+
 void serializarListaFija();
 
 
@@ -82,13 +89,13 @@ void serializar(){
 
 	size_t tamanioEnvio = sizeof(u_int32_t) + sizeof(char);
 
-	void* envio = malloc(tamanioEnvio);
+	paquete* envio = crearPaquete(tamanioEnvio);
 
-	empaquetar(&envio, &emisor.numero, sizeof(size_t));
+	empaquetar(envio, &emisor.numero, sizeof(size_t));
 
-	empaquetar(&envio, &emisor.letra, sizeof(char));
+	empaquetar(envio, &emisor.letra, sizeof(char));
 
-	enviarPaquete(socketServidor, &envio, tamanioEnvio);
+	enviarPaquete(socketServidor, envio);
 
 
 
@@ -100,11 +107,11 @@ void serializar(){
 void serializarPorLasDudas(){
 	float numero = 30.0;
 
-	void* envio = malloc(sizeof(float));
+	paquete* envio = crearPaquete(sizeof(float));
 
-	empaquetar(&envio, &numero, sizeof(float));
+	empaquetar(envio, &numero, sizeof(float));
 
-	enviarPaquete(socketServidor, &envio, sizeof(float));
+	enviarPaquete(socketServidor, envio);
 
 
 
@@ -120,13 +127,13 @@ void serializarTamanioVariableFeo(){
 	vector[0] = 300;
 	vector[1] = 500;
 
-	paquete envio = crearPaquete(sizeof(size_t) + tamanio);
+	paquete* envio = crearPaquete(sizeof(size_t) + tamanio);
 
 	empaquetar(envio, &tamanio, sizeof(size_t));
 
 	empaquetar(envio, vector, tamanio);
 
-	enviarPaquete(socketServidor, envio, sizeof(size_t) + tamanio);
+	enviarPaquete(socketServidor, envio);
 
 
 
@@ -137,18 +144,42 @@ void serializarTamanioVariableFeo(){
 
 void serializarTamanioVariable(){
 	char* cadena = "Ripinpin";
-
 	size_t tamanioCadena = tamanioEnBytesString(cadena);
 
 	size_t tamanioReal = tamanioEnBytesVariables(1) + tamanioCadena;
 
-	void* envio = malloc(tamanioReal);
+	paquete* envio = crearPaquete(tamanioReal);
 
-	empaquetarVariable(&envio, cadena, tamanioCadena);
+	empaquetarVariable(envio, cadena, tamanioCadena);
 
-	enviarPaquete(socketServidor, &envio, tamanioReal);
+	enviarPaquete(socketServidor, envio);
 
 	printf("Se pudo enviar el paquete correctamente.\n");
+
+}
+
+void serializarTamanioVariableQueNoEsString(){
+	struct parOrdenado* vector = calloc(2, 2 * sizeof(float));
+	size_t tamanioVector = 2 * 2 * sizeof(float);
+
+	vector[0].x = 500.30;	// Que forma más extraña de armar la matriz...
+	vector[0].y = 200.25;
+	vector[1].x = 666.66;
+	vector[1].y = 999.99;
+
+	size_t tamanioPaquete = sizeof(size_t) + tamanioVector;
+
+	paquete* envio = crearPaquete(tamanioPaquete);
+
+	empaquetarVariable(envio, vector, tamanioVector);
+
+	enviarPaquete(socketServidor, envio);
+
+
+
+	// Aserciones
+
+	printf("Se pudo enviar el vector correctamente.\n");
 
 }
 
@@ -182,11 +213,11 @@ void serializarListaFija(){
 
 	size_t tamanioEnvio = sizeof(u_int32_t) + tamanioLista;
 
-	void* envio = malloc(tamanioEnvio);
+	paquete* envio = crearPaquete(tamanioEnvio);
 
-	empaquetarLista(&envio, lista, tamanioNodo);
+	empaquetarLista(envio, lista, tamanioNodo);
 
-	enviarPaquete(socketServidor, &envio, tamanioEnvio);
+	enviarPaquete(socketServidor, envio);
 
 	list_destroy(lista);
 
@@ -224,6 +255,9 @@ int main(){
 
 	proximoTest("Que se pueda deserializar el string Ripinpin.");
 	serializarTamanioVariable();
+
+	proximoTest("No todo es char* en la vida. Probemos con el vector ((500.30, 200.25), (666.66, 999.99))");
+	serializarTamanioVariableQueNoEsString();
 
 	proximoTest("Que se pueda serializar la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)].");
 	serializarListaFija();

@@ -21,7 +21,11 @@
 
 // Estructuras de datos
 
-typedef void** paquete;
+typedef struct{
+	size_t tamanio;
+	size_t tamanioUsado;
+	void* contenido;
+} paquete;
 
 // Una estructura donde se copian bytes para enviar por socket.
 
@@ -44,57 +48,53 @@ typedef void** paquete;
 
 // Funciones para enviar y recibir datos (abstracciones de send y recv)
 
-void	enviarDato(int socket, void* dato, size_t tamanioDato);					// Para enviar un dato con un send.
+void		enviarDato(int socket, void* dato, size_t tamanioDato);					// Para enviar un dato con un send.
 
-void	recibirDato(int socket, void* datos, size_t tamanioDato);				// Para recibir un dato de un recv.
+void		recibirDato(int socket, void* dato, size_t tamanioDato);				// Para recibir un dato de un recv.
 
 
 
 // Funciones para serializar
 
-paquete crearPaquete(size_t tamanioPaquete);									// Malloc para crear un paquete y enviar una estructura.
+paquete*	crearPaquete(size_t tamanioPaquete);									// Malloc para crear un paquete y enviar una estructura.
 
-void 	destruirPaquete(paquete unPaquete);										// Free del paquete creado.
+void 		destruirPaquete(paquete* envio);										// Free del paquete creado.
 
-void 	empaquetar(paquete envio, void* datos, size_t tamanioDato);				// Para añadir una estructura a un mensaje.
+void 		empaquetar(paquete* envio, void* datos, size_t tamanioDato);			// Para añadir una estructura a un mensaje.
 
-void	empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato);	// Para añadir una estructura de tamaño variable, como un char*.
+void		empaquetarVariable(paquete* envio, void* datos, size_t tamanioDato);	// Para añadir una estructura de tamaño variable, como un char*.
 
-void 	empaquetarLista(paquete unPaquete, t_list* lista, size_t tamanioNodo);	// Para serializar listas con nodos de tamaño fijo.
+void 		empaquetarLista(paquete* envio, t_list* lista, size_t tamanioNodo);		// Para serializar listas con nodos de tamaño fijo.
 
-void	empaquetarListaVariable(paquete unPaquete, t_list* lista);				// TODO: Para empaquetar listas con nodos de tamaño variables, como si tuvieran un char* en su nodo.
-
-void 	enviarPaquete(int socket, paquete unPaquete, size_t tamanioEnvio);		// Send del paquete armado.
+void 		enviarPaquete(int socket, paquete* envio);								// Send del paquete armado.
 
 
 
 // Funciones para deserializar
 
-void 	recibirPaquete(int socket, void* receptor, size_t tamanioRecibo);		// Recv del paquete que llega por socket.
+void 		recibirPaquete(int socket, void* receptor, size_t tamanioRecibo);		// Recv del paquete que llega por socket.
 
-void	recibirPaqueteVariable(int socket, void** receptor);					// Recv de un paquete con tamño de datos variable.
+void		recibirPaqueteVariable(int socket, void** receptor);					// Recv de un paquete con tamño de datos variable.
 
-void	recibirLista(int socket, t_list* lista, size_t tamanioNodo);			// Para deserializar listas.
-
-void	recibirListaVariable(int socket, t_list* lista);						// TODO: Para deserializar listas con char* y esas cosas turbias.
+void		recibirLista(int socket, t_list* lista, size_t tamanioNodo);			// Para deserializar listas.
 
 
 
 // Funciones de envío/recibo que me pidieron que deje.
 
-void	enviarTamanio(int socket, size_t tamanioDatos); 						// Para enviar tamaño de un dato.
+void		enviarTamanio(int socket, size_t tamanioDatos); 						// Para enviar tamaño de un dato.
 
-size_t	recibirTamanio(int socket); 											// Para recibir tamaño de un mensaje.
+size_t		recibirTamanio(int socket); 											// Para recibir tamaño de un mensaje.
 
 
 
 // Funciones para calcular tamaños en bytes comunes (Agreguen alguno de ser necesario)
 
-size_t 	tamanioEnBytesVariables(u_int32_t cantidadDatosVariables);				// Tamaño extra producido por necesitar enviar un dato de tamaño variable.
+size_t 		tamanioEnBytesVariables(u_int32_t cantidadDatosVariables);				// Tamaño extra producido por necesitar enviar un dato de tamaño variable.
 
-size_t	tamanioEnBytesString(char* string);										// Cálculo del tamaño en bytes de char* punteros.
+size_t		tamanioEnBytesString(char* string);										// Cálculo del tamaño en bytes de char* punteros.
 
-size_t	tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo);				// Cálculo del tamaño en bytes de una lista con nodos de tamaño fijo.
+size_t		tamanioEnBytesListaFija(t_list* lista, size_t tamanioNodo);				// Cálculo del tamaño en bytes de una lista con nodos de tamaño fijo.
 
 
 
@@ -109,56 +109,69 @@ void enviarDato(int socket, void* dato, size_t tamanioDato){
 	esErrorConSalida(verificador, "\nNo se pudo enviar el dato.\n");
 }
 
-void recibirDato(int socket, void* datos, size_t tamanioDato){
+void recibirDato(int socket, void* dato, size_t tamanioDato){
 	int verificador;													// Chequea que el recibo sea correcto.
 
-	verificador = recv(socket, datos, tamanioDato, 0);					// Recibe el dato.
+	verificador = recv(socket, dato, tamanioDato, 0);					// Recibe el dato.
 	esErrorConSalida(verificador, "\nNo se pudo recibir el paquete.\n");
 }
 
-paquete crearPaquete(size_t tamanio){
-	paquete unPaquete;
-	*unPaquete = malloc(tamanio);
+paquete* crearPaquete(size_t tamanio){
+	paquete* envio = malloc(2 * sizeof(size_t) + tamanio);
 
-	return unPaquete;
+	envio->tamanio = tamanio;
+	envio->tamanioUsado = 0;
+	envio->contenido = malloc(tamanio);
+
+	return envio;
 }
 
-void destruirPaquete(paquete unPaquete){
-	free(*unPaquete);
+void destruirPaquete(paquete *envio){
+	free(envio->contenido);
+	free(envio);
 }
 
-void empaquetar(paquete unPaquete, void* datos, size_t tamanioDato){
-	memcpy(*unPaquete, datos, tamanioDato);		// Empaqueta el dato copiándolo en un mensaje.
-	*unPaquete += tamanioDato;					// Desplaza el puntero para poder poner el dato que siga a continuación.
+void empaquetar(paquete* envio, void* datos, size_t tamanioDato){
+	int verificador;										// Para verificar que no se están empaquetando más cosas que el paquete puede contener.
+
+	envio->tamanioUsado += tamanioDato;
+
+	verificador = (envio->tamanio) - (envio->tamanioUsado);
+
+	esErrorSimple(verificador, "Se están empaquetando más datos de los disponibles.\n");
+
+	memcpy(envio->contenido, datos, tamanioDato);			// Empaqueta el dato copiándolo en un mensaje.
+	envio->contenido += tamanioDato;						// Desplaza el puntero para poder poner el dato que siga a continuación.
 }
 
-void empaquetarVariable(paquete unPaquete, void* datos, size_t tamanioDato){
-	empaquetar(unPaquete, &tamanioDato, sizeof(size_t));
+void empaquetarVariable(paquete* envio, void* datos, size_t tamanioDato){
+	empaquetar(envio, &tamanioDato, sizeof(size_t));
 
-	empaquetar(unPaquete, datos, tamanioDato);
+	empaquetar(envio, datos, tamanioDato);
 }
 
-void empaquetarLista(paquete unPaquete, t_list* lista, size_t tamanioNodo){
+void empaquetarLista(paquete* envio, t_list* lista, size_t tamanioNodo){
 	u_int32_t indice;													// Para recorrer la lista como un array.
 	u_int32_t cantidadElementos = list_size(lista);						// Para saber cuántos elementos enviar.
 
-	empaquetar(unPaquete, &cantidadElementos, sizeof(u_int32_t));		// Para que el receptor sepa cuántos nodos va a tener la lista.
+	empaquetar(envio, &cantidadElementos, sizeof(u_int32_t));			// Para que el receptor sepa cuántos nodos va a tener la lista.
 
 	for(indice = 0; indice < cantidadElementos; indice++)
 	{
-		empaquetar(unPaquete, list_get(lista, indice), tamanioNodo);	// Lo empaqueto para el send().
+		empaquetar(envio, list_get(lista, indice), tamanioNodo);		// Lo empaqueto para el send().
 	}
 }
 
-void enviarPaquete(int socket, paquete paqueteEnvio, size_t tamanioEnvio){
-	int verificador;														// Para verificar que el envío fue correcto.
-	*paqueteEnvio -= tamanioEnvio;											// Reubica el puntero del paquete para referenciar a inicio y enviarlo correctamente.
+void enviarPaquete(int socket, paquete* envio){
+	int verificador = (envio->tamanioUsado) - (envio->tamanio);				// Para verificar que al paquete está completo a la hora de enviar.
 
-	enviarDato(socket, *paqueteEnvio, tamanioEnvio);
+	esErrorSimple(verificador, "Faltan empaquetar datos.\n");
 
-	esErrorConSalida(verificador, "\nNo se pudo enviar el paquete.\n");
+	envio->contenido -= envio->tamanio;										// Reubica el puntero del paquete para referenciar a inicio y enviarlo correctamente.
 
-	destruirPaquete(paqueteEnvio);											// Libera el paquete.
+	enviarDato(socket, envio->contenido, envio->tamanio);					// Envía el paquete
+
+	destruirPaquete(envio);													// Libera el paquete.
 }
 
 void recibirPaquete(int socket, void* receptor, size_t tamanioRecibo){

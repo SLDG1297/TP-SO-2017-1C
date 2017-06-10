@@ -21,6 +21,11 @@ struct estructura{
 	char letra;
 };
 
+struct parOrdenado{
+	float x;
+	float y;
+} __attribute__((packed));
+
 struct nodoFijo{
 	char letra;
 	u_int32_t entero;
@@ -56,6 +61,8 @@ void deserializarPorLasDudas();
 void deserializarTamanioVariableFeo();
 
 void deserializarTamanioVariable();
+
+void deserializarTamanioVariableQueNoEsString();
 
 void deserializarListaFija();
 
@@ -146,6 +153,33 @@ void deserializarTamanioVariable(){
 		printf("Se esperaba Ripinpin y obtuviste %s.\n\n", recibo);
 }
 
+void deserializarTamanioVariableQueNoEsString(){
+	struct parOrdenado* vector;
+
+	recibirPaqueteVariable(socketCliente, &vector);
+
+
+
+	// Aserciones
+
+	// Esperado
+
+	struct parOrdenado* esperado = calloc(2, 2 * sizeof(float));
+	size_t tamanioVector = 2 * 2 * sizeof(float);
+
+	esperado[0].x = 500.30;
+	esperado[0].y = 200.25;
+	esperado[1].x = 666.66;
+	esperado[1].y = 999.99;
+
+	// Resultado
+	if(esperado[0].x == vector[0].x && esperado[0].y == vector[0].y && esperado[1].x == vector[1].x && esperado[1].y == vector[1].y)
+		printf("Obtuviste el vector ((500.30, 200.25), (666.66, 999.99)).\n");
+	else
+		printf("Ripeaste...\n");
+
+}
+
 void deserializarListaFija(){
 	struct nodoFijo obtenido1;
 	struct nodoFijo obtenido2;
@@ -188,6 +222,8 @@ void deserializarListaFija(){
 
 	int proposicion3 = elemento3.letra == obtenido3.letra && elemento3.entero == obtenido3.entero && elemento3.flotante == obtenido3.flotante;
 
+	// Resultado
+
 	int veredicto = proposicion1 && proposicion2 && proposicion3;
 
 	if(veredicto)
@@ -224,6 +260,9 @@ int main(){
 
 	proximoTest("Que se pueda deserializar el string Ripinpin.");
 	deserializarTamanioVariable();
+
+	proximoTest("Que se deserialice el vector ((500.30, 200.25), (666.66, 999.99))");
+	deserializarTamanioVariableQueNoEsString();
 
 	proximoTest("Que se pueda deserializar la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)].");
 	deserializarListaFija();
