@@ -42,18 +42,18 @@
 #include "../librerias/kernel/menuContextualKernel.h"
 
 #define RUTA_ARCHIVO "./config_kernel.cfg"
-#define SIZE_DATA 1024
-#define ID_CONSOLA 1
-#define ID_CPU 2
-#define INICIAR_PROGRAMA 51
+#define SIZE_DATA			1024
+#define ID_CONSOLA			1
+#define ID_CPU				2
+#define ID_FS				3
+#define INICIAR_PROGRAMA 	51
 #define SOLICITAR_BYTES_PAG 52
 #define ALMACENAR_BYTES_PAG 53
 #define ASIGNAR_PAGINAS_PRC 54
-#define FINALIZAR_PRG 55
+#define FINALIZAR_PRG 		55
 
 int ordenDeConsolaParaProceso;
 int ordenDeHeap;
-int identificador;
 int contadorPid = 1;
 
 
@@ -80,17 +80,11 @@ int contadorPid = 1;
 	int longitudEstructuraSocket;
 
 // CONTADORES FOR
-	int i, j;
+	int socketPosible, j;
 	int validacionDeMemoria = 0;
 	struct sockaddr_in cliente_dir;
 
-	struct timeval tv;
-//DECLARACION DE LISTAS
 
-	t_list *procesos;
-	t_list *consolas;
-	t_list *cpus;
-	t_list *pcbs;
 
 	typedef struct {
 		int pid;
@@ -109,13 +103,10 @@ int contadorPid = 1;
 // ************** MAIN *********************
 int main(int argc, char *argv[]) {
 
-	procesos = list_create();
-	consolas = list_create();
-	cpus = list_create();
-	pcbs = list_create();
 
 
 	iniciarConfiguraciones(RUTA_ARCHIVO);
+	inicializarListas();
 
 	FD_ZERO(&socketsRelevantes);
 	FD_ZERO(&socketsFiltrados);
@@ -147,111 +138,28 @@ int main(int argc, char *argv[]) {
 	pthread_t idHilo;
 	pthread_create(&idHilo, NULL, consolaOperaciones, NULL);
 
-//	pthread_create(&idHilo, NULL, consolaOperaciones, NULL);
-	char* buffer;
-//hilo de escucha 
+
+//hilo de escucha
 	while (1) {
-		memset(buffer, '\0', SIZE_DATA);
+
 		socketsFiltrados = socketsRelevantes;
 		valorRtaSelect = select(fileDescMax + 1, &socketsFiltrados, NULL, NULL,
-				&tv);
+				NULL);
 		esErrorConSalida(valorRtaSelect, "Error en select");
 
 		//int nroConsola=0;
 
-		for (i = 0; i <= fileDescMax; i++) {
+		for (socketPosible = 0; socketPosible <= fileDescMax; socketPosible++) {
 
-			if (FD_ISSET(i, &socketsFiltrados)) {
+			if (FD_ISSET(socketPosible, &socketsFiltrados)) {
 
-				if (i == sockListener) {
+				if (socketPosible == sockListener) {
 
-					aceptarConexion(nuevoSocket, cliente_dir);
-
-					valorRtaRecv = recv(nuevoSocket,identificador,sizeof(int), 0);
-
-					esErrorConSalida(valorRtaRecv, "Error en recv ID");
-
-					operacionSegunIdentificador(identificador);
-
+					realizarOperacionDeListener(nuevoSocket);
 
 				} // cierra if
 				else {
-
-					/*//Si no es listener, es consola, cpu, o filesystem
-
-
-
-					 //Si es CPU:
-
-					 //recibir pcb
-
-					 //actualizar pcb
-
-					 //
-
-
-
-					 //Si es Consola
-
-					 //recibir instruccion
-
-					 //Nuevo Programa
-
-					 //recibir path
-
-
-
-					 //generarLineasUtiles(Path)
-
-
-
-					 //creando pcb
-
-					 //pcb nuevoPCB;
-
-					 //nuevoPCB.pid = contadorPid;
-
-					 //incrementarcontadorPid();
-
-					 //nuevoPCB.programCounter = 0;
-
-					 //tamañoPath = calcularTamañoPath(Path);
-
-					 //nuevoPCB.paginasUsadas = tamañoPath / tamañoPagina;
-
-					 //nuevoPCB.indiceCodigo =
-
-					 //nuevoPCB.indiceEtiqueta=
-
-					 //nuevoPCB.indiceStack=
-
-					 //nuevoPCB.exitCode=
-
-
-
-					 //solicitar memoria
-
-					 //send(sockMemoria, &nuevoPCB.pid, sizeof(int), 0);
-
-					 //send(sockMemoria, &nuevoPCB.paginasUsadas, sizeof(int), 0);
-
-					 //recv(sockMemoria, &validacionDeMemoria, sizeof(int), 0);
-
-
-
-					 //enviar pcb mas codigo a memoria
-
-
-
-					 //elegir cpu_activa
-
-					 //enviar a cpu_activa
-
-
-
-					 //terminar programa
-
-					 */
+					realizarOperacionDeSocket(socketPosible);
 
 				} //cierra Else
 
@@ -274,6 +182,19 @@ int main(int argc, char *argv[]) {
  return socket1==socket2 ? 1 : 0
  }*/
 
+void realizarOperacionDeListener(int nuevoSocket){
+	int identificador;
+
+	aceptarConexion(nuevoSocket, cliente_dir);
+
+	valorRtaRecv = recv(nuevoSocket,&identificador,sizeof(int), 0);
+
+	esErrorConSalida(valorRtaRecv, "Error en recv ID");
+
+	operacionSegunIdentificador(identificador);
+}
+
+
 void operacionSegunIdentificador(int identificador){
 	switch (identificador) {
 
@@ -291,7 +212,7 @@ void operacionSegunIdentificador(int identificador){
 
 								fileDescMax = nuevoSocket;
 
-							agregarALista(ID_CONSOLA, nuevoSocket, consolas);
+							agregarALista(ID_CONSOLA, nuevoSocket);
 
 							//mensaje de nueva conexion de consola.
 
@@ -315,7 +236,7 @@ void operacionSegunIdentificador(int identificador){
 
 								fileDescMax = nuevoSocket;
 
-							agregarALista(ID_CPU, nuevoSocket, cpus);
+							agregarALista(ID_CPU, nuevoSocket);
 
 							//mensaje de nueva conexion de cpu.
 
@@ -334,5 +255,4 @@ void operacionSegunIdentificador(int identificador){
 
 
 }
-
 

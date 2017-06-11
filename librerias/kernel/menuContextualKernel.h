@@ -9,7 +9,11 @@
 #define MENUCONTEXTUALKERNEL_H_
 
 // MENU DE CONTEXTO
-void generarMenu(void) {
+void generarMenu();
+void generarMenuDeProceso();
+void generarMenuDeHeap();
+
+void generarMenu() {
 	//Borrarpantalla clear??
 	system("cls");
 	printf("consola del kernel\n");
@@ -21,7 +25,7 @@ void generarMenu(void) {
 	printf("6-Detener la planificacion\n");
 }
 
-void generarMenuDeProceso(void) {
+void generarMenuDeProceso() {
 	printf("Elija una accion\n");
 	printf("1- Cantidad de rafagas ejecutadas\n");
 	printf("2-Cantidad de operaciones privilegiadas ejecutadas\n");
@@ -30,7 +34,7 @@ void generarMenuDeProceso(void) {
 	printf("5-Cantidad de Syscalls ejecutadas\n");
 }
 
-void generarMenuDeHeap(void) {
+void generarMenuDeHeap() {
 	printf("1- cantidad de acciones alojar realizadas\n");
 	printf("2- cantidad de acciones liberar realizadas\n");
 }

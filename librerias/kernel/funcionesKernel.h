@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -41,8 +42,6 @@
 #include "../pcb.h"
 #include "../conexionSocket.h"
 
-
-
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 
 int PUERTO_KERNEL;
@@ -64,6 +63,8 @@ char* SHARED_VARS[3];
 // DECLARACION MEMORIA
 int frameSize;
 
+int socketPosible;
+
 //DECLARACION DE FUNCIONES
 void iniciarConfiguraciones(char* ruta);
 int asignarSocketFS();
@@ -78,6 +79,8 @@ void setFrameSize(int tamanio);
 int obtenerOrden();
 void incrementarContadorPid(int *contadorPid);
 void mensajeDeError(int orden);
+bool perteneceAListaCpu(int socketPosible, cpu_activo nodoCpu);
+bool perteneceAListaConsola(consola_activa* consola);
 
 // DECLARACION DE TIPOS
 typedef struct {
@@ -86,15 +89,25 @@ typedef struct {
 } cpuAsociadoAPcb;
 
 typedef struct {
-	int estado;
+	bool activo;
 	int socket;
 } consola_activa;
 
 typedef struct {
-	int estado;
+	bool activo;
 	int socket;
 } cpu_activo;
 
+//DECLARACION DE LISTAS
+
+t_list *procesosActivos;
+t_list *consolas;
+t_list *cpus;
+t_list *pcbs;
+
+#define ID_CONSOLA	1
+#define ID_CPU		2
+#define ID_FS 		3
 
 void iniciarConfiguraciones(char* ruta) {
 	//CODIGO PARA LLAMAR AL ARCHIVO
@@ -121,6 +134,7 @@ void iniciarConfiguraciones(char* ruta) {
 	SEM_IDS[3];
 	SHARED_VARS[3];
 }
+
 // ************** ASIGNACION SOCKETS ***********
 int asignarSocketMemoria() {
 
@@ -140,133 +154,260 @@ int asignarSocketListener() {
 	printf("\nEsperando en el puerto %i\n", PUERTO_KERNEL);
 	return socketKernel;
 }
+// ************** INICIALIZAR LISTAS ***********
+void inicializarListas() {
+	procesosActivos = list_create();
+	consolas = list_create();
+	cpus = list_create();
+	pcbs = list_create();
 
-void agregarALista(int tipo, int socketDato, t_list *lista) {
+}
+
+void agregarALista(int tipo, int socketDato) {
 	consola_activa consola;
 	cpu_activo cpu;
-	switch (tipo){
+	switch (tipo) {
 	case 0:
 		//si tipo igual a cero, se crea una consola
 		break;
 	case 1:
 
 		consola.socket = socketDato;
-		list_add(lista,&consola);
+		consola.activo = false;
+		list_add(consolas, &consola);
 		break;
 	case 2:
 
 		cpu.socket = socketDato;
-		list_add(lista, &cpu);
+		cpu.activo = false;
+		list_add(cpus, &cpu);
 		break;
 	default:
 		printf("Error de tipo");
 		break;
-
 
 	}
 
 }
 void *consolaOperaciones() {
 
-
 	//hilo de interfaz de consola
 	generarMenu();
 	int ordenDeConsola = obtenerOrden();
 	switch (ordenDeConsola) {
-		case 1:
-								//mostrar listado de procesos del sistema\n
-			break;
-		case 2:
-			operacionesParaProceso();
-			break;
-		case 3:
-								//mostrar tabla global de archivos
-			break;
-		case 4:
-								//modificar grado de multiprogramacion
-			break;
-		case 5:
-								//finalizar un proceso
-			break;
-		case 6:
-								//detener la planificacion
-			break;
-		default:
-			mensajeDeError(ordenDeConsola);
-			break;
+	case 1:
+		//mostrar listado de procesosActivos del sistema\n
+		break;
+	case 2:
+		operacionesParaProceso();
+		break;
+	case 3:
+		//mostrar tabla global de archivos
+		break;
+	case 4:
+		//modificar grado de multiprogramacion
+		break;
+	case 5:
+		//finalizar un proceso
+		break;
+	case 6:
+		//detener la planificacion
+		break;
+	default:
+		mensajeDeError(ordenDeConsola);
+		break;
 	}
 	return 0;
 
 }
 
-void operacionesParaProceso(){
+void operacionesParaProceso() {
 	int opcion;
 	generarMenuDeProceso();
-	opcion=obtenerOrden();
-				switch (opcion) {
-					case 1:
-											//mostrar cantidad de rafagas ejecutadas
-						break;
-					case 2:
-										//mostrar cantidad de operaciones provilegiadas ejecutadas
-						break;
-					case 3:
-											//obtener la tabla de archivos abiertos
-						break;
-					case 4:
-											//cantidad de paginas de heap
-						generarMenuDeHeap();
+	opcion = obtenerOrden();
+	switch (opcion) {
+	case 1:
+		//mostrar cantidad de rafagas ejecutadas
+		break;
+	case 2:
+		//mostrar cantidad de operaciones provilegiadas ejecutadas
+		break;
+	case 3:
+		//obtener la tabla de archivos abiertos
+		break;
+	case 4:
+		//cantidad de paginas de heap
+		generarMenuDeHeap();
 
-							if (obtenerOrden() == 1) {
-											//mostrar cantidad de acciones alojar ejecutadas por el proceso
-							} else {
-											//mostrar cantidad de acciones Liberar ejecutadas por el proceso
-							}
-						break;
-					case 5:
-											//mostrar cantidad de syscalls ejecutadas
-						break;
-					default:
-						break;
-				}
+		if (obtenerOrden() == 1) {
+			//mostrar cantidad de acciones alojar ejecutadas por el proceso
+		} else {
+			//mostrar cantidad de acciones Liberar ejecutadas por el proceso
+		}
+		break;
+	case 5:
+		//mostrar cantidad de syscalls ejecutadas
+		break;
+	default:
+		break;
+	}
+}
+void realizarOperacionDeSocket(int socketPosible) {
+	int modulo = determinarTipoSocket(socketPosible);
+	switch (modulo) {
+		case ID_CPU:
+		//pcbRecibido = recibirYDeserializarPCB();
+		//actualizarPCB(pcbRecibido);
+
+		break;
+		case ID_CONSOLA:
+
+		/*//Si no es listener, es consola, cpu, o filesystem
+
+
+		 //Si es Consola
+
+		 //recibir instruccion
+
+		 //Nuevo Programa
+
+		 //recibir path
+
+
+
+		 //generarLineasUtiles(Path)
+
+
+
+		 //creando pcb
+
+		 //pcb nuevoPCB;
+
+		 //nuevoPCB.pid = contadorPid;
+
+		 //incrementarcontadorPid();
+
+		 //nuevoPCB.programCounter = 0;
+
+		 //tamañoPath = calcularTamañoPath(Path);
+
+		 //nuevoPCB.paginasUsadas = tamañoPath / tamañoPagina;
+
+		 //nuevoPCB.indiceCodigo =
+
+		 //nuevoPCB.indiceEtiqueta=
+
+		 //nuevoPCB.indiceStack=
+
+		 //nuevoPCB.exitCode=
+
+
+
+		 //solicitar memoria
+
+		 //send(sockMemoria, &nuevoPCB.pid, sizeof(int), 0);
+
+		 //send(sockMemoria, &nuevoPCB.paginasUsadas, sizeof(int), 0);
+
+		 //recv(sockMemoria, &validacionDeMemoria, sizeof(int), 0);
+
+
+
+		 //enviar pcb mas codigo a memoria
+
+
+
+		 //elegir cpu_activa
+
+		 //enviar a cpu_activa
+
+
+
+		 //terminar programa
+
+		 break;
+		 case ID_FS:
+		 break;
+		 default:
+		 break;*/
+
+		 }
+
 }
 
+void actualizarPCB(pcb pcbRecibido){
+	//void (*constante) (void*)
 
+}
+int buscarIndice(void* elemento, t_list *lista){
+	int tamanio = list_size(lista);
+	int indice = 0;
+
+	while(indice < tamanio)
+	{
+		void* nodo = list_get(lista, indice);
+
+
+	}
+
+
+}
+
+int determinarTipoSocket(int sp){
+	 socketPosible=sp;
+	 bool (*condicionCpu)(void*) = &perteneceAListaCpu;
+	 bool (*condicionConsola) (void*) = &perteneceAListaConsola;
+
+	 //bool list_any_satisfy(t_list* self, bool(*condition)(void*));
+	 if(list_any_satisfy(cpus,condicionCpu))
+	 return ID_CPU; // cpu
+	 if(list_any_satisfy(consolas,condicionConsola))
+	 return ID_CONSOLA;
+
+	 return ID_FS;
+ }
+
+bool perteneceAListaCpu(cpu_activo* cpu){
+	 return (cpu->socket == socketPosible);
+	 }
+
+bool perteneceAListaConsola(consola_activa* consola){
+	 return (consola->socket == socketPosible);
+	 }
 
 int obtenerTamanioPagina(int sock) {
-	int rtaFuncion;
-	int tamanioDePagina;
-	rtaFuncion = recv(sock, &tamanioDePagina, sizeof(tamanioDePagina), 0);
-	esErrorConSalida(rtaFuncion, "Error al obetener el tamaño de pagina");
-	return tamanioDePagina;
-}
+	 int rtaFuncion;
+	 int tamanioDePagina;
+	 rtaFuncion = recv(sock, &tamanioDePagina, sizeof(tamanioDePagina), 0);
+	 esErrorConSalida(rtaFuncion, "Error al obetener el tamaño de pagina");
+	 return tamanioDePagina;
+	 }
 
 void handshake(int sock) {
-	int rtaFuncion;
-	int handshake = 1;
-	rtaFuncion = send(sock, &handshake, sizeof(handshake), 0);
-	esErrorConSalida(rtaFuncion, "Error en el handshake de memoria (envio)");
-}
+	 int rtaFuncion;
+	 int handshake = 1;
+	 rtaFuncion = send(sock, &handshake, sizeof(handshake), 0);
+	 esErrorConSalida(rtaFuncion, "Error en el handshake de memoria (envio)");
+	 }
 
 void setFrameSize(int tamanio) {
-	frameSize = tamanio;
-}
+	 frameSize = tamanio;
+	 }
 
 
 int obtenerOrden() {
-	int orden;
-	printf("Elija una opcion\n");
-	scanf("%d", orden);
-	return orden;
-}
-
+	 int orden=0;
+	 printf("Elija una opcion\n");
+	 scanf("%d", orden);
+	 return orden;
+	 }
 void incrementarContadorPid( int* contadorPid) {
-	*contadorPid++;
-}
+	 *contadorPid++;
+	 }
 
 void mensajeDeError(int orden) {
-	printf("%d no es una orden valida\n", orden);
-}
+	 printf("%d no es una orden valida\n", orden);
+	 }
 
-#endif /* FUNCIONESKERNEL_H_ */
+	 #endif /* FUNCIONESKERNEL_H_ */
 
