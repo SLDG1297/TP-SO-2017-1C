@@ -21,21 +21,17 @@
 #include <semaphore.h>
 
 #include <commons/log.h>
-#include <commons/string.h>
 #include <commons/config.h>
 #include <commons/temporal.h>
-#include <commons/bitarray.h>
 #include <commons/temporal.h>
-#include <commons/process.h>
-#include <commons/txt.h>
 #include <commons/collections/list.h>
-#include <commons/collections/dictionary.h>
-#include <commons/collections/queue.h>
+
 
 //***INCLUDE LIBRERIAS PROPAIS
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
-#include "../librerias/funcionesMemoria.h"
+#include "../librerias/memoria/funcionesMemoria.h"
+#include "../librerias/conexionSocket.h"
 #include "../librerias/serializador.h"
 
 //***DEFINE DATOS ESTATICOS
@@ -52,7 +48,7 @@
 //***DATOS PARA ENTABLAR CONEXION CON EL KERNEL
 
 int yes = 1;
-struct sockaddr_in espera, datosDelKernel;
+struct sockaddr_in direccionEspera, datosDelKernel;
 int socketServidor;
 
 //***PUNTERO A BLOQUES DE MEMORIA
@@ -131,46 +127,34 @@ int iniciarConexionServidor() {
 
 	//Declaracion de variables para recibir valor de rta
 	int valorRtaBind = 0;
-//	int valorRtaListen = 0;
 
-//	int longitudEstructuraSocket = sizeof(datosDelKernel);
 	//DIRECCION PARA ESPERAR A LA CONEXION CON EL KERNEL
 
-	espera.sin_family = AF_INET;
-	espera.sin_port = htons(getPuertoMemoria());
-	espera.sin_addr.s_addr = INADDR_ANY;
-	bzero(&(espera.sin_zero), 8);
+    direccionEspera = crearDireccionServidor(getPuertoMemoria());
 
+	/*
+    direccionEspera.sin_family = AF_INET;
+	direccionEspera.sin_port = htons(getPuertoMemoria());
+	direccionEspera.sin_addr.s_addr = INADDR_ANY;
+	bzero(&(direccionEspera.sin_zero), 8);
+	*/
 //Bind(): Asigna la direccion de addr al socket referido por el SocketEsperaKernel
-	valorRtaBind = bind(socketEsperaKernel, (struct sockaddr *) &espera,
+
+    asociarDireccion(socketEsperaKernel,direccionEspera);
+
+/*
+    valorRtaBind = bind(socketEsperaKernel, (struct sockaddr *) &direccionEspera,
 			sizeof(struct sockaddr));
 	errorSalidaSocket(valorRtaBind, "Error en Bind",
 			(int *) socketEsperaKernel);
+*/
 
-	printf("Bind correcto\n");
 	printf("Socket asignado: %d\n", socketEsperaKernel);
 	puts("Esperando la conexion del kernel\n");
 
 	return socketEsperaKernel;
 }
 
-int crearSocket() {
-	//Declaracion de variable para recibir valor de rta
-	int valorRtaSetSockOpt;
-	int sockDeEspera;
-
-	//Socket(): creates an endpoint for communication and returns a file descriptor that refers to that endpoint.
-
-	sockDeEspera = socket(AF_INET, SOCK_STREAM, 0);
-	errorSalidaSocket(sockDeEspera, "Fallo en la creacion del socket de espera",
-			&sockDeEspera);
-
-	valorRtaSetSockOpt = setsockopt(sockDeEspera, SOL_SOCKET, SO_REUSEADDR,
-			(const char*) &yes, sizeof(yes));
-	errorSalidaSocket(valorRtaSetSockOpt,
-			"Error en setSockOpt en el socket de espera", &sockDeEspera);
-	return sockDeEspera;
-}
 
 char* laConexionFueExitosa(int *socket) {
 
@@ -179,6 +163,7 @@ char* laConexionFueExitosa(int *socket) {
 	datosEnviados = send(*socket, getFrameSize(), tamanio, 0);
 	esErrorConSalida(datosEnviados, "Error en el envio de datos: FRAME_SIZE");
 
+	//modificar para el kernel
 	void* datos = malloc(SIZE_DATA);
 	tamanio = sizeof(datos);
 	datosRecibidos = recv(*socket, datos, tamanio, 0);
@@ -215,69 +200,8 @@ void *asignarSocketAConexion() {
 	pthread_join(idHilo_OPERACIONES, NULL);
 
 }
-//Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
-void seleccionOperacionesMemoria(int socket) {
 
-	int seleccion, pid, paginas, rtaFuncion, offset, size, nroFrame;
-
-	seleccion = recibirSeleccionOperacion(socket);
-	switch (seleccion) {
-	case INICIAR_PROGRAMA:
-		pid = recibirTamanio(socket);
-		paginas = recibirTamanio(socket);
-		rtaFuncion = inicializarPrograma(pid, paginas);
-		sleep(getRetardo());
-		enviarTamanio(socket, rtaFuncion);
-		break;
-
-	case SOLICITAR_BYTES_PAG:
-
-		pid = recibirTamanio(socket);
-		nroFrame = recibirTamanio(socket);
-		offset = recibirTamanio(socket);
-		size = recibirTamanio(socket);
-		buffer = malloc(size);
-		solicitarBytesDePagina(pid, nroFrame, offset, size);
-		sleep(getRetardo());
-		enviarMensaje(socket, buffer, size);
-		free(buffer);
-		break;
-	case ALMACENAR_BYTES_PAG:
-
-		buffer = malloc(size);
-		pid = recibirTamanio(socket);
-		nroFrame = recibirTamanio(socket);
-		offset = recibirTamanio(socket);
-		size = recibirTamanio(socket);
-		recibirDatos(socket, &buffer, size);
-		rtaFuncion = almacenarBytesEnPagina(pid, nroFrame, offset, size,
-				buffer);
-		sleep(getRetardo());
-		enviarTamanio(socket, rtaFuncion);
-		free(buffer);
-		break;
-
-	case ASIGNAR_PAGINAS_PRC:
-		pid = recibirTamanio(socket);
-		paginas = recibirTamanio(socket);
-		rtaFuncion = asignarPaginasProceso(pid, paginas);
-		enviarTamanio(socket, rtaFuncion);
-
-		break;
-
-	case FINALIZAR_PRG:
-
-		pid = recibirTamanio(socket);
-
-		break;
-	default:
-		break;
-
-	}
-
-}
-
-//Este metodo pone al socket en escuchar, con una lista de espera de 5 y acepta la primera conexion de la misma lista, como ultima instancia devuelve
+//Este metodo pone al socket en escuchar, con una lista de direccionEspera de 5 y acepta la primera conexion de la misma lista, como ultima instancia devuelve
 //el socket correspondiente a la conexion aceptada
 int ponerSocketEnEscucha_aceptarConexion() {
 	int valorRtaListen, conexionAceptada;
@@ -294,7 +218,7 @@ int ponerSocketEnEscucha_aceptarConexion() {
 	conexionAceptada = accept(socketServidor, (struct sockaddr*) &strAddr,
 			&sizeStrAddr);
 	esErrorSinSalida(conexionAceptada,
-			"No se ha podido aceptar la conexion en espera");
+			"No se ha podido aceptar la conexion en direccionEspera");
 
 	printf("Socket asignado a conexion aceptada: %d", conexionAceptada);
 	return conexionAceptada;
@@ -425,3 +349,87 @@ int finalizarPrograma(int pid) {
 	return 1;
 }
 
+//Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
+void seleccionOperacionesMemoria(int socket) {
+
+	int seleccion, pid, paginas, rtaFuncion, offset, size, nroFrame;
+
+	seleccion = recibirSeleccionOperacion(socket);
+	switch (seleccion) {
+	case INICIAR_PROGRAMA:
+		pid = recibirTamanio(socket);
+		paginas = recibirTamanio(socket);
+		rtaFuncion = inicializarPrograma(pid, paginas);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		break;
+
+	case SOLICITAR_BYTES_PAG:
+
+		pid = recibirTamanio(socket);
+		nroFrame = recibirTamanio(socket);
+		offset = recibirTamanio(socket);
+		size = recibirTamanio(socket);
+		buffer = malloc(size);
+		solicitarBytesDePagina(pid, nroFrame, offset, size);
+		sleep(getRetardo());
+		enviarMensaje(socket, buffer, size);
+		free(buffer);
+		break;
+	case ALMACENAR_BYTES_PAG:
+
+		buffer = malloc(size);
+		pid = recibirTamanio(socket);
+		nroFrame = recibirTamanio(socket);
+		offset = recibirTamanio(socket);
+		size = recibirTamanio(socket);
+		recibirDatos(socket, &buffer, size);
+		rtaFuncion = almacenarBytesEnPagina(pid, nroFrame, offset, size,
+				buffer);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		free(buffer);
+		break;
+
+	case ASIGNAR_PAGINAS_PRC:
+		pid = recibirTamanio(socket);
+		paginas = recibirTamanio(socket);
+		rtaFuncion = asignarPaginasProceso(pid, paginas);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		break;
+
+	case FINALIZAR_PRG:
+		pid = recibirTamanio(socket);
+		rtaFuncion=finalizarPrograma(pid);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		break;
+	default:
+		rtaFuncion=4040;
+		printf("Error en la operacion de entrada");
+		enviarTamanio(socket,rtaFuncion);
+		break;
+
+	}
+
+}
+
+/*int crearSocket() {
+	//Declaracion de variable para recibir valor de rta
+	int valorRtaSetSockOpt;
+	int sockDeEspera;
+
+	//Socket(): creates an endpoint for communication and returns a file descriptor that refers to that endpoint.
+
+	sockDeEspera = socket(AF_INET, SOCK_STREAM, 0);
+	errorSalidaSocket(sockDeEspera, "Fallo en la creacion del socket de direccionEspera",
+			&sockDeEspera);
+
+	valorRtaSetSockOpt = setsockopt(sockDeEspera, SOL_SOCKET, SO_REUSEADDR,
+			(const char*) &yes, sizeof(yes));
+	errorSalidaSocket(valorRtaSetSockOpt,
+			"Error en setSockOpt en el socket de direccionEspera", &sockDeEspera);
+	return sockDeEspera;
+}
+*/

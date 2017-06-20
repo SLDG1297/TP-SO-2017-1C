@@ -12,41 +12,37 @@
 #include <commons/log.h>
 #include <string.h>
 
-#include "../librerias/controlArchivosDeConfiguracion.h"
-#include "../librerias/serializador.h"
+#include "../controlArchivosDeConfiguracion.h"
+#include "../serializador.h"
 
-#define RUTA_ARCHIVO "./config_memoria.cfg"
+#define RUTA_ARCHIVO "../../memoria/config_memoria.cfg"
 #define LIBRE -7
 #define OCUPADO_x_STR -14
 #define NOT_FOUND -28
 
-
-//DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
-int PUERTO_MEMORIA;
-int FRAME_SIZE;
-int FRAMES;
-int ENTRADAS_CACHE;
-int CACHE_X_PROC;
-int RETARDO_MEMORIA;
-
-t_log *archivoLog,*archivoSP;
-
-
+//ESTRUCTURAS
 typedef struct {
 	int pid;
 	int nroPagina;
 	int frame;
 } strAdministrativa;
 
-typedef struct {
-	int pid;
-	int nroPagina;
-	void *contenido;
-} strCache;
+//DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
+int PUERTO_MEMORIA;
+int FRAME_SIZE;
+int FRAMES;
+int RETARDO_MEMORIA;
+
+//ARCHIVOS LOG
+t_log *archivoLog,*archivoSP;
+
+
+
 
 //  ******* DECLARACION DE FUNCIONES  *******
 //estoy podrida de los warnings
 
+t_config* asignarRutaDeArchivo();
 void asignarDatosDeConfiguracion();
 int* reservarMemoria();
 void  crearArchivo(char* ruta);
@@ -64,20 +60,24 @@ int strVacia(int *ptr);
 
 int getSizeStrAdm();
 
+
 // ******* INICIO DE CODIGO  *******
 
-void asignarDatosDeConfiguracion() {
-	t_config* configuracion;
+t_config* asignarRutaDeArchivo(){
 	char* ruta = RUTA_ARCHIVO;
-	configuracion = llamarArchivo(ruta);
+	t_config* llamadaArchivo= llamarArchivo(ruta);
+	return llamadaArchivo;
+}
+void asignarDatosDeConfiguracion() {
+	t_config* configuracion = asignarRutaDeArchivo();
 
 	PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO");
 	FRAME_SIZE = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
 	FRAMES = busquedaClaveNumerica(configuracion, "MARCOS");
-	ENTRADAS_CACHE = busquedaClaveNumerica(configuracion, "ENTRADAS_CACHE");
-	CACHE_X_PROC = busquedaClaveNumerica(configuracion, "CACHE_X_PROC");
 	RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
 }
+
+//  ******* FUNCIONES DE BLOQUE DE MEMORIA *******
 
 //Reservo la memoria que necesito
 int* reservarMemoria() {
@@ -153,6 +153,9 @@ void inicializarStrAdm(int* bloqueMemoria) {
 	log_info(archivoLog,"");
 }
 
+
+
+
 //Como su nombre lo indica imprime todas las estructuras adm en pantalla
 void imprimirStrAdm(int* bloqueMemoria) {
 	strAdministrativa aux;
@@ -219,11 +222,11 @@ int iniciarStrAdmDePrc(int pid, int c, int* ptr) {
 	strAdministrativa aux;
 	aux.pid=pid;
 
-	//Se fija la cantidad de paginas que tiene el proceso en todo la EA (estructura Adm)
+	//Se fija la cantidad de paginas que tiene el proceso en toda la EA (estructura Adm)
 	aux.nroPagina = paginasPrc(pid, ptr);
 
 	aux.frame = c ;
-	memcpy(ptr,&aux,sizeof(strAdministrativa));
+	memcpy(ptr,&aux,s izeof(strAdministrativa));
 
  return 1;
 }
@@ -355,7 +358,6 @@ int buscarFrameDePagina(int pid, int *ptr, int pagina){
 }
 
 
-
 //  ******* FUNCIONES DE CONSOLA DE LA MEMORIA  *******
 
 //Modificar la cantidad de tiempo que espera el proceso memoria antes de responder una solicitud
@@ -365,7 +367,7 @@ void retardo(int tiempoEspera) {
 
 //Genera un reporte en pantalla y en un archivo en disco del estado actual del
 //cache, estructuras de memoria, contenido de memoria
-void dump() {
+void dump(int operacion) {
 
 }
 
@@ -386,6 +388,12 @@ int recibirSeleccionOperacion(int socket) {
 	read(socket,operacion,sizeof(int));
 	printf("Orden de operacion recibido:  %d",*operacion);
 	return *operacion;
+}
+
+void enviarMensaje(int socket, void* buffer, size_t tamanioBuffer){
+
+	paquete* pack =  crearPaquete(tamanioBuffer);
+	empaquetarVariable(pack, buffer,tamanioBuffer);
 }
 
 
