@@ -2,11 +2,11 @@
 
 .metadata/*
 target/*
-.settings/*
 .project
 .cproject
 .classpath
 **/Debug/*
+**/.settings/*
 **/.metadata/*
 **/RemoteSystemsTempFiles/*
 
