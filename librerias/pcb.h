@@ -12,6 +12,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <commons/collections/list.h>
+#include <commons/string.h>
+
 #include <parser/metadata_program.h>
 
 #include "./serializador.h"
@@ -106,7 +109,7 @@ void	serializarPCB(int socket, paquete* envio, pcb* unPcb);			// Enviar PCB (Gua
 
 pcb* 	deserializarPCB(int socket);									// Recibe PCB (NO ME DIGAS!!)
 
-void	preprocesador(char* programa, pcb* unPcb);						// Preprocesador de código para generar el índice de código del PCB
+void	preprocesador(char* codigo, pcb* unPcb);						// Preprocesador de código para generar el índice de código del PCB
 
 
 
@@ -156,22 +159,26 @@ pcb* deserializarPCB(int socket){
 	return unPcb;
 }
 
-void preprocesador(char* programa, pcb* unPcb){
+void preprocesador(char* codigo, pcb* unPcb){
 	size_t tamanio;																// Para calcular tamaños de datos serializados.
-	t_metadata_program* codigo = metadata_desde_literal(programa);				// Para generar el índice de código a partir de un script.
+	t_metadata_program* programa = metadata_desde_literal(codigo);				// Para generar el índice de código a partir de un script.
 
 	// Asignaciones de datos al PCB.
-	unPcb->programCounter = codigo->instruccion_inicio;							// Asigna el Program Counter con la primer instrucción a ejecutar.
 
-	unPcb->cantidadInstrucciones = codigo->instrucciones_size;					// Asigna la cantidad de instrucciones del programa.
+	unPcb->programCounter = programa->instruccion_inicio;						// Asigna el Program Counter con la primer instrucción a ejecutar.
+
+	unPcb->cantidadInstrucciones = programa->instrucciones_size;				// Asigna la cantidad de instrucciones del programa.
+
 	tamanio = unPcb->cantidadInstrucciones * sizeof(lineaUtil);					// Asigna el tamaño en bytes de la lista de instrucciones serializada: BYTES = CANTIDAD * 2 * INT
-	memcpy(&unPcb->indiceCodigo, codigo->instrucciones_serializado, tamanio);	// Copia la lista serializada en el PCB.
+	unPcb->indiceCodigo = malloc(tamanio);										// Aloca memoria para el ínidce de código.
+	memcpy(unPcb->indiceCodigo, programa->instrucciones_serializado, tamanio);	// Copia la lista serializada en el PCB.
 
-	unPcb->bytesEtiquetas = codigo->etiquetas_size;								// Asigna la cantidad de etiquetas de instrucciones del programa.
-	tamanio = unPcb->bytesEtiquetas;											// Asigna el tamaño en bytes de la lista serializada de etiquetas.
-	memcpy(&unPcb->indiceEtiqueta, codigo->etiquetas, tamanio);					// Copia la lista serializada en el PCB.
+	unPcb->bytesEtiquetas = programa->etiquetas_size;							// Asigna la cantidad de etiquetas de instrucciones del programa.
+	tamanio = unPcb->bytesEtiquetas + 1;										// Asigna el tamaño en bytes de la lista serializada de etiquetas.
+	unPcb->indiceEtiqueta = malloc(tamanio);									// Aloca memoria para el índice de etiquetas.
+	memcpy(unPcb->indiceEtiqueta, programa->etiquetas, tamanio);				// Copia la lista serializada en el PCB.
 
-	metadata_destruir(codigo);
+	metadata_destruir(programa);
 }
 
 #endif /* PCB_H_ */

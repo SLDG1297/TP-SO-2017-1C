@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc serializadorCliente.c -o serializadorCliente -lcommons
+./serializadorCliente
+rm serializadorCliente

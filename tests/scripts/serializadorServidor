@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc serializadorServidor.c -o serializadorServidor -lcommons
+./serializadorServidor
+rm serializadorServidor

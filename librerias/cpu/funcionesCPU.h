@@ -18,7 +18,8 @@
 
 #include <parser/metadata_program.h>
 
-#include "../librerias/serializador.h"
+#include "../pcb.h"
+#include "../serializador.h"
 
 // Protocolo de comunicación de CPU
 #define	HANDSHAKE_CPU	1297

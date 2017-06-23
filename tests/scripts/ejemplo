@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc ejemplo.c -o ejemplo -lcspecs
+./ejemplo
+rm ejemplo
