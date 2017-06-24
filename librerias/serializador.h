@@ -150,14 +150,15 @@ void empaquetarVariable(paquete* envio, void* datos, size_t tamanioDato){
 }
 
 void empaquetarLista(paquete* envio, t_list* lista, size_t tamanioNodo){
-	u_int32_t indice;													// Para recorrer la lista como un array.
+	u_int32_t indice = 0;												// Para recorrer la lista como un array.
 	u_int32_t cantidadElementos = list_size(lista);						// Para saber cuántos elementos enviar.
 
 	empaquetar(envio, &cantidadElementos, sizeof(u_int32_t));			// Para que el receptor sepa cuántos nodos va a tener la lista.
 
-	for(indice = 0; indice < cantidadElementos; indice++)
+	while(indice < cantidadElementos)
 	{
 		empaquetar(envio, list_get(lista, indice), tamanioNodo);		// Lo empaqueto para el send().
+		indice++;
 	}
 }
 
@@ -190,17 +191,19 @@ size_t recibirPaqueteVariable(int socket, void** receptor){
 }
 
 size_t recibirLista(int socket, t_list* lista, size_t tamanioNodo){
-	u_int32_t indice;				// Para agregar nodos a la lista como un array.
+	u_int32_t indice = 0;			// Para agregar nodos a la lista como un array.
 	u_int32_t cantidadElementos;	// Para saber el tope de la lista y cuando parar de añadir objetos a la misma.
 
 	recibirPaquete(socket, &cantidadElementos, sizeof(size_t));	// Recibe el tamaño de la lista.
 
-	for(indice = 0; indice < cantidadElementos; indice++)
+	while(indice < cantidadElementos)
 	{
 		void* nodo = malloc(tamanioNodo);			// Aloco memoria para un nodo.
 
 		recibirPaquete(socket, nodo, tamanioNodo);	// Recibo el nodo.
 		list_add(lista, nodo);						// Lo añado a la lista.
+
+		indice++;
 	}
 
 	u_int32_t tamanioLista = tamanioEnBytesListaFija(lista, tamanioNodo);

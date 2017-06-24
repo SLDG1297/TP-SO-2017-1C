@@ -143,7 +143,7 @@ void deserializarTamanioVariable(){
 	char* recibo;
 	char* cadenaEsperada = "Ripinpin";
 
-	recibirPaqueteVariable(socketCliente, &recibo);
+	recibirPaqueteVariable(socketCliente, (void**)&recibo);		// Menos pregunta y a Dios perdona...
 
 
 
@@ -159,7 +159,7 @@ void deserializarTamanioVariableQueNoEsString(){
 	struct parOrdenado* vector;
 	size_t tamanio;
 
-	tamanio = recibirPaqueteVariable(socketCliente, &vector);
+	tamanio = recibirPaqueteVariable(socketCliente, (void**)&vector);
 
 
 
@@ -269,4 +269,6 @@ int main(){
 
 	proximoTest("Que se pueda deserializar la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)].");
 	deserializarListaFija();
+
+	return 0;
 }

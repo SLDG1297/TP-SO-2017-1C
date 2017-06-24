@@ -264,4 +264,6 @@ int main(){
 
 	proximoTest("Que se pueda serializar la lista [(a, 1, 30.0) , (b, 500, 0.5), (z, 666, 676.1)].");
 	serializarListaFija();
+
+	return 0;
 }

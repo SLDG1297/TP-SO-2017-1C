@@ -19,8 +19,6 @@
 
 #include "./serializador.h"
 
-
-
 // Estructuras de datos
 
 // el "__attribute__((packed))" es para que la estructura no tenga padding (Espacio de más para mejorar el acceso a la info, que puede cambiar el tamaño que se quiere enviar realmente)
@@ -101,15 +99,15 @@ pcb;
 
 // Declaraciones
 
-size_t	calcularTamanioPCB(pcb* unPcb);									// Es obvio XD
+size_t		calcularTamanioPCB(pcb* unPcb);					// Es obvio XD
 
-size_t	calcularTamanioStack(t_list* pila, size_t cantidadDeContextos);	// Este también XD
+size_t		calcularTamanioStack(t_list* pila);				// Este también XD
 
-void	serializarPCB(int socket, paquete* envio, pcb* unPcb);			// Enviar PCB (Guau...)
+paquete*	serializarPCB(int socket, pcb* unPcb);			// Serializar PCB (Guau...)
 
-pcb* 	deserializarPCB(int socket);									// Recibe PCB (NO ME DIGAS!!)
+pcb* 		deserializarPCB(int socket);					// Deserializar PCB (NO ME DIGAS!!)
 
-void	preprocesador(char* codigo, pcb* unPcb);						// Preprocesador de código para generar el índice de código del PCB
+void		preprocesador(char* codigo, pcb* unPcb);		// Preprocesador de código para generar el índice de código del PCB
 
 
 
@@ -122,40 +120,96 @@ size_t calcularTamanioPCB(pcb* unPcb){
 				+	sizeof(u_int32_t)													// Program Counter
 				+	sizeof(u_int32_t)													// Cantidad de páginas
 				+	sizeof(size_t)														// Cantidad de instrucciones
-				+	unPcb->cantidadInstrucciones * sizeof(lineaUtil)					// Índice de Eódigo
+				+	unPcb->cantidadInstrucciones * sizeof(lineaUtil)					// Índice de Código
 				+	sizeof(size_t)														// Tamaño etiquetas
 				+	unPcb->bytesEtiquetas												// Índice de Etiquetas
 				+	sizeof(size_t)														// Cantidad de contextos
-				+	calcularTamanioStack(unPcb->indiceStack, unPcb->cantidadStack)		// Índice de Stack
+				+	calcularTamanioStack(unPcb->indiceStack)							// Índice de Stack
 				+	sizeof(u_int32_t);													// Exit Code
 
 	return tamanio;
 }
 
-size_t calcularTamanioStack(t_list* pila, size_t cantidadDeContextos){
+size_t calcularTamanioStack(t_list* pila){
 	size_t tamanio;
-	int indice;
+	size_t cantidadDeContextos = list_size(pila);
 
-	for(indice = 0; indice < cantidadDeContextos; indice++)
+	int indice = 0;
+	while(indice < cantidadDeContextos)
 	{
 		indiceDeStack* contexto = (indiceDeStack*) list_get(pila, indice);
 
-		tamanio +=	contexto->cantidadArgumentos * sizeof(argStack)
-				+	contexto->cantidadVariables * sizeof(variableStack)
-				+ 	sizeof(u_int32_t)
-				+ 	sizeof(posicionMemoria);
+		tamanio +=	contexto->cantidadArgumentos * sizeof(argStack)						// Tamaño de la lista de argumentos
+				+	sizeof(u_int32_t)													// Para empaquetar índice de la lista de argumentos
+				+	contexto->cantidadVariables * sizeof(variableStack)					// Tamaño de la lista de variables
+				+	sizeof(u_int32_t)													// Para empaquetar índice de la lista de variables
+				+ 	sizeof(u_int32_t)													// Tamaño del program counter que se devuelve cuando finaliza la función
+				+ 	sizeof(posicionMemoria);											// Tamaño de la posició de retorno
+
+		indice++;
 	}
 
 	return tamanio;
 }
 
-void serializarPCB(int socket, paquete* envio, pcb* unPcb){
-	// TODO: Serializar
+paquete* serializarPCB(int socket, pcb* unPcb){
+	// TODO: Testear Serialización PCB
+	paquete* envio = crearPaquete(calcularTamanioPCB(unPcb));
+
+	empaquetar(envio, &unPcb->pid, sizeof(u_int32_t));
+
+	empaquetar(envio, &unPcb->programCounter, sizeof(u_int32_t));
+
+	empaquetar(envio, &unPcb->paginasUsadas, sizeof(u_int32_t));
+
+	empaquetarVariable(envio, &unPcb->indiceCodigo, unPcb->cantidadInstrucciones * sizeof(lineaUtil));
+
+	empaquetarVariable(envio, &unPcb->indiceEtiqueta, unPcb->bytesEtiquetas);
+
+	empaquetar(envio, &unPcb->cantidadStack, sizeof(size_t));
+
+	int i = 0;
+	while(i < list_size(unPcb->indiceStack))
+	{
+		indiceDeStack* contexto = (indiceDeStack *) list_get(unPcb->indiceStack, i);
+
+		empaquetar(envio, &contexto->cantidadArgumentos, sizeof(u_int32_t));
+		empaquetarLista(envio, contexto->argumentos, sizeof(argStack));
+
+		empaquetar(envio, &contexto->cantidadVariables, sizeof(u_int32_t));
+		empaquetarLista(envio, contexto->variables, sizeof(variableStack));
+
+		empaquetar(envio, &contexto->retPos, sizeof(u_int32_t));
+		empaquetar(envio, &contexto->retVar, sizeof(posicionMemoria));
+
+		i++;
+	};
+
+	empaquetar(envio, &unPcb->exitCode, sizeof(u_int32_t));
+
+	return envio;
 }
 
 pcb* deserializarPCB(int socket){
+	// TODO: Testear Deserialización PCB
 	pcb* unPcb;
-	// TODO: Serializar
+
+	recibirPaquete(socket, &unPcb->pid, sizeof(u_int32_t));
+
+	recibirPaquete(socket, &unPcb->programCounter, sizeof(u_int32_t));
+
+	recibirPaquete(socket, &unPcb->paginasUsadas, sizeof(u_int32_t));
+
+	unPcb->cantidadInstrucciones = recibirPaqueteVariable(socket, (void**)&unPcb->indiceCodigo);	// Jaja DDS. Mirá como tiro algo paso por parámetro algo mutable y devuelvo un valor XDXDXD
+
+	unPcb->bytesEtiquetas = recibirPaqueteVariable(socket, (void**)&unPcb->indiceEtiqueta);			// Chiteadísimo...
+
+	recibirPaquete(socket, &unPcb->cantidadStack, sizeof(size_t));
+
+	// TODO: Recibir Stack
+
+	recibirPaquete(socket, &unPcb->exitCode, sizeof(u_int32_t));
+
 	return unPcb;
 }
 
@@ -174,9 +228,10 @@ void preprocesador(char* codigo, pcb* unPcb){
 	memcpy(unPcb->indiceCodigo, programa->instrucciones_serializado, tamanio);	// Copia la lista serializada en el PCB.
 
 	unPcb->bytesEtiquetas = programa->etiquetas_size;							// Asigna la cantidad de etiquetas de instrucciones del programa.
-	tamanio = unPcb->bytesEtiquetas + 1;										// Asigna el tamaño en bytes de la lista serializada de etiquetas.
+
+	tamanio = unPcb->bytesEtiquetas;											// Asigna el tamaño en bytes de la lista serializada de etiquetas.
 	unPcb->indiceEtiqueta = malloc(tamanio);									// Aloca memoria para el índice de etiquetas.
-	memcpy(unPcb->indiceEtiqueta, programa->etiquetas, tamanio);				// Copia la lista serializada en el PCB.
+	memcpy(unPcb->indiceEtiqueta, programa->etiquetas, tamanio);				// Asigna el índice de etiquetas en el PCB.
 
 	metadata_destruir(programa);
 }
