@@ -97,6 +97,9 @@ int contadorPid = 1;
 
 		int valorRtaRecv = 0;
 		int valorRtaSelect = 0;
+//DELCARACION DE HILOS
+
+		pthread_t idHilo, idHiloSelect;
 
 //DECLARACION DE PROTOTIPOS DE FUNCIONES
 		void operacionSegunIdentificador(int identificador);
@@ -134,12 +137,19 @@ int main(int argc, char *argv[]) {
 	FD_SET(sockListener, &socketsRelevantes);
 	fileDescMax = sockListener;
 
-	printf("Consola de kernel\n");
-	pthread_t idHilo;
 	pthread_create(&idHilo, NULL, consolaOperaciones, NULL);
+	pthread_create(&idHiloSelect, NULL, seleccionarSocketRelevantes,NULL);
+
+	pthread_join(idHiloSelect, NULL);
+	pthread_join(idHilo, NULL);
+
+	return 0;
+
+}
 
 
-//hilo de escucha
+
+void* seleccionarSocketRelevantes(){
 	while (1) {
 
 		socketsFiltrados = socketsRelevantes;
@@ -163,30 +173,19 @@ int main(int argc, char *argv[]) {
 
 				} //cierra Else
 
-			}					//cierra - if(FD_ISSET(j, &socketsRelevantes))
+			}	//cierra - if(FD_ISSET(j, &socketsRelevantes))
 
-		}						// cierra for for
+		}	// cierra for for
 
 	}	// cierra while
-
-	pthread_join(idHilo, NULL);
-
-	return 0;
-
 }
-
-//Agregas un elemento a la lista segun el tipo
-
-/*
- bool compararSockets(int socket1, int socket2){
- return socket1==socket2 ? 1 : 0
- }*/
 
 void realizarOperacionDeListener(int nuevoSocket){
 	int identificador;
 
 	aceptarConexion(nuevoSocket, cliente_dir);
 
+	handshake(nuevoSocket);
 	valorRtaRecv = recv(nuevoSocket,&identificador,sizeof(int), 0);
 
 	esErrorConSalida(valorRtaRecv, "Error en recv ID");
@@ -198,59 +197,59 @@ void realizarOperacionDeListener(int nuevoSocket){
 void operacionSegunIdentificador(int identificador){
 	switch (identificador) {
 
-						case ID_CONSOLA:
+		case ID_CONSOLA:
 
-							//Si la conexion es una consola, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
+			//Si la conexion es una consola, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
 
-							FD_SET(nuevoSocket, &socketsRelevantes);
+			FD_SET(nuevoSocket, &socketsRelevantes);
 
-							send(nuevoSocket,"Conexion aceptada. Bienvenido, proceso Consola",strlen("Conexion aceptada. Bienvenido, proceso Consola"),0);
+			send(nuevoSocket,"Conexion aceptada. Bienvenido, proceso Consola",strlen("Conexion aceptada. Bienvenido, proceso Consola"),0);
 
-							//Actualizando el maximo descriptor de fichero.
+			//Actualizando el maximo descriptor de fichero.
 
-							if (nuevoSocket > fileDescMax)
+			if (nuevoSocket > fileDescMax)
 
-								fileDescMax = nuevoSocket;
+				fileDescMax = nuevoSocket;
 
-							agregarALista(ID_CONSOLA, nuevoSocket);
+			agregarALista(ID_CONSOLA, nuevoSocket);
 
-							//mensaje de nueva conexion de consola.
+			//mensaje de nueva conexion de consola.
 
-							printf("kernel: Nueva conexion de una consola, ip:%s en el socket %d\n",inet_ntoa(cliente_dir.sin_addr),nuevoSocket);
+			printf("kernel: Nueva conexion de una consola, ip:%s en el socket %d\n",inet_ntoa(cliente_dir.sin_addr),nuevoSocket);
 
-							break;
+			break;
 
-						case ID_CPU:
+		case ID_CPU:
 
-							//Si la conexion es una cpu, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
+			//Si la conexion es una cpu, agregamos el socket a relavantes y enviamos mensaje de aceptacion.
 
-							FD_SET(nuevoSocket, &socketsRelevantes);
+			FD_SET(nuevoSocket, &socketsRelevantes);
 
-							send(nuevoSocket,"Conexion aceptada. Bienvenido, proceso Cpu",strlen("Conexion aceptada. Bienvenido, proceso Cpu"),
+			send(nuevoSocket,"Conexion aceptada. Bienvenido, proceso Cpu",strlen("Conexion aceptada. Bienvenido, proceso Cpu"),
 
-							0);
+			0);
 
-							//Actualizando el maximo descriptor de fichero.
+			//Actualizando el maximo descriptor de fichero.
 
-							if (nuevoSocket > fileDescMax)
+			if (nuevoSocket > fileDescMax)
 
-								fileDescMax = nuevoSocket;
+				fileDescMax = nuevoSocket;
 
-							agregarALista(ID_CPU, nuevoSocket);
+			agregarALista(ID_CPU, nuevoSocket);
 
-							//mensaje de nueva conexion de cpu.
+			//mensaje de nueva conexion de cpu.
 
-							printf("kernel: Nueva conexion de un cpu, ip:%s en el socket %d\n", inet_ntoa(cliente_dir.sin_addr),nuevoSocket);
+			printf("kernel: Nueva conexion de un cpu, ip:%s en el socket %d\n", inet_ntoa(cliente_dir.sin_addr),nuevoSocket);
 
-							break;
+			break;
 
-						default:
+		default:
 
-							printf("Identificación incorrecta");
+			printf("Identificación incorrecta");
 
-							break;
+			break;
 
-						} // cierra switch
+		} // cierra switch
 
 
 

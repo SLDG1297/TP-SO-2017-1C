@@ -28,7 +28,7 @@ typedef struct {
 } strAdministrativa;
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
-int PUERTO_MEMORIA;
+int _puertoMemoria;
 int FRAME_SIZE;
 int FRAMES;
 int RETARDO_MEMORIA;
@@ -71,7 +71,7 @@ t_config* asignarRutaDeArchivo(){
 void asignarDatosDeConfiguracion() {
 	t_config* configuracion = asignarRutaDeArchivo();
 
-	PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO");
+	_puertoMemoria = busquedaClaveNumerica(configuracion, "PUERTO");
 	FRAME_SIZE = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
 	FRAMES = busquedaClaveNumerica(configuracion, "MARCOS");
 	RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
@@ -401,7 +401,7 @@ void enviarMensaje(int socket, void* buffer, size_t tamanioBuffer){
 // ******* GETS *******
 
 int getPuertoMemoria(){
-	return PUERTO_MEMORIA;
+	return _puertoMemoria;
 }
 int getFrameSize(){
 	return FRAME_SIZE;

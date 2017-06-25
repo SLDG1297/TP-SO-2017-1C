@@ -42,45 +42,9 @@
 #include "../pcb.h"
 #include "../conexionSocket.h"
 
-//DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
-
-int PUERTO_KERNEL;
-int PUERTO_CPU;
-int PUERTO_MEMORIA;
-int PUERTO_FS;
-char* IP_MEMORIA;
-char* IP_FS;
-
-int QUANTUM;
-int QUANTUM_SLEEP;
-int GRADO_MULTIPROG;
-int SEM_INIT[3];
-int STACK_SIZE;
-
-char* ALGORITMO;
-char* SEM_IDS[3];
-char* SHARED_VARS[3];
-// DECLARACION MEMORIA
-int frameSize;
-
-int socketPosible;
-
-//DECLARACION DE FUNCIONES
-void iniciarConfiguraciones(char* ruta);
-int asignarSocketFS();
-int asignarSocketMemoria();
-int asignarSocketListener();
-void agregarALista(int tipo, int socketDato, t_list *lista);
-void *consolaOperaciones();
-void operacionesParaProceso();
-int obtenerTamanioPagina(int sock);
-void handshake(int sock);
-void setFrameSize(int tamanio);
-int obtenerOrden();
-void incrementarContadorPid(int *contadorPid);
-void mensajeDeError(int orden);
-bool perteneceAListaCpu(int socketPosible, cpu_activo nodoCpu);
-bool perteneceAListaConsola(consola_activa* consola);
+#define ID_CONSOLA	1
+#define ID_CPU		2
+#define ID_FS 		3
 
 // DECLARACION DE TIPOS
 typedef struct {
@@ -105,9 +69,44 @@ t_list *consolas;
 t_list *cpus;
 t_list *pcbs;
 
-#define ID_CONSOLA	1
-#define ID_CPU		2
-#define ID_FS 		3
+//DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
+int _puertoKernel;
+int _puertoCpu;
+int _puertoMemoria;
+int _puertoFS;
+char* _ipMemoria;
+char* _ipFs;
+
+int _quantum;
+int _quantumSleep;
+int _gradoMultiprog;
+int _semInit[3];
+int _stackSize;
+
+char* _algoritmo;
+char* _semIds[3];
+char* sharedVars[3];
+// DECLARACION MEMORIA
+int frameSize;
+
+int socketPosible;
+
+//DECLARACION DE FUNCIONES
+void iniciarConfiguraciones(char* ruta);
+int asignarSocketFS();
+int asignarSocketMemoria();
+int asignarSocketListener();
+void agregarALista(int tipo, int socketDato, t_list *lista);
+void *consolaOperaciones();
+void operacionesParaProceso();
+int obtenerTamanioPagina(int sock);
+void handshake(int sock);
+void setFrameSize(int tamanio);
+int obtenerOrden();
+void incrementarContadorPid(int *contadorPid);
+void mensajeDeError(int orden);
+bool perteneceAListaCpu(int socketPosible, cpu_activo nodoCpu);
+bool perteneceAListaConsola(consola_activa* consola);
 
 void iniciarConfiguraciones(char* ruta) {
 	//CODIGO PARA LLAMAR AL ARCHIVO
@@ -117,41 +116,42 @@ void iniciarConfiguraciones(char* ruta) {
 
 	t_config* configuracion = llamarArchivo(ruta);
 
-	PUERTO_KERNEL = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
-	PUERTO_CPU = busquedaClaveNumerica(configuracion, "PUERTO_CPU");
-	PUERTO_MEMORIA = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
-	PUERTO_FS = busquedaClaveNumerica(configuracion, "PUERTO_FS");
-	IP_MEMORIA = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
-	IP_FS = busquedaClaveAlfanumerica(configuracion, "IP_FS");
+	_puertoKernel = busquedaClaveNumerica(configuracion, "PUERTO_KERNEL");
+	_puertoCpu = busquedaClaveNumerica(configuracion, "PUERTO_CPU");
+	_puertoMemoria = busquedaClaveNumerica(configuracion, "PUERTO_MEMORIA");
+	_puertoFS = busquedaClaveNumerica(configuracion, "PUERTO_FS");
+	_ipMemoria = busquedaClaveAlfanumerica(configuracion, "IP_MEMORIA");
+	_ipFs = busquedaClaveAlfanumerica(configuracion, "IP_FS");
 
-	QUANTUM = busquedaClaveNumerica(configuracion, "QUANTUM");
-	QUANTUM_SLEEP = busquedaClaveNumerica(configuracion, "QUANTUM_SLEEP");
-	GRADO_MULTIPROG = busquedaClaveNumerica(configuracion, "GRADO_MULTIPROG");
-	SEM_INIT[3];
-	STACK_SIZE = busquedaClaveNumerica(configuracion, "STACK_SIZE");
+	_quantum = busquedaClaveNumerica(configuracion, "QUANTUM");
+	_quantumSleep = busquedaClaveNumerica(configuracion, "QUANTUM_SLEEP");
+	_gradoMultiprog = busquedaClaveNumerica(configuracion, "GRADO_MULTIPROG");
+	_semInit[3];
+	_stackSize = busquedaClaveNumerica(configuracion, "STACK_SIZE");
 
-	ALGORITMO = busquedaClaveAlfanumerica(configuracion, "ALGORITMO");
-	SEM_IDS[3];
-	SHARED_VARS[3];
+	_algoritmo = busquedaClaveAlfanumerica(configuracion, "ALGORITMO");
+	_semIds[3];
+	sharedVars[3];
+
 }
 
 // ************** ASIGNACION SOCKETS ***********
 int asignarSocketMemoria() {
 
-	return conectar(IP_MEMORIA, PUERTO_MEMORIA);
+	return conectar(_ipMemoria, _puertoMemoria);
 }
 
 int asignarSocketFS() {
-	return conectar(IP_FS, PUERTO_FS);
+	return conectar(_ipFs, _puertoFS);
 
 }
 
 int asignarSocketListener() {
 	int socketKernel;
 
-	socketKernel = servir(PUERTO_KERNEL);
+	socketKernel = servir(_puertoKernel);
 
-	printf("\nEsperando en el puerto %i\n", PUERTO_KERNEL);
+	printf("\nEsperando en el puerto %i\n", _puertoKernel);
 	return socketKernel;
 }
 // ************** INICIALIZAR LISTAS ***********
@@ -190,12 +190,13 @@ void agregarALista(int tipo, int socketDato) {
 
 }
 void *consolaOperaciones() {
+	printf("Consola de kernel\n");
 
-	//hilo de interfaz de consola
 	generarMenu();
 	int ordenDeConsola = obtenerOrden();
 	switch (ordenDeConsola) {
 	case 1:
+		
 		//mostrar listado de procesosActivos del sistema\n
 		break;
 	case 2:
@@ -205,7 +206,10 @@ void *consolaOperaciones() {
 		//mostrar tabla global de archivos
 		break;
 	case 4:
-		//modificar grado de multiprogramacion
+		printf("Ingrese el nuevo grado de multiprogramacion");
+		scanf("%d",_gradoMultiprog);
+		printf("El nuevo grado de multiprogramacion es %d",_gradoMultiprog);
+
 		break;
 	case 5:
 		//finalizar un proceso
@@ -230,7 +234,7 @@ void operacionesParaProceso() {
 		//mostrar cantidad de rafagas ejecutadas
 		break;
 	case 2:
-		//mostrar cantidad de operaciones provilegiadas ejecutadas
+		//mostrar cantidad de operaciones privilegiadas ejecutadas
 		break;
 	case 3:
 		//obtener la tabla de archivos abiertos
@@ -255,55 +259,51 @@ void operacionesParaProceso() {
 void realizarOperacionDeSocket(int socketPosible) {
 	int modulo = determinarTipoSocket(socketPosible);
 	switch (modulo) {
-		case ID_CPU:
+	case ID_CPU:
 		//pcbRecibido = recibirYDeserializarPCB();
 		//actualizarPCB(pcbRecibido);
 
 		break;
-		case ID_CONSOLA:
+	case ID_CONSOLA:
+		char* contenido;
+		//Si no es listener, es consola, cpu, o filesystem
 
-		/*//Si no es listener, es consola, cpu, o filesystem
+		//Si es Consola
 
+		//recibir instruccion
 
-		 //Si es Consola
+		//Nuevo Programa
 
-		 //recibir instruccion
+		//recibir path
 
-		 //Nuevo Programa
+		pcb nuevoProceso;
 
-		 //recibir path
+		preprocesador(contenido, &nuevoProceso);
+		//generarLineasUtiles(Path)
 
+		//creando pcb
 
+		//pcb nuevoPCB;
 
-		 //generarLineasUtiles(Path)
+		//nuevoPCB.pid = contadorPid;
 
+		//incrementarcontadorPid();
 
+		//nuevoPCB.programCounter = 0;
 
-		 //creando pcb
+		//tamañoPath = calcularTamañoPath(Path);
 
-		 //pcb nuevoPCB;
+		//nuevoPCB.paginasUsadas = tamañoPath / tamañoPagina;
 
-		 //nuevoPCB.pid = contadorPid;
+		//nuevoPCB.indiceCodigo =
 
-		 //incrementarcontadorPid();
+		//nuevoPCB.indiceEtiqueta=
 
-		 //nuevoPCB.programCounter = 0;
+		//nuevoPCB.indiceStack=
 
-		 //tamañoPath = calcularTamañoPath(Path);
+		//nuevoPCB.exitCode=
 
-		 //nuevoPCB.paginasUsadas = tamañoPath / tamañoPagina;
-
-		 //nuevoPCB.indiceCodigo =
-
-		 //nuevoPCB.indiceEtiqueta=
-
-		 //nuevoPCB.indiceStack=
-
-		 //nuevoPCB.exitCode=
-
-
-
-		 //solicitar memoria
+		/*		 //solicitar memoria
 
 		 //send(sockMemoria, &nuevoPCB.pid, sizeof(int), 0);
 
@@ -331,83 +331,101 @@ void realizarOperacionDeSocket(int socketPosible) {
 		 default:
 		 break;*/
 
-		 }
+	}
 
 }
 
-void actualizarPCB(pcb pcbRecibido){
+void actualizarPCB(pcb pcbRecibido) {
 	//void (*constante) (void*)
 
 }
-int buscarIndice(void* elemento, t_list *lista){
+
+int buscarIndice(cpu_activo *elemento, t_list *lista) {
 	int tamanio = list_size(lista);
 	int indice = 0;
 
-	while(indice < tamanio)
-	{
-		void* nodo = list_get(lista, indice);
-
+	while (indice < tamanio) {
+		cpu_activo *nodo = list_get(lista, indice);
+		if (nodo != NULL) {
+			if (elemento->activo == nodo->activo
+					&& elemento->socket == nodo->socket)
+				return indice;
+			indice++;
+		} else
+			return -1;
 
 	}
-
-
+	return -1;
 }
 
-int determinarTipoSocket(int sp){
-	 socketPosible=sp;
-	 bool (*condicionCpu)(void*) = &perteneceAListaCpu;
-	 bool (*condicionConsola) (void*) = &perteneceAListaConsola;
+int buscarIndice(consola_activa *elemento, t_list *lista) {
+	int tamanio = list_size(lista);
+	int indice = 0;
 
-	 //bool list_any_satisfy(t_list* self, bool(*condition)(void*));
-	 if(list_any_satisfy(cpus,condicionCpu))
-	 return ID_CPU; // cpu
-	 if(list_any_satisfy(consolas,condicionConsola))
-	 return ID_CONSOLA;
+	while (indice < tamanio) {
+		cpu_activo *nodo = list_get(lista, indice);
+		if (elemento->activo == nodo->activo
+				&& elemento->socket == nodo->socket)
+			return indice;
+		indice++;
+	}
+	return -1;
+}
 
-	 return ID_FS;
- }
+int determinarTipoSocket(int sp) {
+	socketPosible = sp;
+	bool (*condicionCpu)(void*) = &perteneceAListaCpu;
+	bool (*condicionConsola)(void*) = &perteneceAListaConsola;
 
-bool perteneceAListaCpu(cpu_activo* cpu){
-	 return (cpu->socket == socketPosible);
-	 }
+	//bool list_any_satisfy(t_list* self, bool(*condition)(void*));
+	if (list_any_satisfy(cpus, condicionCpu))
+		return ID_CPU; // cpu
+	if (list_any_satisfy(consolas, condicionConsola))
+		return ID_CONSOLA;
 
-bool perteneceAListaConsola(consola_activa* consola){
-	 return (consola->socket == socketPosible);
-	 }
+	return ID_FS;
+}
+
+bool perteneceAListaCpu(cpu_activo* cpu) {
+	return (cpu->socket == socketPosible);
+}
+
+bool perteneceAListaConsola(consola_activa* consola) {
+	return (consola->socket == socketPosible);
+}
 
 int obtenerTamanioPagina(int sock) {
-	 int rtaFuncion;
-	 int tamanioDePagina;
-	 rtaFuncion = recv(sock, &tamanioDePagina, sizeof(tamanioDePagina), 0);
-	 esErrorConSalida(rtaFuncion, "Error al obetener el tamaño de pagina");
-	 return tamanioDePagina;
-	 }
+	int rtaFuncion;
+	int tamanioDePagina;
+	rtaFuncion = recv(sock, &tamanioDePagina, sizeof(tamanioDePagina), 0);
+	esErrorConSalida(rtaFuncion, "Error al obetener el tamaño de pagina");
+	return tamanioDePagina;
+}
 
 void handshake(int sock) {
-	 int rtaFuncion;
-	 int handshake = 1;
-	 rtaFuncion = send(sock, &handshake, sizeof(handshake), 0);
-	 esErrorConSalida(rtaFuncion, "Error en el handshake de memoria (envio)");
-	 }
+	int rtaFuncion;
+	int handshake = 1;
+	rtaFuncion = send(sock, &handshake, sizeof(handshake), 0);
+	esErrorConSalida(rtaFuncion, "Error en el handshake de memoria (envio)");
+}
 
 void setFrameSize(int tamanio) {
-	 frameSize = tamanio;
-	 }
-
+	frameSize = tamanio;
+}
 
 int obtenerOrden() {
-	 int orden=0;
-	 printf("Elija una opcion\n");
-	 scanf("%d", orden);
-	 return orden;
-	 }
-void incrementarContadorPid( int* contadorPid) {
-	 *contadorPid++;
-	 }
+	int orden = 0;
+	printf("Elija una opcion\n");
+	scanf("%d", orden);
+	return orden;
+}
+void incrementarContadorPid(int* contadorPid) {
+	*contadorPid++;
+}
 
 void mensajeDeError(int orden) {
-	 printf("%d no es una orden valida\n", orden);
-	 }
+	printf("%d no es una orden valida\n", orden);
+}
 
-	 #endif /* FUNCIONESKERNEL_H_ */
+#endif /* FUNCIONESKERNEL_H_ */
 
