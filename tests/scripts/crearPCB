@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc crearPCB.c -o crearPCB -lcommons -lparser-ansisop
+./crearPCB
+rm crearPCB
