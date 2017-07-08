@@ -23,7 +23,6 @@
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/temporal.h>
-#include <commons/temporal.h>
 #include <commons/collections/list.h>
 
 
@@ -89,9 +88,12 @@ int main(int argc, char *argv[]) {
 	asignarDatosDeConfiguracion();
 
 	ptrMemoria = reservarMemoria();
+	ptrCache = reservarCache();
 	crearArchivo(RUTA_LOG);
 	inicializarStrAdm(ptrMemoria);
 	imprimirStrAdm(ptrMemoria);
+
+
 
 	//* creamos un socket con el cual vamos a manejar la conexion con el kernel
 	socketServidor = iniciarConexionServidor();
@@ -228,6 +230,71 @@ int ponerSocketEnEscucha_aceptarConexion() {
 
 // ************************* OPERACIONES DE MEMORIA *************************************
 
+//Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
+void seleccionOperacionesMemoria(int socket) {
+
+	int seleccion, pid, paginas, rtaFuncion, offset, size, nroFrame;
+
+	seleccion = recibirSeleccionOperacion(socket);
+	switch (seleccion) {
+	case INICIAR_PROGRAMA:
+		pid = recibirTamanio(socket);
+		paginas = recibirTamanio(socket);
+		rtaFuncion = inicializarPrograma(pid, paginas);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		break;
+
+	case SOLICITAR_BYTES_PAG:
+
+		pid = recibirTamanio(socket);
+		nroFrame = recibirTamanio(socket);
+		offset = recibirTamanio(socket);
+		size = recibirTamanio(socket);
+		buffer = malloc(size);
+		solicitarBytesDePagina(pid, nroFrame, offset, size);
+		sleep(getRetardo());
+		enviarMensaje(socket, buffer, size);
+		free(buffer);
+		break;
+	case ALMACENAR_BYTES_PAG:
+		//TODO recepcion de datos
+		buffer = malloc(size);
+		pid = recibirTamanio(socket);
+		nroFrame = recibirTamanio(socket);
+		offset = recibirTamanio(socket);
+		size = recibirTamanio(socket);
+//todo		recibirDatos(socket, buffer, size);
+		rtaFuncion = almacenarBytesEnPagina(pid, nroFrame, offset, size,
+				buffer);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		free(buffer);
+		break;
+
+	case ASIGNAR_PAGINAS_PRC:
+		pid = recibirTamanio(socket);
+		paginas = recibirTamanio(socket);
+		rtaFuncion = asignarPaginasProceso(pid, paginas);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		break;
+
+	case FINALIZAR_PRG:
+		pid = recibirTamanio(socket);
+		rtaFuncion=finalizarPrograma(pid);
+		sleep(getRetardo());
+		enviarTamanio(socket, rtaFuncion);
+		break;
+	default:
+		rtaFuncion=4040;
+		printf("Error en la operacion de entrada");
+		enviarTamanio(socket,rtaFuncion);
+		break;
+
+	}
+
+}
 
 /*
  * Cuando el KRN comunique el inicio de un nuevo prog se crearan las estructuras necesarias para administrarlo correctamente. En una misma pag
@@ -262,7 +329,7 @@ char* solicitarBytesDePagina(int pid, int nroPagina, int offset, int size) {
 	if (frame != -28) {
 		memcpy(&buffer, ptrMemoria + frame * getFrameSize() + offset, size);
 		log_info(getArchivoLog(),
-				"\nSe ha almacenado el valor: %s\nPID: %d \nFRAME: %d \nPAGINA: %d \nOFFSET: %d ",
+				"\nSe ha obtenido el valor: %s\nPID: %d \nFRAME: %d \nPAGINA: %d \nOFFSET: %d ",
 				buffer, pid, frame, nroPagina, offset);
 	} else
 		log_warning(getArchivoLog(),
@@ -289,6 +356,7 @@ int almacenarBytesEnPagina(int pid, int nroPagina, int offset, int size,
 
 	if (frame != -28) {
 		memcpy(ptrMemoria + frame * getFrameSize() + offset, &buffer, size);
+		actualizarCache(pid, nroPagina, frame);
 		log_info(getArchivoLog(),
 				"\nSe ha almacenado el valor: %s\nPID: %d \nFRAME: %d \nPAGINA: %d \nOFFSET: %d ",
 				buffer, pid, frame, nroPagina, offset);
@@ -348,72 +416,35 @@ int finalizarPrograma(int pid) {
 	printf("\nEl programa %d ha finalizado", pid);
 	return 1;
 }
+void* buscarFrame(int pid, int pagina){
+	void* aux = malloc(getFrameSize());
+	int posicion = buscarEntrada(ptrCache,pid,pagina);
+	if(posicion!=-1){
+		leerEntrada(ptrCache, posicion, aux);
+	}
+	else{
+		posicion = buscarFrameDePagina(pid, ptrMemoria, pagina);
+		if(posicion!=-28){
+		//Copia los datos almacenados en el frame dado por la pagina.
+		memcpy(aux, ptrMemoria+posicion*getFrameSize(),getFrameSize());
+		ingresarNuevaEntrada(ptrCache,pid, pagina,aux);
+		}
+	}
 
-//Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
-void seleccionOperacionesMemoria(int socket) {
+	return aux;
+}
 
-	int seleccion, pid, paginas, rtaFuncion, offset, size, nroFrame;
-
-	seleccion = recibirSeleccionOperacion(socket);
-	switch (seleccion) {
-	case INICIAR_PROGRAMA:
-		pid = recibirTamanio(socket);
-		paginas = recibirTamanio(socket);
-		rtaFuncion = inicializarPrograma(pid, paginas);
-		sleep(getRetardo());
-		enviarTamanio(socket, rtaFuncion);
-		break;
-
-	case SOLICITAR_BYTES_PAG:
-
-		pid = recibirTamanio(socket);
-		nroFrame = recibirTamanio(socket);
-		offset = recibirTamanio(socket);
-		size = recibirTamanio(socket);
-		buffer = malloc(size);
-		solicitarBytesDePagina(pid, nroFrame, offset, size);
-		sleep(getRetardo());
-		enviarMensaje(socket, buffer, size);
-		free(buffer);
-		break;
-	case ALMACENAR_BYTES_PAG:
-
-		buffer = malloc(size);
-		pid = recibirTamanio(socket);
-		nroFrame = recibirTamanio(socket);
-		offset = recibirTamanio(socket);
-		size = recibirTamanio(socket);
-		recibirDatos(socket, &buffer, size);
-		rtaFuncion = almacenarBytesEnPagina(pid, nroFrame, offset, size,
-				buffer);
-		sleep(getRetardo());
-		enviarTamanio(socket, rtaFuncion);
-		free(buffer);
-		break;
-
-	case ASIGNAR_PAGINAS_PRC:
-		pid = recibirTamanio(socket);
-		paginas = recibirTamanio(socket);
-		rtaFuncion = asignarPaginasProceso(pid, paginas);
-		sleep(getRetardo());
-		enviarTamanio(socket, rtaFuncion);
-		break;
-
-	case FINALIZAR_PRG:
-		pid = recibirTamanio(socket);
-		rtaFuncion=finalizarPrograma(pid);
-		sleep(getRetardo());
-		enviarTamanio(socket, rtaFuncion);
-		break;
-	default:
-		rtaFuncion=4040;
-		printf("Error en la operacion de entrada");
-		enviarTamanio(socket,rtaFuncion);
-		break;
-
+void actualizarCache(int pid, int pag, int frame){
+	int posicion = buscarEntrada(ptrCache, pid, pag);
+	if(posicion!=-1){
+	void* aux = malloc(getFrameSize());
+	memcpy(aux, ptrMemoria+frame*getFrameSize(),getFrameSize());
+	escribirCache(ptrCache,pid,pag,aux);
+	free(aux);
 	}
 
 }
+
 
 /*int crearSocket() {
 	//Declaracion de variable para recibir valor de rta

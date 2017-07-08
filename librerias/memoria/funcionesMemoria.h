@@ -16,11 +16,12 @@
 #include "../serializador.h"
 
 #define RUTA_ARCHIVO "../../memoria/config_memoria.cfg"
-#define LIBRE -7
+#define LIBRE -1
 #define OCUPADO_x_STR -14
 #define NOT_FOUND -28
 
 //ESTRUCTURAS
+
 typedef struct {
 	int pid;
 	int nroPagina;
@@ -29,9 +30,9 @@ typedef struct {
 
 //DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
 int _puertoMemoria;
-int FRAME_SIZE;
-int FRAMES;
-int RETARDO_MEMORIA;
+int _frameSize;
+int _frames;
+int _retardoMemoria;
 
 //ARCHIVOS LOG
 t_log *archivoLog,*archivoSP;
@@ -58,6 +59,9 @@ int compararPID(strAdministrativa aux,int pid);
 int paginasLibresEnMemoria(int *ptr);
 int strVacia(int *ptr);
 
+void enviarMensaje(int socket, void* buffer, size_t tamanioBuffer);
+void recibirDatos(int socket, void* buffer, size_t tamanioBuffer);
+
 int getSizeStrAdm();
 
 
@@ -72,9 +76,9 @@ void asignarDatosDeConfiguracion() {
 	t_config* configuracion = asignarRutaDeArchivo();
 
 	_puertoMemoria = busquedaClaveNumerica(configuracion, "PUERTO");
-	FRAME_SIZE = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
-	FRAMES = busquedaClaveNumerica(configuracion, "MARCOS");
-	RETARDO_MEMORIA = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
+	_frameSize = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
+	_frames = busquedaClaveNumerica(configuracion, "MARCOS");
+	_retardoMemoria = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
 }
 
 //  ******* FUNCIONES DE BLOQUE DE MEMORIA *******
@@ -82,7 +86,7 @@ void asignarDatosDeConfiguracion() {
 //Reservo la memoria que necesito
 int* reservarMemoria() {
 	int* memoria;
-	memoria = malloc(FRAME_SIZE * FRAMES);
+	memoria = malloc(_frameSize * _frames);
 	if (memoria == NULL)
 		esErrorConSalida(-1,
 				"Error en la solicitud de bloque de memoria (Malloc)");
@@ -93,6 +97,7 @@ int* reservarMemoria() {
 
 void crearArchivo(char* ruta) {
 
+	mkdir("./archivosLog",0755);
 	archivoLog= log_create(ruta, "Memoria", true, LOG_LEVEL_INFO);
 	archivoSP= log_create(ruta, "Memoria", false, LOG_LEVEL_INFO);
 }
@@ -113,25 +118,25 @@ void inicializarStrAdm(int* bloqueMemoria) {
 	int paginaOcupada=0;
 	int sizeStrAdm;
 	int sizeBlockAdm;
-	int contador_frame = 0; // contador para los frames dentro del for
+	int contadorFrame = 0; // contador para los frames dentro del for
 	strAdministrativa auxiliar;
 
-	//El tamaño de la estructura por la cantidad de FRAMES 500*256B = 6000 B
-	//Si hacemos 6000/FRAMES nos da 12, por lo cual le sumamos dos marcos 6.512
+	//El tamaño de la estructura por la cantidad de _frames 500*256B = 6000 B
+	//Si hacemos 6000/_frames nos da 12, por lo cual le sumamos dos marcos 6.512
 	// y le restamos 12 para que al dividirlo nos de 13 marcos
 	sizeStrAdm = sizeof(strAdministrativa);
-	sizeBlockAdm = ((sizeStrAdm * FRAMES) + FRAME_SIZE*2-12) / FRAMES;
+	sizeBlockAdm = ((sizeStrAdm * _frames) + _frameSize) / _frameSize;
 
 	auxiliar.pid = LIBRE;
-	auxiliar.frame = contador_frame;
+	auxiliar.frame = contadorFrame;
 	auxiliar.nroPagina = LIBRE;
 
-	//mientras la cantidad de frames del contador sea menor a 500 (FRAMES)
-	while (contador_frame < FRAMES) {
+	//mientras la cantidad de frames del contador sea menor a 500 (_frames)
+	while (contadorFrame < _frames) {
 
 		//Con este if nos aseguramos que hay 12 frames utilizados para las estructuras administrativas
 		//de esta manera cuando guardemos info no vamos a pisar nada
-		if (contador_frame >= FRAMES - sizeBlockAdm) {
+		if (contadorFrame < sizeBlockAdm) {
 			auxiliar.pid = OCUPADO_x_STR;
 			auxiliar.nroPagina = paginaOcupada;
 			paginaOcupada++;
@@ -140,16 +145,16 @@ void inicializarStrAdm(int* bloqueMemoria) {
 			auxiliar.nroPagina = LIBRE;
 		}
 		//Esta funcion copia los datos The memcpy(DEST,SRC,BYTES) function copies n bytes from memory area src to memory area dest.
-		memcpy(bloqueMemoria + contador_frame * sizeStrAdm, &auxiliar,
+		memcpy(bloqueMemoria + contadorFrame * sizeStrAdm, &auxiliar,
 				sizeStrAdm);
-		contador_frame++;
-		auxiliar.frame = contador_frame;
+		contadorFrame++;
+		auxiliar.frame = contadorFrame;
 	}
 
 	log_info(archivoLog, "El bloque de memorias administrativas ocupa %d frames",
 			sizeBlockAdm);
 	log_info(archivoLog, "Son %d estructuras con un peso individual de %d Bytes\n*******************************************",
-			FRAMES, sizeStrAdm);
+			_frames, sizeStrAdm);
 	log_info(archivoLog,"");
 }
 
@@ -161,7 +166,7 @@ void imprimirStrAdm(int* bloqueMemoria) {
 	strAdministrativa aux;
 	int c = 0;
 	log_info(archivoLog,"*******************************************");
-	while (c < FRAMES) {
+	while (c < _frames) {
 		memcpy(&aux, bloqueMemoria + c * sizeof(strAdministrativa),
 				sizeof(strAdministrativa));
 		//printf("\nPID: %d, NroPagina: %d, Frame: %d", aux.pid, aux.nroPagina,	aux.frame);
@@ -190,7 +195,7 @@ void liberarStrAdm(int pid, int* ptr) {
 
 	//Mientras contador sea menor a la cant de frames,
 	//el ptero se sigue moviendo de a una estructura adm
-	while(c<FRAMES){
+	while(c<_frames){
 
 		//Copio los datos apuntos en la direccion de memoria a un auxiliar de estructura
 		memcpy(&aux, ptr + c * sizeof(strAdministrativa),sizeof(strAdministrativa));
@@ -226,7 +231,7 @@ int iniciarStrAdmDePrc(int pid, int c, int* ptr) {
 	aux.nroPagina = paginasPrc(pid, ptr);
 
 	aux.frame = c ;
-	memcpy(ptr,&aux,s izeof(strAdministrativa));
+	memcpy(ptr,&aux,sizeof(strAdministrativa));
 
  return 1;
 }
@@ -280,7 +285,7 @@ int paginasPrc(int pid, int*ptr){
 	int paginasPrc=0,c=0;
 	strAdministrativa aux;
 	size_t size=sizeof(strAdministrativa);
-	while(c<FRAMES){
+	while(c<_frames){
 
 		memcpy(&aux,ptr+c*sizeof(strAdministrativa),size);
 		if(compararPID(aux,pid)){
@@ -298,7 +303,7 @@ int paginasLibresEnMemoria(int *ptr){
 		int c=0, paginasLibres=0,frame=-1;
 		size_t size=sizeof(strAdministrativa);
 		strAdministrativa aux;
-		while(c<FRAMES){
+		while(c<_frames){
 			memcpy(&aux, ptr+c*sizeof(strAdministrativa),size);
 			if(compararPID(aux,LIBRE)){
 				paginasLibres++;
@@ -318,7 +323,7 @@ int strVacia(int *ptr){
 	int frameLibre=NOT_FOUND;
 	strAdministrativa aux;
 	size_t size=sizeof(strAdministrativa);
-	while(c<FRAMES){
+	while(c<_frames){
 		memcpy(&aux, ptr+c*sizeof(strAdministrativa),size);
 		if(compararPID(aux,LIBRE)){
 			frameLibre=c;
@@ -332,7 +337,7 @@ int strVacia(int *ptr){
 int buscarFrame(int pid, int *ptr){
 	int c=0;
 	strAdministrativa aux;
-	while(c<FRAMES){
+	while(c<_frames){
 		memcpy(&aux,ptr+c*getSizeStrAdm(),getSizeStrAdm());
 		if(compararPID(aux, pid))
 			return aux.frame;
@@ -346,7 +351,7 @@ int buscarFrameDePagina(int pid, int *ptr, int pagina){
 	int contador;
 	strAdministrativa aux;
 
-	while (contador<FRAMES){
+	while (contador<_frames){
 
 		memcpy(&aux, ptr+contador*sizeof(strAdministrativa),sizeof(strAdministrativa));
 		if(compararPID(aux,pid)&&aux.nroPagina==pagina){
@@ -357,12 +362,15 @@ int buscarFrameDePagina(int pid, int *ptr, int pagina){
 	return NOT_FOUND;
 }
 
+void leerFrame(int* ptr, void* contenido, int movimiento){
+
+}
 
 //  ******* FUNCIONES DE CONSOLA DE LA MEMORIA  *******
 
 //Modificar la cantidad de tiempo que espera el proceso memoria antes de responder una solicitud
 void retardo(int tiempoEspera) {
-	RETARDO_MEMORIA = tiempoEspera;
+	_retardoMemoria = tiempoEspera;
 }
 
 //Genera un reporte en pantalla y en un archivo en disco del estado actual del
@@ -390,6 +398,9 @@ int recibirSeleccionOperacion(int socket) {
 	return *operacion;
 }
 
+//todo
+//void recibirDatos(int socket, void* buffer, size_t tamanioBuffer){}
+
 void enviarMensaje(int socket, void* buffer, size_t tamanioBuffer){
 
 	paquete* pack =  crearPaquete(tamanioBuffer);
@@ -404,7 +415,7 @@ int getPuertoMemoria(){
 	return _puertoMemoria;
 }
 int getFrameSize(){
-	return FRAME_SIZE;
+	return _frameSize;
 }
 
 int getSizeStrAdm(){
@@ -412,7 +423,7 @@ int getSizeStrAdm(){
 }
 
 int getRetardo(){
-	return RETARDO_MEMORIA;
+	return _retardoMemoria;
 }
 
 
