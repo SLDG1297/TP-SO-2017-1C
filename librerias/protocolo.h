@@ -17,6 +17,11 @@
 // Protocolo de comunicación del Kernel
 
 // Protocolo de comuniación del File System
+#define VALIDAR_ARCHIVO			1701
+#define CREAR_ARCHIVO			1702
+#define BORRAR					1703
+#define OBTENER_DATOS			1704
+#define GUARDAR_DATOS			1705
 
 // Protocolo de comunicación de la Memoria
 #define INICIAR_PROGRAMA 		51

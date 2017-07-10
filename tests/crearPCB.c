@@ -4,8 +4,6 @@
 
 #include <commons/collections/list.h>
 
-
-
 #include "../librerias/pcb.h"
 
 
@@ -13,60 +11,6 @@
 // Variables globales
 
 char* ruta = "crearPCBCodigo.txt";
-
-
-
-// Declaraciones
-
-pcb 		crearPCB(u_int32_t pid, char* path, u_int32_t tamanioPaginas);
-
-char* 		obtenerCodigo(char* path);
-
-u_int32_t	calcularPaginasUsadas(u_int32_t tamanioInstrucciones, u_int32_t tamanioPaginas);
-
-
-
-// Definiciones
-
-pcb crearPCB(u_int32_t pid, char* path, u_int32_t tamanioPaginas){
-	pcb nuevoProceso;							// Inicializar PCB
-
-	nuevoProceso.pid = pid;						// Asignar PID
-
-	char* codigo = obtenerCodigo(path);			// El File System devuelve el código de un archivo.
-
-	preprocesador(codigo, &nuevoProceso);		// Obtengo los índices de etiquetas y de código del código.
-
-	nuevoProceso.paginasUsadas = calcularPaginasUsadas(nuevoProceso.cantidadInstrucciones, tamanioPaginas);	// Asignar páginas usadas por el código.
-
-	nuevoProceso.indiceStack = list_create();	// Inicializar stack;
-
-	free(codigo);
-
-	return nuevoProceso;
-}
-
-char* obtenerCodigo(char* path){
-	char* codigo;
-	long int tamanio;
-
-	FILE* archivo = fopen(path, "r");
-
-	fseek(archivo, 0, SEEK_END);
-	tamanio = ftell(archivo);
-	rewind(archivo);
-
-	codigo = malloc(tamanio);
-	fread(codigo, sizeof(char), tamanio, archivo);
-
-	fclose(archivo);
-
-	return codigo;
-}
-
-u_int32_t calcularPaginasUsadas(u_int32_t tamanioInstrucciones, u_int32_t tamanioPaginas){
-	return tamanioInstrucciones / tamanioPaginas;
-}
 
 
 

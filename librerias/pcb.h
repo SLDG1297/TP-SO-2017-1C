@@ -99,19 +99,58 @@ pcb;
 
 // Declaraciones
 
-size_t		calcularTamanioPCB(pcb* unPcb);					// Es obvio XD
+pcb 		crearPCB(u_int32_t pid, char* path, u_int32_t tamanioPaginas);		// Crea un PCB...
 
-size_t		calcularTamanioStack(t_list* pila);				// Este también XD
+char* 		obtenerCodigo(char* path);											// Obtiene el código de un programa a partir de un script
 
-paquete*	serializarPCB(int socket, pcb* unPcb);			// Serializar PCB (Guau...)
+void		preprocesador(char* codigo, pcb* unPcb);							// Generar el índice de código del PCB
 
-pcb* 		deserializarPCB(int socket);					// Deserializar PCB (NO ME DIGAS!!)
+size_t		calcularTamanioPCB(pcb* unPcb);										// Es obvio XD
 
-void		preprocesador(char* codigo, pcb* unPcb);		// Preprocesador de código para generar el índice de código del PCB
+size_t		calcularTamanioStack(t_list* pila);									// Este también XD
 
+paquete*	serializarPCB(int socket, pcb* unPcb);								// Serializar PCB (Guau...)
+
+pcb* 		deserializarPCB(int socket);										// Deserializar PCB (NO ME DIGAS!!)
 
 
 // Definiciones
+
+pcb crearPCB(u_int32_t pid, char* path, u_int32_t tamanioPaginas){
+	pcb nuevoProceso;							// Inicializar PCB
+
+	nuevoProceso.pid = pid;						// Asignar PID
+
+	char* codigo = obtenerCodigo(path);			// El File System devuelve el código de un archivo.
+
+	preprocesador(codigo, &nuevoProceso);		// Obtengo los índices de etiquetas y de código del código.
+
+	nuevoProceso.paginasUsadas = nuevoProceso.cantidadInstrucciones / tamanioPaginas;	// Asignar páginas usadas por el código.
+
+	nuevoProceso.indiceStack = list_create();	// Inicializar stack;
+
+	free(codigo);
+
+	return nuevoProceso;
+}
+
+char* obtenerCodigo(char* path){
+	char* codigo;
+	long int tamanio;
+
+	FILE* archivo = fopen(path, "r");
+
+	fseek(archivo, 0, SEEK_END);
+	tamanio = ftell(archivo);
+	rewind(archivo);
+
+	codigo = malloc(tamanio);
+	fread(codigo, sizeof(char), tamanio, archivo);
+
+	fclose(archivo);
+
+	return codigo;
+}
 
 size_t calcularTamanioPCB(pcb* unPcb){
 	size_t tamanio;

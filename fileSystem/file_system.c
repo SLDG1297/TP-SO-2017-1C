@@ -33,105 +33,48 @@
 
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
+#include "../librerias/conexionSocket.h"
+#include "../librerias/fileSystem/funcionesFileSystem.h"
+#include "../librerias/serializador.h"
 
 #define RUTA_ARCHIVO "./config_file_system.cfg"
-#define SIZE_BUFFER 1024
 
 
-int main(int argc, char *argv[]) {
+int main() {
 
-//CODIGO PARA LLAMAR AL ARCHIVO
-
-	//Estructura para manejar el archivo de configuración -- t_config*
-	//Crear estructura de configuración para obtener los datos del archivo de configuración.
+	// Leer a archivo de configuración
 
 	t_config* configuracion;
 	char* ruta = RUTA_ARCHIVO;
 	configuracion = llamarArchivo(ruta);
 
+	int puertoKernel = busquedaClaveNumerica(configuracion, "PUERTO");
+	char* puntoMontaje = busquedaClaveAlfanumerica(configuracion, "PUNTO_MONTAJE");
 
-//DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL
-
-	//*Socket para esperar conexion con el kernel
-	int sockDeEspera;
-
-	//*Socket para entablar conexion con el kernel
-	int sockAlKernel;
-
-	int yes = 1;
-	int longitudDatosEnviados;
-	int longitudEstructuraSocket;
-	char buffer[SIZE_BUFFER];
-	memset (buffer,'\0',SIZE_BUFFER);
-	char* handshake = "La conexion al proceso fileSystem fue exitosa";
-	struct sockaddr_in espera,datosDelKernel;
-
-//DECLARACION DE VARIABLES PARA VALORES DE RESPUESTA
-
-	int valorRtaSetSockOpt = 0;
-	int valorRtaBind = 0;
-	int valorRtaListen = 0;
-
-//DECLARACION Y ASIGNACION DE DATOS PARA EL ARCHIVO DE CONFIGURACION
-	int PUERTO = busquedaClaveNumerica(configuracion, "PUERTO");
-	char* PUNTO_MONTAJE = busquedaClaveAlfanumerica(configuracion,"PUNTO_MONTAJE");
-
-// CODIGO PRINCIPAL DE FILE SYSTEM
-		sockDeEspera = socket(AF_INET,SOCK_STREAM,0);
-		esErrorConSalida(sockDeEspera,"Fallo en la creacion del socket de espera");
+	envolver(puertoKernel, puntoMontaje);
 
 
-		valorRtaSetSockOpt= setsockopt(sockDeEspera, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-		esErrorConSalida(valorRtaSetSockOpt,"Error en setsockopt en el socket de espera");
 
-		printf("Setsockopt correcto\n");
-		puts("Socket de espera creado\n");
+	// Iniciar estructuras propias del File System
 
-//DIRECCION PARA ESPERAR LA CONEXION CON EL KERNEL
-		espera.sin_family = AF_INET;
-		espera.sin_port = htons(PUERTO);
-		espera.sin_addr.s_addr = INADDR_ANY;
-		bzero(&(espera.sin_zero), 8);
-
-		valorRtaBind = bind(sockDeEspera, (struct sockaddr *) &espera,sizeof(struct sockaddr)) ;
-		esErrorConSalida(valorRtaBind,"Error en Bind");
+	iniciarEstructuras();
 
 
-		printf("Bind correcto\n");
-		puts("Esperando la conexion del kernel\n");
 
-	    valorRtaListen = listen(sockDeEspera, 1);
-	    esErrorConSalida(valorRtaListen,"Error en listen");
+	// Establecer conexión como servidor
 
-		longitudEstructuraSocket = sizeof (datosDelKernel);
-
-		sockAlKernel = accept(sockDeEspera,(struct sockaddr *) &datosDelKernel,&longitudEstructuraSocket);
-		esErrorSinSalida(sockAlKernel,"Error en accept");
+	int socketKernel = servir(puertoKernel);
 
 
-		close(sockDeEspera);
 
-		longitudDatosEnviados = send(sockAlKernel,handshake, strlen(handshake),0);
+	// Elegir acción
 
-		esErrorSinSalida(longitudDatosEnviados,"Fallo en el handshake");
+	while(1)
+	{
+		u_int32_t accion = recibirHeader(socketKernel);
 
-
-		puts ("La conexion al proceso kernel fue exitosa\n");
-		puts ("Esperando mensajes\n");
-
-		while(1){
-
-			int bytesRecibidos = recv(sockAlKernel,buffer,sizeof(buffer),0);
-
-			esErrorSinSalida(bytesRecibidos,"Error en la recepcion");
-
-			sinBytesRecibidos(bytesRecibidos);
-
-			printf ("Buffer: %s\n",buffer);
-			memset (buffer,'\0',SIZE_BUFFER);
-		}
-
-
+		elegirOperacion(accion);
+	}
 
 	return 0;
 
