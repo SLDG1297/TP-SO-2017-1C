@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc funcionesFS.c -o funcionesFS -lcommons -lcspecs
+./funcionesFS
+rm funcionesFS

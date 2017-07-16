@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <cspecs/cspec.h>
 
+
+
 // Hay toda una teoría atrás de los términos que pongo. Algo de BDD, no sé que corno. Así que algunas cosas son medio raras XD
 
 context (example) {	// Indica el comportamiento de los tests con un identificador.

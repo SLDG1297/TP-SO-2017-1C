@@ -5,6 +5,7 @@
 #include <commons/txt.h>
 
 #include "../librerias/pcb.h"
+#include "../librerias/fileSystem/funcionesFileSystem.h"
 
 void prueba();
 

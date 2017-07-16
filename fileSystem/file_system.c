@@ -40,6 +40,7 @@
 #define RUTA_ARCHIVO "./config_file_system.cfg"
 
 
+
 int main() {
 
 	// Leer a archivo de configuración
@@ -52,12 +53,6 @@ int main() {
 	char* puntoMontaje = busquedaClaveAlfanumerica(configuracion, "PUNTO_MONTAJE");
 
 	envolver(puertoKernel, puntoMontaje);
-
-
-
-	// Iniciar estructuras propias del File System
-
-	iniciarEstructuras();
 
 
 

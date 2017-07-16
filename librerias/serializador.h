@@ -1,10 +1,3 @@
-/*
- * serializador.h
- *
- *  Created on: 9/5/2017
- *      Author: utnso
- */
-
 #ifndef SERIALIZADOR_H_
 #define SERIALIZADOR_H_
 
@@ -103,7 +96,7 @@ void enviarDato(int socket, void* dato, size_t tamanioDato){
 void recibirDato(int socket, void* dato, size_t tamanioDato){
 	int verificador;													// Chequea que el recibo sea correcto.
 
-	verificador = recv(socket, dato, tamanioDato, 0);					// Recibe el dato.
+	verificador = recv(socket, dato, tamanioDato, MSG_WAITALL);			// Recibe el dato.
 	esErrorConSalida(verificador, "\nNo se pudo recibir el paquete.\n");
 }
 
@@ -175,7 +168,7 @@ void enviarPaquete(int socket, paquete* envio){
 }
 
 void recibirPaquete(int socket, void* receptor, size_t tamanioRecibo){
-	recibirDato(socket, receptor, tamanioRecibo);	// Re parásito XD
+	recibirDato(socket, receptor, tamanioRecibo);							// Re parásito XD
 }
 
 size_t recibirPaqueteVariable(int socket, void** receptor){
