@@ -29,7 +29,7 @@ void llenarVarsPrimitivas(pcb* _PCB, u_int32_t* _TAMANIO_PAG);
 indiceDeStack* pararmeEnContextoActual();
 
 //Se le pide espacio a la memoria para una variable de tamaño tamañoDeVariable
-posicionMemoria solicitarEspacioAMemoria(u_int32_t pid, u_int32_t tamañoDeVariable);
+posicionMemoria solicitarEspacioAMemoria(u_int32_t pid, u_int32_t tamanioDeVariable);
 
 //Se le pide el valor a la memoria dándole su página, offset y size junto con el pid del proceso;
 t_valor_variable solicitarValorAMemoria(solicitudMemoria solicitud);
@@ -74,36 +74,66 @@ t_puntero calculart_puntero(posicionMemoria posMem){
 posicionMemoria* obtenerPosicionMemoria(t_puntero direccion){
 	t_list* stack = PCB->indiceStack;
 	int cantidadDeContextos = stack->elements_count;
+	int i,j,k;
 
 	//For para ir cambiando de contexto del stack
-	for(int i = 0;i < cantidadDeContextos;i++){
+	for(i = 0;i < cantidadDeContextos;i++){
     indiceDeStack* aux = (indiceDeStack*)list_get(stack,i);
     int cantArgs = aux->argumentos->elements_count;
     int cantVars = aux->variables->elements_count;
 
     //For para ver lista de argumentos
-    for(int j = 0;j < cantArgs ;j++){
-    argStack* argStack = (argStack*)list_get(aux->argumentos,j);
+    for(j = 0;j < cantArgs ;j++){
+    argStack* arguStack = (argStack*)list_get(aux->argumentos,j);
 
     //Si encontró la dirección correcta
-    if(direccion == calculart_puntero(*argStack)){
-    	return (posicionMemoria*)argStack;
+    if(direccion == calculart_puntero(*arguStack)){
+    	return (posicionMemoria*)arguStack;
     }
     }/*Fin del for de lista de argumentos*/
 
     //For para ver lista de variables
-    for(int k = 0;k < cantVars;k++){
+    for(k = 0;k < cantVars;k++){
     variableStack* varStack = (variableStack*)list_get(aux->variables,k);
 
     //Si encontró la dirección correcta
     if(direccion == calculart_puntero(varStack->posicionMemoria)){
-        	return varStack->posicionMemoria;
+    	posicionMemoria* posMem = &(varStack->posicionMemoria);
+        return posMem;
     }
     }/*Fin del for de lista de variables*/
 
 	}/*Fin del for principal(el del contexto)*/
 	return NULL;
 }
+
+posicionMemoria solicitarEspacioAMemoria(u_int32_t pid, u_int32_t tamanioDeVariable){
+posicionMemoria posmem;
+return posmem;
+}
+
+t_valor_variable solicitarValorAMemoria(solicitudMemoria solicitud){
+	t_valor_variable valor;
+	return valor;
+}
+
+void escribirValorEnMemoria(solicitud, valor){
+
+}
+
+t_valor_variable pedirKernelVariableCompartida(variable){
+	t_valor_variable valor;
+	return valor;
+}
+
+void asignarKernelVariableCompartida(variable,valor){
+
+}
+
+void finalizarPrograma(){
+
+}
+
 
 
 //OPERACIONES PARA ESTRUCTURA AnSISOP_funciones -----------------------------------------------------------------------
@@ -141,14 +171,14 @@ void finalizar(void);
 //Se debe almacenar el valor de la variable retorno en la posición de memoria indicada en el stack en retVar.
 void retornar(t_valor_variable retorno);
 
-
 //Definiciones
 
 //-------------------------------------------------------------------------Falta considerar lo del diccionario de variables
 t_puntero definirVariable(t_nombre_variable identificador_variable){
 
-	u_int32_t tamañoDeVariable = sizeof(identificador_variable);
-	posicionMemoria posMem = solicitarEspacioAMemoria(tamañoDeVariable); //-------------------------------TODO
+	u_int32_t tamanioDeVariable = sizeof(identificador_variable);
+	posicionMemoria posMem;
+	//posicionMemoria posMem = solicitarEspacioAMemoria(PCB->pid,tamanioDeVariable); //-------------------------------TODO
 
 	indiceDeStack* aux = pararmeEnContextoActual();
 
@@ -179,8 +209,8 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable){
 	//Para ver si es el argumento de una funcion
 	if (identificador_variable >= '0' && identificador_variable <= '9'){
 	t_list* listaArgumentos = aux->argumentos;
-	argStack* argStack =(argStack*)list_get(listaArgumentos,identificador_variable);
-	return calculart_puntero((posicionMemoria)(*argStack));
+	argStack* arguStack =(argStack*)list_get(listaArgumentos,identificador_variable);
+	return calculart_puntero((posicionMemoria)(*arguStack));
 	}
 
 	//Ahora tengo que recorrer la lista de variables hasta encontrar la requerida
@@ -197,7 +227,7 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable){
 		return calculart_puntero(posMem);
 	}
 
-	//Si no estaba la variable en niguna de las listas
+	//Si no estaba la variable en ninguna de las listas
     return -1;
 }
 
@@ -209,7 +239,7 @@ t_valor_variable dereferenciar(t_puntero direccion_variable){
 	solicitud.pagina = posMem->pagina;
 	solicitud.offset = posMem->offset;
 	solicitud.size = posMem->size;
-    t_valor_variable valor = solicitarValorAMemoria(solicitud); //-----------------------------------------TODO
+    t_valor_variable valor ;//= solicitarValorAMemoria(solicitud); //-----------------------------------------TODO
     return valor;
 }
 
@@ -221,16 +251,16 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor){
 	solicitud.offset = posMem->offset;
 	solicitud.size = posMem->size;
 	//Se le pide escritura a la memoria en la posicion determinada
-	escribirValorEnMemoria(solicitud, valor); //----------------------------------------------------------TODO
+	//escribirValorEnMemoria(solicitud, valor); //----------------------------------------------------------TODO
 }
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable){
-	t_valor_variable valor = pedirKernelVariableCompartida(variable); //----------------------------------TODO
+	t_valor_variable valor ;//= pedirKernelVariableCompartida(variable);//----------------------------------TODO
 	return valor;
 }
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor){
-	t_valor_variable valorAsignado = asignarKernelVariableCompartida(variable,valor); //-------------------TODO
+	t_valor_variable valorAsignado ;//= asignarKernelVariableCompartida(variable,valor); //-------------------TODO
 	return valorAsignado;
 }
 
@@ -258,7 +288,7 @@ void finalizar(){
 
     //Finalizó el programa
     if(ultPos == 0){
-    	finalizarPrograma(); //------------------------------------------------------------------------TODO
+    	//finalizarPrograma(); //------------------------------------------------------------------------TODO
     }
 }
 
