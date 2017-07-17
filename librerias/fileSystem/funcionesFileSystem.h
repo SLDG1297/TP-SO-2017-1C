@@ -1,10 +1,11 @@
 #ifndef FILESYSTEM_FUNCIONESFILESYSTEM_H_
 #define FILESYSTEM_FUNCIONESFILESYSTEM_H_
 
+#include "sadica.h"
+#include "../serializador.h"
+
 #include <stdio.h>
 #include <stdbool.h>
-
-#include "../serializador.h"
 
 // Protocolo de comuniación del File System
 
@@ -13,22 +14,6 @@
 #define BORRAR					1703
 #define OBTENER_DATOS			1704
 #define GUARDAR_DATOS			1705
-
-// Otros valores
-
-#define TAMANIO_METADATA		2 * sizeof(u_int32_t) + strlen("SADICA") + 1
-
-
-
-// Estructuras de datos
-
-typedef struct{
-	u_int32_t 	tamanioBloques;		// Tamanio de los bloques que maneja el FS.
-	u_int32_t 	cantidadBloques;	// Cantidad de bloques que maneja el FS.
-	char* 		numeroMagico;		// Ni idea
-} registroMetadata;
-
-// Registro que compone al archivo Metadata.
 
 
 
@@ -50,7 +35,7 @@ void 	elegirOperacion(int accion);							// TODO: Selector de acciones del File 
 
 // Funciones del File System
 
-void	validarArchivo(char* path);								// TODO: Validar que el archivo solicitado exista en los directorios
+void	validarArchivo(char* path);								// Validar que el archivo solicitado exista en los directorios
 
 void	crearArchivo(char* path);								// TODO: Crear un archivo nuevo
 
@@ -64,11 +49,9 @@ void	guardarDatos(char* path);								// TODO: Escribir datos en un archivo
 
 bool	validar(char* path);									// Devuelve true si existe el archivo y false en caso contrario.
 
-void	iniciarMetadata(char* pathRaiz);						// Crear estructuras para determinar tamaño y cantidad de bloques en FS.
+void 	envioSimplificado(void* dato, u_int32_t tamanio);		// Simplifica el envío de paquetes serializados al Kernel.
 
-void	envioSimplificado(void* dato, u_int32_t tamanio);		// Ahorra el trabajo de empaquetar las cosas, que a veces puede ser denso.
-
-void	envolver(int _socketKernel, char* _puntoMontaje);		// Importa variables de file_system.c a funcionesFileSystem.h
+void	envolver(int _socketKernel, char* _puntoMontaje);		// Importa las variables de la función principal.
 
 
 
@@ -132,27 +115,6 @@ void obtenerDatos(char* path){
 void guardarDatos(char* path){
 
 	// Guarda datos en el archivo que indica el path.
-}
-
-void iniciarMetadata(char* pathRaiz){
-	char* path = string_new();
-
-	string_append(&path, pathRaiz);
-	string_append(&path, "Metadata/Metadata.bin");				// Obtener path real.
-
-	FILE* metadata = fopen(path, "w");							// Abrir archivo de metadata.
-
-	registroMetadata registro;
-
-	registro.tamanioBloques = 64;		// Hardcodeado
-	registro.cantidadBloques = 5192;	// Hardcodeado
-	registro.numeroMagico = "SADICA";	// Hardcodeado
-
-	fwrite(&registro, TAMANIO_METADATA, 1, metadata);			// Escribir en archivo el registro con los datos del FS.
-
-	fclose(metadata);
-
-	free(path);
 }
 
 void envioSimplificado(void* dato, u_int32_t tamanio){

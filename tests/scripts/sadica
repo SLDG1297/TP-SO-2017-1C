@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc sadica.c -o sadica -lcommons -lcspecs
+./sadica
+rm sadica

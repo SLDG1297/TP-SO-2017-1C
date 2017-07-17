@@ -1,0 +1,5 @@
+#!/bin/bash
+cd ..
+gcc fileSystem.c -o fileSystem -lcommons -lcspecs
+./fileSystem
+rm fileSystem

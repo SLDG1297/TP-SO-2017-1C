@@ -35,13 +35,14 @@
 #include "../librerias/controlErrores.h"
 #include "../librerias/conexionSocket.h"
 #include "../librerias/fileSystem/funcionesFileSystem.h"
+#include "../librerias/fileSystem/sadica.h"
 #include "../librerias/serializador.h"
 
 #define RUTA_ARCHIVO "./config_file_system.cfg"
 
 
 
-int main() {
+int main(){
 
 	// Leer a archivo de configuración
 
