@@ -168,7 +168,7 @@ void agregarALista(int tipo, int socketDato) {
 	cpu_activo cpu;
 	switch (tipo) {
 	case 0:
-		//si tipo igual a cero, se crea una consola
+		//si tipo igual a cero, se crea una consola - que es esto????
 		break;
 	case 1:
 
