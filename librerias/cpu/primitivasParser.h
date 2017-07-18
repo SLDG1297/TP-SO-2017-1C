@@ -35,13 +35,13 @@ posicionMemoria solicitarEspacioAMemoria(u_int32_t pid, u_int32_t tamanioDeVaria
 t_valor_variable solicitarValorAMemoria(solicitudMemoria solicitud);
 
 //Escribe el valor pedido en determinada posicion de memoria dandole el pid del proceso
-void escribirValorEnMemoria(solicitud, valor);
+void escribirValorEnMemoria(solicitudMemoria solicitud,t_valor_variable valor);
 
 //Le pide al kernel el valor de la variable compartida solicitada
-t_valor_variable pedirKernelVariableCompartida(variable);
+t_valor_variable pedirKernelVariableCompartida(t_nombre_compartida variable);
 
 //Se le pide al Kernel asignar un valor a determinada variable compartida
-void asignarKernelVariableCompartida(variable,valor);
+void asignarKernelVariableCompartida(t_nombre_compartida variable,t_valor_variable valor);
 
 //Funcion para calcular el t_puntero a partir de una posicion de memoria
 t_puntero calculart_puntero(posicionMemoria posMem);
@@ -50,7 +50,10 @@ t_puntero calculart_puntero(posicionMemoria posMem);
 posicionMemoria* obtenerPosicionMemoria(t_puntero direccion);
 
 //Esta función debe avisarle al Kernel que terminó la ejecución del programa
-void finalizarPrograma();
+void finalizarPrograma(void);
+
+//Dado el nombre de una etiqueta, obtiene el valor que debería tomar el program counter
+u_int32_t buscarPosicionDeLaEtiqueta(t_nombre_etiqueta nombre_etiqueta);
 
 void llenarPCB(pcb* _PCB, u_int32_t* _TAMANIO_PAG){
 	PCB = _PCB;
@@ -117,23 +120,27 @@ t_valor_variable solicitarValorAMemoria(solicitudMemoria solicitud){
 	return valor;
 }
 
-void escribirValorEnMemoria(solicitud, valor){
+void escribirValorEnMemoria(solicitudMemoria solicitud,t_valor_variable valor){
 
 }
 
-t_valor_variable pedirKernelVariableCompartida(variable){
+t_valor_variable pedirKernelVariableCompartida(t_nombre_compartida variable){
 	t_valor_variable valor;
 	return valor;
 }
 
-void asignarKernelVariableCompartida(variable,valor){
+void asignarKernelVariableCompartida(t_nombre_compartida variable,t_valor_variable valor){
 
 }
 
-void finalizarPrograma(){
+void finalizarPrograma(void){
 
 }
 
+u_int32_t buscarPosicionDeLaEtiqueta(t_nombre_etiqueta nombre_etiqueta){ //-------------------TODO
+	u_int32_t newPC;
+	return newPC;
+}
 
 
 //OPERACIONES PARA ESTRUCTURA AnSISOP_funciones -----------------------------------------------------------------------
@@ -265,6 +272,8 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 }
 
 void irAlLabel(t_nombre_etiqueta nombre_etiqueta){
+	u_int32_t programCounterNuevo = buscarPosicionDeLaEtiqueta(nombre_etiqueta);
+	PCB->programCounter = programCounterNuevo;
 
 }
 
