@@ -1,5 +1,5 @@
 #!/bin/bash
 cd ..
 gcc sadica.c -o sadica -lcommons -lcspecs
-./sadica
+valgrind ./sadica
 rm sadica

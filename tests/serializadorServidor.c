@@ -137,6 +137,7 @@ void deserializarTamanioVariableFeo(){
 	else
 		printf("Se esperaba el vector (300, 500) y obtuviste (%d, %d).\n\n", vector[0], vector[1]);
 
+	free(vector);
 }
 
 void deserializarTamanioVariable(){
@@ -153,6 +154,8 @@ void deserializarTamanioVariable(){
 		printf("Se obtuvo la cadena correcta %s.\n\n", cadenaEsperada);
 	else
 		printf("Se esperaba Ripinpin y obtuviste %s.\n\n", recibo);
+
+	free(recibo);
 }
 
 void deserializarTamanioVariableQueNoEsString(){
@@ -181,6 +184,8 @@ void deserializarTamanioVariableQueNoEsString(){
 	else
 		printf("Ripeaste...\n\n");
 
+	free(vector);
+	free(esperado);
 }
 
 void deserializarListaFija(){
@@ -234,6 +239,16 @@ void deserializarListaFija(){
 	else
 		printf("Jaja saludos. Ni en pedo te hago un printf con lo que te tuvo que haber dado.\n\n");
 
+	int i = 0;
+	while(i < list_size(lista))
+	{
+		free(list_remove(lista, i));
+
+		i++;
+	};
+
+	list_clean(lista);
+	list_destroy(lista);
 }
 
 void proximoTest(char* enunciado){

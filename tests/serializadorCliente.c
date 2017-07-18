@@ -138,6 +138,8 @@ void serializarTamanioVariableFeo(){
 
 	enviarPaquete(socketServidor, envio);
 
+	free(vector);
+
 
 
 	// Aserciones
@@ -156,6 +158,10 @@ void serializarTamanioVariable(){
 	empaquetarVariable(envio, cadena, tamanioCadena);
 
 	enviarPaquete(socketServidor, envio);
+
+
+
+	// Aserciones
 
 	printf("Se pudo enviar el paquete correctamente.\n\n");
 
@@ -177,6 +183,8 @@ void serializarTamanioVariableQueNoEsString(){
 	empaquetarVariable(envio, vector, tamanioVector);
 
 	enviarPaquete(socketServidor, envio);
+
+	free(vector);
 
 
 

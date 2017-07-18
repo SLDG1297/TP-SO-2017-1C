@@ -4,8 +4,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 #include <commons/bitarray.h>
+#include <commons/config.h>
+#include <commons/txt.h>
 
 #include "../serializador.h"
 
@@ -36,11 +39,11 @@ typedef struct{
 
 // Metadata
 
-registroMetadata	crearRegistroMetadata();								// Crear estructuras para determinar tamaño y cantidad de bloques en FS.
+void				iniciarMetadata(char* pathRaiz);						// Cargar el archivo Metadata.bin con los registros correspondientes.
 
-FILE*				iniciarMetadata(char* pathRaiz);						// Cargar el archivo Metadata.bin con los registros correspondientes.
+registroMetadata	crearRegistroMetadata(t_config* configuracion);			// Crear estructuras para determinar tamaño y cantidad de bloques en FS.
 
-registroMetadata	leerMetadata(FILE* archivoMetadata);					// Obtener registro de Metadata.bin
+registroMetadata	leerMetadata(char* pathRaiz);							// Obtener registro de Metadata.bin
 
 void				cerrarMetadata(FILE* archivoMetadata);					// Cerrar el archivo Metadata.bin.
 
@@ -52,46 +55,67 @@ FILE*				iniciarBitmap(char* pathRaiz);							// Crear bitmap con los bloques li
 
 t_bitarray*			leerBitmap(FILE* archivoBitmap);						// Obtener registro de Bitmap.bin.
 
-void 				cerrarBitmap(FILE* archivoBitmap, t_bitarray* bitmap);	// Cerrar el archivo Bitmap.bin.
-
 // Otros
 
 FILE*				iniciarArchivo(char* pathRaiz, char* pathRelativo);		// Abre un archivo simplificado.
+
+char*				obtenerPath(char* pathRaiz, char* pathRelativo);		// Obtiene directorio de un archivo en el FS.
+
+void				iniciarDirectorios(char* pathRaiz);						// Crear los directorios del FS.
 
 
 
 // Definiciones
 
-registroMetadata crearRegistroMetadata(){
+void iniciarMetadata(char* pathRaiz){
+	char* pathMetadata = obtenerPath(pathRaiz, "/Metadata/Metadata.bin");
+
+	char* tamanio = string_itoa(TAMANIO_BLOQUES);
+	char* cantidad = string_itoa(CANTIDAD_BLOQUES);
+	char* magica = "SADICA";
+
+	FILE* archivoMetadata = txt_open_for_append(pathMetadata);
+
+	t_config* configuracionMetadata = config_create(pathMetadata);
+
+	config_set_value(configuracionMetadata, "TAMANIO_BLOQUES", tamanio);
+	config_set_value(configuracionMetadata, "CANTIDAD_BLOQUES", cantidad);
+	config_set_value(configuracionMetadata, "MAGIC_NUMBER", magica);
+
+	config_save(configuracionMetadata);
+
+	config_destroy(configuracionMetadata);
+
+	txt_close_file(archivoMetadata);
+
+	free(pathMetadata);
+
+	free(tamanio);
+	free(cantidad);
+}
+
+registroMetadata crearRegistroMetadata(t_config* configuracion){
 	registroMetadata registro;
 
-	registro.tamanioBloques = TAMANIO_BLOQUES;
-	registro.cantidadBloques = CANTIDAD_BLOQUES;
-	registro.numeroMagico = "SADICA";
+	registro.tamanioBloques = config_get_int_value(configuracion, "TAMANIO_BLOQUES");
+	registro.cantidadBloques = config_get_int_value(configuracion, "CANTIDAD_BLOQUES");
+	registro.numeroMagico = config_get_string_value(configuracion, "MAGIC_NUMBER");
 
 	return registro;
 }
 
-FILE* iniciarMetadata(char* pathRaiz){
-	registroMetadata registro = crearRegistroMetadata();							// Registro de metadata.
+registroMetadata leerMetadata(char* pathRaiz){
+	char* pathMetadata = obtenerPath(pathRaiz, "/Metadata/Metadata.bin");
 
-	FILE* archivoMetadata = iniciarArchivo(pathRaiz, "Metadata/Metadata.bin");		// Abrir archivo de metadata.
+	t_config* configuracionMetadata = config_create(pathMetadata);
 
-	fwrite(&registro, TAMANIO_METADATA, 1, archivoMetadata);						// Escribir en archivo el registro con los datos del FS.
+	registroMetadata registro = crearRegistroMetadata(configuracionMetadata);
 
-	return archivoMetadata;
-}
+	config_destroy(configuracionMetadata);
 
-registroMetadata leerMetadata(FILE* archivoMetadata){
-	registroMetadata registro;									// Registro
-
-	fread(&registro, TAMANIO_METADATA, 1, archivoMetadata);		// Leer archivo y obtener datos.
+	free(pathMetadata);
 
 	return registro;
-}
-
-void cerrarMetadata(FILE* archivoMetadata){
-	fclose(archivoMetadata);
 }
 
 char* crearRegistroBitmap(){
@@ -104,7 +128,7 @@ char* crearRegistroBitmap(){
 FILE* iniciarBitmap(char* pathRaiz){
 	char* bitarray = crearRegistroBitmap();										// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
 
-	FILE* archivoBitmap = iniciarArchivo(pathRaiz, "Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
+	FILE* archivoBitmap = iniciarArchivo(pathRaiz, "/Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
 
 	fwrite(bitarray, sizeof(char), CANTIDAD_BLOQUES_BITS, archivoBitmap);
 
@@ -131,16 +155,33 @@ void cerrarBitmap(FILE* archivoBitmap, t_bitarray* bitmap){
 }
 
 FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
-	char* path = string_new();						// Path real.
+	char* path = obtenerPath(pathRaiz, pathRelativo);
 
-	string_append(&path, pathRaiz);
-	string_append(&path, pathRelativo);				// Obtener path real.
-
-	FILE* archivo = fopen(path, "wb+");				// Abrir archivo.
+	FILE* archivo = fopen(path, "wb+");		// Abrir archivo.
 
 	free(path);
 
 	return archivo;
+}
+
+char* obtenerPath(char* pathRaiz, char* pathRelativo){
+	char* path = string_new();				// Path real.
+
+	string_append(&path, pathRaiz);
+	string_append(&path, pathRelativo);		// Obtener path real.
+
+	return path;
+}
+
+void iniciarDirectorios(char* pathRaiz){
+	mkdir(pathRaiz, S_IRWXU);		// Creo el directorio de montaje.
+	chdir(pathRaiz);				// Me muevo al directorio del FS.
+
+	mkdir("Metadata", S_IRWXU);		// Creo los directorios que pide el enunciado.
+	mkdir("Archivos", S_IRWXU);
+	mkdir("Bloques", S_IRWXU);
+
+	chdir("..");					// Vuelvo al directorio raíz del FS.
 }
 
 #endif /* FILESYSTEM_SADICA_H_ */

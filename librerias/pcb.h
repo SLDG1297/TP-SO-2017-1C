@@ -101,7 +101,7 @@ pcb;
 
 pcb 		crearPCB(u_int32_t pid, char* path, u_int32_t tamanioPaginas);		// Crea un PCB...
 
-char* 		obtenerCodigo(char* path);											// Obtiene el código de un programa a partir de un script
+char* 		obtenerCodigo(char* path);											// Obtiene el código de un programa a partir de un script (Mocking de FS provisorio).
 
 void		preprocesador(char* codigo, pcb* unPcb);							// Generar el índice de código del PCB
 
@@ -127,25 +127,25 @@ pcb crearPCB(u_int32_t pid, char* path, u_int32_t tamanioPaginas){
 
 	nuevoProceso.paginasUsadas = nuevoProceso.cantidadInstrucciones / tamanioPaginas;	// Asignar páginas usadas por el código.
 
-	nuevoProceso.indiceStack = list_create();	// Inicializar stack;
-
 	free(codigo);
 
 	return nuevoProceso;
 }
 
 char* obtenerCodigo(char* path){
-	char* codigo;
-	long int tamanio;
+	char* codigo;										// Código del programa.
+	long int tamanio;									// Tamaño en bytes del código.
 
-	FILE* archivo = fopen(path, "r");
+	FILE* archivo = fopen(path, "r");					// Abrir el archivo con el código.
 
-	fseek(archivo, 0, SEEK_END);
-	tamanio = ftell(archivo);
-	rewind(archivo);
+	fseek(archivo, 0, SEEK_END);						// Ir a la posición final del archivo.
+	tamanio = ftell(archivo);							// Indica la posición final del archivo.
+	rewind(archivo);									// Vuelve para la posición inicial del archivo.
 
-	codigo = malloc(tamanio);
-	fread(codigo, sizeof(char), tamanio, archivo);
+	codigo = malloc(tamanio + 1);						// Reserva memoria para el string del código.
+	bzero(codigo, tamanio + 1);							// Inicilaiza el string '\0'.
+
+	fread(codigo, sizeof(char), tamanio, archivo);		// Copiar código en string.
 
 	fclose(archivo);
 

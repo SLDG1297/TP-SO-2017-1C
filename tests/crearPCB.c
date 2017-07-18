@@ -8,18 +8,16 @@
 
 
 
-// Variables globales
-
-char* ruta = "crearPCBCodigo.txt";
-
-
-
 int main(){
 	printf("Test para crear PCB\n\n");
+
+	char* ruta = "crearPCBCodigo.txt";
 
 	char* codigo = obtenerCodigo(ruta);
 
 	printf("Código:\n%s\n\n", codigo);
+
+	free(codigo);
 
 	pcb proceso = crearPCB(20, ruta, 256);
 
@@ -53,6 +51,9 @@ int main(){
 	};
 
 	printf("\nAnda re piola XD\n");
+
+	free(proceso.indiceCodigo);
+	free(proceso.indiceEtiqueta);
 
 	return 0;
 }

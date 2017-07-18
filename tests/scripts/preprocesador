@@ -1,5 +1,5 @@
 #!/bin/bash
 cd ..
 gcc preprocesador.c -o preprocesador -lcommons  -lcspecs -lparser-ansisop
-./preprocesador
+valgrind ./preprocesador
 rm preprocesador

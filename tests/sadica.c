@@ -11,23 +11,17 @@
 
 // Estructuras de datos
 
-char* puntoMontaje	= "pruebaFS/";
-char* pathMetadata	= "pruebaFS/Metadata/Metadata.bin";
-char* pathBitmap	= "pruebaFS/Metadata/Bitmap.bin";
+char* puntoMontaje	= "pruebaFS";
 
 
 context (SADICA) {
 	describe("Inicio de Metadata.bin") {
-    	FILE* archivoMetadata;
+		iniciarDirectorios(puntoMontaje);
     	registroMetadata metadata;
 
     	before{
-    		archivoMetadata = iniciarMetadata(puntoMontaje);
-    		metadata = leerMetadata(archivoMetadata);
-    	} end
-
-		after{
-    		cerrarMetadata(archivoMetadata);
+    		iniciarMetadata(puntoMontaje);
+    		metadata = leerMetadata(puntoMontaje);
     	} end
 
     	it("Se puede acceder al tamaño de bloques de Metadata.bin"){

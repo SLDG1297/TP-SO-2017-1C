@@ -1,5 +1,5 @@
 #!/bin/bash
 cd ..
 gcc crearPCB.c -o crearPCB -lcommons -lparser-ansisop
-./crearPCB
+valgrind ./crearPCB
 rm crearPCB

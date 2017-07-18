@@ -1,5 +1,5 @@
 #!/bin/bash
 cd ..
 gcc ejemplo.c -o ejemplo -lcspecs
-./ejemplo
+valgrind ./ejemplo
 rm ejemplo
