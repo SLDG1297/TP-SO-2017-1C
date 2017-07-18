@@ -30,19 +30,20 @@
 #include "../librerias/controlArchivosDeConfiguracion.h"
 #include "../librerias/controlErrores.h"
 #include "../librerias/memoria/funcionesMemoria.h"
+#include "../librerias/memoria/funcionesCache.h"
 #include "../librerias/conexionSocket.h"
 #include "../librerias/serializador.h"
 
 //***DEFINE DATOS ESTATICOS
-#define RUTA_ARCHIVO "./config_memoria.cfg"
+
 #define SIZE_DATA 1024
 #define RUTA_LOG "./memoriaLog.txt"
 
-#define INICIAR_PROGRAMA 	51
-#define SOLICITAR_BYTES_PAG 52
-#define ALMACENAR_BYTES_PAG 53
-#define ASIGNAR_PAGINAS_PRC 54
-#define FINALIZAR_PRG 		55
+#define INICIAR_PROGRAMA 	1051
+#define SOLICITAR_BYTES_PAG 1052
+#define ALMACENAR_BYTES_PAG 1053
+#define ASIGNAR_PAGINAS_PRC 1054
+#define FINALIZAR_PRG 		1055
 
 //***DATOS PARA ENTABLAR CONEXION CON EL KERNEL
 
@@ -61,19 +62,18 @@ sem_t semaforo;
 
 //***DECLARACION DE PROTOTIPO DE FUNCIONES
 
-int crearSocket();
-char* laConexionFueExitosa(int *socket);
-int iniciarConexionServidor();
+void actualizarCache(int pid, int pag, int frame);
+void buscarFrame(int pid, int pagina,void *aux);
+int finalizarPrograma(int pid);
+int asignarPaginasProceso(int pid, int cantPaginas);
+int almacenarBytesEnPagina(int pid, int nroPagina, int offset, int size,char* buffer);
+char* solicitarBytesDePagina(int pid, int nroPagina, int offset, int size);
+int inicializarPrograma(int pid, int cantPaginas);
+void seleccionOperacionesMemoria(int socket) ;
 int ponerSocketEnEscucha_aceptarConexion();
 void *asignarSocketAConexion();
-void seleccionOperacionesMemoria(int socket);
-
-int inicializarPrograma(int pid, int paginas);
-char *solicitarBytesDePagina(int pid, int nroPagina, int offset, int size);
-int almacenarBytesEnPagina(int pid, int nroPagina, int offset, int size,
-		char* buffer);
-int asignarPaginasProceso(int pid, int paginas);
-int finalizarPrograma(int pid);
+char* laConexionFueExitosa(int *socket);
+int iniciarConexionServidor();
 
 //************** MAIN **************//
 int main(int argc, char *argv[]) {
@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
 	else
 		printf("hilo creado");
 
+	consolaMemoria();
 	//int pthread_join(pthread_t thread, void **retval);
 	//* Finalmente esperamos a que el hilo original termine
 
@@ -126,9 +127,6 @@ int iniciarConexionServidor() {
 	int socketEsperaKernel = crearSocket();
 	printf("Setsockopt correcto\n");
 	puts("Socket de espera creado\n");
-
-	//Declaracion de variables para recibir valor de rta
-	int valorRtaBind = 0;
 
 	//DIRECCION PARA ESPERAR A LA CONEXION CON EL KERNEL
 
@@ -233,7 +231,7 @@ int ponerSocketEnEscucha_aceptarConexion() {
 //Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
 void seleccionOperacionesMemoria(int socket) {
 
-	int seleccion, pid, paginas, rtaFuncion, offset, size, nroFrame;
+	int seleccion, pid, paginas, rtaFuncion, offset, size=0, nroFrame;
 
 	seleccion = recibirSeleccionOperacion(socket);
 	switch (seleccion) {
@@ -416,11 +414,12 @@ int finalizarPrograma(int pid) {
 	printf("\nEl programa %d ha finalizado", pid);
 	return 1;
 }
-void* buscarFrame(int pid, int pagina){
-	void* aux = malloc(getFrameSize());
+
+void buscarFrame(int pid, int pagina, void* aux){
+
 	int posicion = buscarEntrada(ptrCache,pid,pagina);
 	if(posicion!=-1){
-		leerEntrada(ptrCache, posicion, aux);
+		leerContenido(ptrCache, posicion, aux);
 	}
 	else{
 		posicion = buscarFrameDePagina(pid, ptrMemoria, pagina);
@@ -430,8 +429,6 @@ void* buscarFrame(int pid, int pagina){
 		ingresarNuevaEntrada(ptrCache,pid, pagina,aux);
 		}
 	}
-
-	return aux;
 }
 
 void actualizarCache(int pid, int pag, int frame){
@@ -439,28 +436,10 @@ void actualizarCache(int pid, int pag, int frame){
 	if(posicion!=-1){
 	void* aux = malloc(getFrameSize());
 	memcpy(aux, ptrMemoria+frame*getFrameSize(),getFrameSize());
-	escribirCache(ptrCache,pid,pag,aux);
+	escribirCache(ptrCache,pid,pag,aux,posicion);
 	free(aux);
 	}
 
 }
 
 
-/*int crearSocket() {
-	//Declaracion de variable para recibir valor de rta
-	int valorRtaSetSockOpt;
-	int sockDeEspera;
-
-	//Socket(): creates an endpoint for communication and returns a file descriptor that refers to that endpoint.
-
-	sockDeEspera = socket(AF_INET, SOCK_STREAM, 0);
-	errorSalidaSocket(sockDeEspera, "Fallo en la creacion del socket de direccionEspera",
-			&sockDeEspera);
-
-	valorRtaSetSockOpt = setsockopt(sockDeEspera, SOL_SOCKET, SO_REUSEADDR,
-			(const char*) &yes, sizeof(yes));
-	errorSalidaSocket(valorRtaSetSockOpt,
-			"Error en setSockOpt en el socket de direccionEspera", &sockDeEspera);
-	return sockDeEspera;
-}
-*/

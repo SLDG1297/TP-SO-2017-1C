@@ -16,6 +16,9 @@
 #include "../controlArchivosDeConfiguracion.h"
 #include "../serializador.h"
 #include "./funcionesMemoria.h"
+//#include "../../memoria/memoria.c"
+
+#define LIBRE -1
 
 typedef struct {
 	int pid;
@@ -24,45 +27,46 @@ typedef struct {
 
 int* ultimoAcceso;
 
-int ENTRADAS_CACHE = 10;
-int CACHE_X_PROC;
+int _entradasCache = 10;
+int _cacheXPrc;
 
 void escribirAdmCache();
 void iniciarAdmCache(int* cache);
 int compararDatos(strCache a, strCache b);
 int entradaMasAntigua();
 
+void leerEntrada(int* cache, int posicion, strCache *adm, void* contenido);
+void imprimirEntradasSinContenido();
+
 void iniciarDatosConfiguracionCache() {
 	t_config* configuracion = asignarRutaDeArchivo();
-	ENTRADAS_CACHE = busquedaClaveNumerica(configuracion, "ENTRADAS_CACHE");
-	CACHE_X_PROC = busquedaClaveNumerica(configuracion, "CACHE_X_PROC");
+	_entradasCache = busquedaClaveNumerica(configuracion, "ENTRADAS_CACHE");
+	_cacheXPrc = busquedaClaveNumerica(configuracion, "CACHE_X_PROC");
 }
 
 int* reservarCache() {
 	int sizeCache = sizeof(strCache);
 	iniciarDatosConfiguracionCache();
-	int* ptrCache = malloc(ENTRADAS_CACHE * (sizeCache + getFrameSize()));
+	int* ptrCache = malloc(_entradasCache * (sizeCache + getFrameSize()));
 	//ENTRADAS CACHE * 4
-	ultimoAcceso = malloc(ENTRADAS_CACHE * sizeof(temporal_get_string_time()));
+	ultimoAcceso = malloc(_entradasCache * sizeof(temporal_get_string_time()));
 	return ptrCache;
 }
 
 //Setea todos los datos de la str adm de la cache en -1
 void iniciarAdmCache(int* cache) {
 
-	int movimiento = sizeof(strCache) + getFrameSize();
+	int movimiento = sizeof(strCache) + _frameSize;
 	int entrada = 0;
 	int movimientoChar = sizeof(temporal_get_string_time());
 	strCache aux;
-
-	while (entrada < ENTRADAS_CACHE) {
-		aux.nroPagina = -1;
-		aux.pid = -1;
+	aux.nroPagina = LIBRE;
+	aux.pid = LIBRE;
+	while (entrada < _entradasCache) {
 		//setea en -1 el pid y el nro de pagina de la str adm
 		memcpy(cache + entrada * movimiento, &aux, sizeof(strCache));
 		//Setea en la hora actual el ultimo acceso, en la estructura paralela
-		memcpy(ultimoAcceso + entrada * movimientoChar,
-				temporal_get_string_time(), movimientoChar);
+		escribirUltimoAcceso(entrada);
 		entrada++;
 	}
 
@@ -79,8 +83,8 @@ void escribirUltimoAcceso(int posicion) {
 void escribirCache(int* cache, int pid, int pag, void* contenido,
 		int posicion) {
 	strCache info;
-	info.pid=pid;
-	info.nroPagina=pag;
+	info.pid = pid;
+	info.nroPagina = pag;
 	int movimiento = getFrameSize() + sizeof(strCache);
 
 	//Escribe la entrada de la str Cache
@@ -98,15 +102,61 @@ char* leerUltimoAcceso(int posicion) {
 	return valor;
 }
 
+void imprimirEntradasActivas() {
+	void *contenido = malloc(_frameSize);
+	strCache adm;
+	int c;
+	log_info(archivoLog, "*** INICIO IMPRESION DE ENTRADAS CACHE ACTIVAS ***");
+	while (c < _entradasCache) {
+
+		leerEntrada(ptrCache, c, &adm, contenido);
+		if (adm.pid != LIBRE) {
+			log_info(archivoLog, "PID: %d", adm.pid);
+			log_info(archivoLog, "Pag: %d", adm.nroPagina);
+			log_info(archivoLog, "Contenido:\n", (char *) contenido);
+		}
+		c++;
+	}
+	log_info(archivoLog, "*** FIN ***");
+	free(contenido);
+}
+
+void imprimirEntradasSinContenido() {
+
+	void *contenido = malloc(_frameSize);
+	strCache adm;
+	int c;
+	log_info(archivoLog, "*** INICIO IMPRESION DE ENTRADAS CACHE ***");
+	while (c < _entradasCache) {
+		leerAdmCache(ptrCache, c, &adm);
+		log_info(archivoLog, "PID: %d", adm.pid);
+		log_info(archivoLog, "Pag: %d", adm.nroPagina);
+	}
+	log_info(archivoLog, "*** FIN ***");
+	free(contenido);
+}
+
 //Copia el contenido de una entrada de cache y lo devulve
-void leerEntrada(int* cache, int posicion, void* contenido) {
+void leerEntrada(int* cache, int posicion, strCache *adm, void* contenido) {
 
 	int sizeStr = sizeof(strCache);
 	int movimiento = sizeStr + getFrameSize();
-
+	memcpy(adm, cache + posicion * movimiento, sizeStr);
 	memcpy(contenido, cache + posicion * movimiento + sizeStr, getFrameSize());
 	escribirUltimoAcceso(posicion);
 }
+void leerAdmCache(int* cache, int posicion, strCache *adm) {
+	int sizeStr = sizeof(strCache);
+	int movimiento = sizeStr + _frameSize;
+	memcpy(adm, cache + posicion * movimiento, sizeStr);
+}
+void leerContenido(int* cache, int posicion, void* contenido) {
+	int sizeStr = sizeof(strCache);
+	int movimiento = 2 * sizeStr + _frameSize;
+	memcpy(contenido, cache + posicion * movimiento, _frameSize);
+	escribirUltimoAcceso(posicion);
+}
+
 //Busca una entrada dentro de la cache a partir de los datos pasados, si la encuentra
 //devuelve la posicion en la cache
 int buscarEntrada(int* cache, int pid, int pagina) {
@@ -116,7 +166,7 @@ int buscarEntrada(int* cache, int pid, int pagina) {
 	int c = 0;
 	aux.pid = pid;
 	aux.nroPagina = pagina;
-	while (c < ENTRADAS_CACHE) {
+	while (c < _entradasCache) {
 		memcpy(&auxB, cache + c * movimiento, sizeStr);
 		if (compararDatos(aux, auxB))
 			return c;
@@ -125,10 +175,10 @@ int buscarEntrada(int* cache, int pid, int pagina) {
 	return -1;
 }
 
-void ingresarNuevaEntrada(int* ptrCache, int pid, int pagina,void* aux) {
-	int entradaVieja=entradaMasAntigua();
+void ingresarNuevaEntrada(int* ptrCache, int pid, int pagina, void* aux) {
+	int entradaVieja = entradaMasAntigua();
 	//Escribo la cache en la posicion, en la que la ultima que entrada tiene el menor acceso
-	escribirCache(ptrCache,pid,pagina,aux,entradaVieja);
+	escribirCache(ptrCache, pid, pagina, aux, entradaVieja);
 }
 
 //----------------- COMPARAR DATOS -----------------
@@ -143,25 +193,24 @@ int compararDatos(strCache a, strCache b) {
 
 // Recibe dos posiciones y devuelve la posicion que tenga la entrada mas vieja
 int entradaMasAntigua() {
-	int c = 0, posicion=0;
+	int c = 0, posicion = 0;
 	int comparacion;
 
-	while (c < ENTRADAS_CACHE) {
+	while (c < _entradasCache) {
 		//Si es menor a cero posA es menor que posB, por el contrario si es amyor a cero, entonces posA es mayor a posB
 		comparacion = strcmp(leerUltimoAcceso(posicion), leerUltimoAcceso(c));
 		if (comparacion > 0)
 			posicion = c;
 		/*
 
-		Nota: 	Si el 1er parametro es menor al 2do => compatacion < 0
-				Si el 1er parametro es igual al 2do => comparacion = 0
-				si el 1er parametro es mayor al 2do => comparacion > 0
+		 Nota: 	Si el 1er parametro es menor al 2do => compatacion < 0
+		 Si el 1er parametro es igual al 2do => comparacion = 0
+		 si el 1er parametro es mayor al 2do => comparacion > 0
 		 */
 		c++;
 	}
 	return posicion;
 }
-
 
 
 int getStrCache() {
