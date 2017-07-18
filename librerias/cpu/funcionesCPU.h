@@ -98,28 +98,13 @@ solicitudMemoria generarSolicitudMemoria(pcb* unPcb, u_int32_t tamanioPaginas){
 
 	int proximaInstruccion = unPcb->programCounter; 								// Indica cuál es la proxima instrucción a ejecutar.
 
-	lineaUtil instruccion = unPcb->indiceCodigo[proximaInstruccion];				// Obtengo el la posición de inicio y fin del programa.
-	u_int32_t posicionInstruccion = proximaInstruccion * sizeof(lineaUtil); 		// Obtengo la posición de la instrucción en bytes.
+	lineaUtil instruccion = unPcb->indiceCodigo[proximaInstruccion];				// Obtengo la posición de inicio y fin de la instrucción
 
-	u_int32_t pagina = hallarPagina(posicionInstruccion, tamanioPaginas); 			// Esta es la página en Memoria donde está la instrucción.
-	u_int32_t offset = instruccion.offset; 											// Esto es el desplazamiento en bytes del código respecto al inicio del programa escrito.
-	u_int32_t longitud = instruccion.longitud; 										// Esto es la longitud en bytes de la instrucción respecto del offset.
-
-	solicitudInstruccion.pid = unPcb->pid;											// Creación de la estructura para enviar solicitud.
-	solicitudInstruccion.pagina = pagina;
-	solicitudInstruccion.offset = offset;
-	solicitudInstruccion.size = longitud;
+	solicitudInstruccion.pid = unPcb->pid;
+	solicitudInstruccion.pagina = instruccion.offset / tamanioPaginas;
+	solicitudInstruccion.offset = instruccion.offset % tamanioPaginas;
 
 	return solicitudInstruccion;
-}
-
-u_int32_t hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas){
-	u_int32_t pagina = 0;
-
-	while(posicionInstruccion > (pagina + 1) * tamanioPaginas)
-		pagina++;
-
-	return pagina;
 }
 
 void handshake(int socket, u_int32_t codigoCPU){
