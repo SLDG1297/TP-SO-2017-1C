@@ -54,7 +54,7 @@
 
 int ordenDeConsolaParaProceso;
 int ordenDeHeap;
-int contadorPid = 1;
+int asignadorDePid = 1;
 
 
 // **************** DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL ****************
@@ -84,6 +84,13 @@ int contadorPid = 1;
 	int validacionDeMemoria = 0;
 	struct sockaddr_in cliente_dir;
 
+	//DECLARCION DE COLAS PARA PROGRAMACION
+	t_queue *colaNew;
+	t_queue *colaReady;
+	t_queue *colaExecute;
+	t_queue *colaBlock;
+	t_queue *colaExit;
+
 
 
 	typedef struct {
@@ -99,7 +106,7 @@ int contadorPid = 1;
 		int valorRtaSelect = 0;
 //DELCARACION DE HILOS
 
-		pthread_t idHilo, idHiloSelect;
+		pthread_t idHilo, idHiloSelect, idHiloPlanificadorLargoPlazo;
 
 //DECLARACION DE PROTOTIPOS DE FUNCIONES
 		void operacionSegunIdentificador(int identificador);
@@ -140,6 +147,23 @@ int main(int argc, char *argv[]) {
 	pthread_create(&idHilo, NULL, consolaOperaciones, NULL);
 	pthread_create(&idHiloSelect, NULL, seleccionarSocketRelevantes,NULL);
 
+	pthread_create(&idHiloPlanificadorLargoPlazo, NULL, planificadorLargoPlazo , NULL);
+
+
+	//PLANIFICACION
+
+	//DECLARACION Y CREACION DE COLAS
+
+	colaNew = queue_create();
+	colaReady = queue_create();
+	colaExecute = queue_create();
+	colaBlock = queue_create();
+	colaExit = queue_create();
+
+
+
+
+
 	pthread_join(idHiloSelect, NULL);
 	pthread_join(idHilo, NULL);
 
@@ -147,6 +171,94 @@ int main(int argc, char *argv[]) {
 
 }
 
+
+int consultarDisponibilidadParaProcesos(/*tamaño necesario para el proceso */*programa){
+
+	if(){
+		return 1;
+
+	}else{
+		return 0;
+	}
+
+}
+
+
+
+void *planificiadorLargoPlazo(){
+
+	//grado de multiprogramacion
+	extern int _gradoMultiprog;
+	//el grado de multiprogramacion es el valor maximo del semaforo
+
+
+	while(1){
+
+	//se le pregunt a la memoria si hay lugar
+	//semaforear
+
+
+			//verificar que la cola no esta vacia todo
+
+	int *programa = queue_peek(colaNew); //es el pid de un pcb	//se lo saca de colaNew
+
+	int hayEspacio = consultarDisponibilidadParaProcesos(/*tamaño necesario para el proceso */*programa);
+
+
+	//send
+
+
+	//aca va a quedar esperando a que la memoria le indique que hay lugar
+	//recv
+
+	if(hayEspacio ==1){
+
+		int *programa = queue_pop(colaNew); //es el pid de un pcb	//se lo saca de colaNew
+
+		queue_push(colaReady, programa);//pone el proceso en colaReady
+
+		//aumentar señal de que hay algo en ready
+
+		}
+
+	}
+
+return 0;
+}
+
+
+//todo crear hilo
+void *planificadorACortoPlazo(){
+
+	int *programa;
+	int algoritmoDePlanificion = 0; //leer archivo configuracion todo
+
+
+	while(1){
+
+		//esperar a señal de que hay algo en la cola de ready
+
+		switch(algoritmoDePlanificacion){
+
+		case '1':  //FIFO
+
+			programa = queue_pop(colaReady);
+
+			break;
+
+
+
+		case '2':  //ROUND ROBIN
+
+			break;
+
+		default:
+
+		}//fin del switch
+
+	}//fin de while(1)
+
+}
 
 
 void* seleccionarSocketRelevantes(){

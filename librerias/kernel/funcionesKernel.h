@@ -53,7 +53,8 @@ typedef struct {
 } cpuAsociadoAPcb;
 
 typedef struct {
-	bool activo;
+	//bool activo;
+	int pid;
 	int socket;
 } consola_activa;
 
@@ -173,7 +174,8 @@ void agregarALista(int tipo, int socketDato) {
 	case 1:
 
 		consola.socket = socketDato;
-		consola.activo = false;
+		//consola.activo = false;
+		consola.pid = 0;
 		list_add(consolas, &consola);
 		break;
 	case 2:
@@ -256,6 +258,8 @@ void operacionesParaProceso() {
 		break;
 	}
 }
+
+//Si no es listener, es consola, cpu, o filesystem
 void realizarOperacionDeSocket(int socketPosible) {
 	int modulo = determinarTipoSocket(socketPosible);
 	switch (modulo) {
@@ -264,64 +268,67 @@ void realizarOperacionDeSocket(int socketPosible) {
 		//actualizarPCB(pcbRecibido);
 
 		break;
-	case ID_CONSOLA:
+	case ID_CONSOLA: //Si es Consola
+		//de la consola solo se van a recibir paths de programas
+
 		char* contenido;
-		//Si no es listener, es consola, cpu, o filesystem
+		char bufferPath[1024]; //CORREGIR todo
+		extern int asignadorDePid;
+		extern int sockMemoria;
+		extern int validacionDeMemoria;
 
-		//Si es Consola
-
-		//recibir instruccion
+		//unregistro de que PIDS tiene cada consola
 
 		//Nuevo Programa
-
+		{
 		//recibir path
+		//todo usar funciones en la biblioteca
+		recibirDato(socketPosible, &bufferPath ,sizeof(bufferPath)); //ver
 
-		pcb nuevoProceso;
+		//mandar lo del buffer a la lista de new
 
-		preprocesador(contenido, &nuevoProceso);
-		//generarLineasUtiles(Path)
+
+
+
+		//en la lista de ready se manda a memoria
 
 		//creando pcb
-
-		//pcb nuevoPCB;
-
-		//nuevoPCB.pid = contadorPid;
-
-		//incrementarcontadorPid();
-
-		//nuevoPCB.programCounter = 0;
-
-		//tamañoPath = calcularTamañoPath(Path);
-
-		//nuevoPCB.paginasUsadas = tamañoPath / tamañoPagina;
-
-		//nuevoPCB.indiceCodigo =
-
-		//nuevoPCB.indiceEtiqueta=
-
-		//nuevoPCB.indiceStack=
-
-		//nuevoPCB.exitCode=
-
-		/*		 //solicitar memoria
-
-		 //send(sockMemoria, &nuevoPCB.pid, sizeof(int), 0);
-
-		 //send(sockMemoria, &nuevoPCB.paginasUsadas, sizeof(int), 0);
-
-		 //recv(sockMemoria, &validacionDeMemoria, sizeof(int), 0);
+		pcb nuevoPCB = crearPCB(asignadorDePid, bufferPath, tamanioPaginas);
 
 
+		//todo hacer send de esto a la consola
 
-		 //enviar pcb mas codigo a memoria
+		asignadorDePid ++; //contador para los PIDS
+
+		//esto es parte del proceso en ready
+		//sends a la memoria
+
+		enviarDato(sockMemoria, &nuevoPCB.pid, sizeof(int) );
+
+		enviarDato(sockMemoria, &nuevoPCB.paginasUsadas, sizeof(int) );
+
+		recibirDato(sockMemoria, &validacionDeMemoria, sizeof(int));
+
+
+		//ir al filesystem cuando exista
+		//enviar el path y recibir el codigo
+
+
+		//enviar pcb mas codigo a memoria
+		//enviarDato(sockMemoria, ,);
+		}
+
+		//elegir cpu_activa
+
+		//enviar a cpu_activa
 
 
 
-		 //elegir cpu_activa
-
-		 //enviar a cpu_activa
+		{
 
 
+
+		}
 
 		 //terminar programa
 
