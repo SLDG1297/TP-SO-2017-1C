@@ -16,7 +16,7 @@
 #include "../serializador.h"
 //#include "../../memoria/memoria.c"
 
-#define RUTA_ARCHIVO "../../memoria/config_memoria.cfg"
+#define RUTA_ARCHIVO "config_memoria.cfg"
 #define LIBRE -1
 #define OCUPADO_x_STR -14
 #define NOT_FOUND -28
@@ -80,6 +80,11 @@ void liberarStrAdm(int pid, int* ptr) ;
 int strLibre(int* ptr) ;
 void inicializarStrAdm(int* bloqueMemoria);
 
+void recibirDatosPID_PAG(int socket, int *pid, int *pag);
+void recibirDatosTotal(int socket, int* pid, int *pag, int* offset, int *size);
+
+
+
 t_log* getArchivoSP();
 t_log* getArchivoLog();
 void crearArchivo(char* ruta) ;
@@ -99,7 +104,8 @@ t_config* asignarRutaDeArchivo(){
 void asignarDatosDeConfiguracion() {
 	t_config* configuracion = asignarRutaDeArchivo();
 
-	_puertoMemoria = busquedaClaveNumerica(configuracion, "PUERTO");
+	char* puerto = "PUERTO";
+	_puertoMemoria = busquedaClaveNumerica(configuracion, puerto);
 	_frameSize = busquedaClaveNumerica(configuracion, "MARCO_SIZE");
 	_frames = busquedaClaveNumerica(configuracion, "MARCOS");
 	_retardoMemoria = busquedaClaveNumerica(configuracion, "RETARDO_MEMORIA");
@@ -395,9 +401,7 @@ void imprimirStrAdm(int* bloqueMemoria) {
 	while (c < _frames) {
 		memcpy(&aux, bloqueMemoria + c * sizeof(strAdministrativa),	sizeof(strAdministrativa));
 		//printf("\nPID: %d, NroPagina: %d, Frame: %d", aux.pid, aux.nroPagina,	aux.frame);
-		log_info(archivoLog,"PID: %d",aux.pid);
-		log_info(archivoLog,"Pag: %d", aux.nroPagina);
-		log_info(archivoLog,"Frame:\n",aux.frame);
+		log_info(archivoLog,"*** PID = %d /// PAG = %d /// FRAME = %d ***",aux.pid, aux.nroPagina,aux.frame);
 		c++;
 	}
 	log_info(archivoLog,"*** FIN ***");
@@ -597,8 +601,17 @@ int recibirSeleccionOperacion(int socket) {
 	return *operacion;
 }
 
-//todo
-//void recibirDatos(int socket, void* buffer, size_t tamanioBuffer){}
+void recibirDatosPID_PAG(int socket, int *pid, int *pag){
+	recibirPaquete(socket, pid, sizeof(u_int32_t));
+	recibirPaquete(socket, pag, sizeof(u_int32_t));
+}
+
+void recibirDatosTotal(int socket, int* pid, int *pag, int* offset, int *size){
+	recibirDatosPID_PAG(socket, pid, pag);
+	recibirPaquete(socket, &offset, sizeof(u_int32_t));
+	recibirPaquete(socket, &size, sizeof(u_int32_t));
+
+}
 
 void enviarMensaje(int socket, void* buffer, size_t tamanioBuffer){
 

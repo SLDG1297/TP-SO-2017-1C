@@ -43,7 +43,8 @@
 #define SOLICITAR_BYTES_PAG 1052
 #define ALMACENAR_BYTES_PAG 1053
 #define ASIGNAR_PAGINAS_PRC 1054
-#define FINALIZAR_PRG 		1055
+#define LIBERAR_PAG_1PRC	1055
+#define FINALIZAR_PRG 		1056
 
 //***DATOS PARA ENTABLAR CONEXION CON EL KERNEL
 
@@ -233,11 +234,11 @@ void seleccionOperacionesMemoria(int socket) {
 
 	int seleccion, pid, paginas, rtaFuncion, offset, size=0, nroFrame;
 
-	seleccion = recibirSeleccionOperacion(socket);
+	recibirPaquete(socket, &seleccion, sizeof(u_int32_t));
+
 	switch (seleccion) {
 	case INICIAR_PROGRAMA:
-		pid = recibirTamanio(socket);
-		paginas = recibirTamanio(socket);
+		recibirDatosPID_PAG(socket, &pid, &paginas);
 		rtaFuncion = inicializarPrograma(pid, paginas);
 		sleep(getRetardo());
 		enviarTamanio(socket, rtaFuncion);
@@ -245,10 +246,7 @@ void seleccionOperacionesMemoria(int socket) {
 
 	case SOLICITAR_BYTES_PAG:
 
-		pid = recibirTamanio(socket);
-		nroFrame = recibirTamanio(socket);
-		offset = recibirTamanio(socket);
-		size = recibirTamanio(socket);
+		recibirDatosTotal(socket, &pid, &paginas, &offset, &size);
 		buffer = malloc(size);
 		solicitarBytesDePagina(pid, nroFrame, offset, size);
 		sleep(getRetardo());
@@ -256,13 +254,10 @@ void seleccionOperacionesMemoria(int socket) {
 		free(buffer);
 		break;
 	case ALMACENAR_BYTES_PAG:
-		//TODO recepcion de datos
-		buffer = malloc(size);
-		pid = recibirTamanio(socket);
-		nroFrame = recibirTamanio(socket);
-		offset = recibirTamanio(socket);
-		size = recibirTamanio(socket);
-//todo		recibirDatos(socket, buffer, size);
+
+		recibirDatosTotal(socket, &pid, &paginas, &offset, &size);
+		recibirPaqueteVariable(socket, (void**) &buffer);
+
 		rtaFuncion = almacenarBytesEnPagina(pid, nroFrame, offset, size,
 				buffer);
 		sleep(getRetardo());
@@ -271,15 +266,18 @@ void seleccionOperacionesMemoria(int socket) {
 		break;
 
 	case ASIGNAR_PAGINAS_PRC:
-		pid = recibirTamanio(socket);
-		paginas = recibirTamanio(socket);
+		recibirDatosPID_PAG(socket, &pid, &paginas);
 		rtaFuncion = asignarPaginasProceso(pid, paginas);
 		sleep(getRetardo());
 		enviarTamanio(socket, rtaFuncion);
 		break;
 
+	case LIBERAR_PAG_1PRC:
+		//todo liberar pagina de un proceso
+		break;
+
 	case FINALIZAR_PRG:
-		pid = recibirTamanio(socket);
+		recibirPaquete(socket, &pid, sizeof(u_int32_t));
 		rtaFuncion=finalizarPrograma(pid);
 		sleep(getRetardo());
 		enviarTamanio(socket, rtaFuncion);

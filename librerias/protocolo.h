@@ -24,11 +24,12 @@
 #define GUARDAR_DATOS			1705
 
 // Protocolo de comunicación de la Memoria
-#define INICIAR_PROGRAMA 		51
-#define SOLICITAR_BYTES_PAG 	52
-#define ALMACENAR_BYTES_PAG 	53
-#define ASIGNAR_PAGINAS_PRC 	54
-#define FINALIZAR_PRG 			55
+#define INICIAR_PROGRAMA 		1051
+#define SOLICITAR_BYTES_PAG 	1052
+#define ALMACENAR_BYTES_PAG 	1053
+#define ASIGNAR_PAGINAS_PRC 	1054
+#define LIBERAR_PAG_1PRC		1055
+#define FINALIZAR_PRG 			1056
 
 // Protocolo de comunicación de las CPU's
 #define	HANDSHAKE_CPU			1297

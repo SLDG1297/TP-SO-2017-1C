@@ -21,6 +21,13 @@
 #include "../pcb.h"
 #include "../serializador.h"
 
+// Protocolo de comunicación de la Memoria
+#define INICIAR_PROGRAMA 		1051
+#define SOLICITAR_BYTES_PAG 	1052
+#define ALMACENAR_BYTES_PAG 	1053
+#define ASIGNAR_PAGINAS_PRC 	1054
+#define FINALIZAR_PRG 			1055
+
 // Protocolo de comunicación de CPU
 #define	HANDSHAKE_CPU	1297
 #define FIN_OPERACION 	1298
@@ -52,14 +59,20 @@ char* 		fetchInstruction(int socketMemoria, solicitudMemoria instruccion);						
 
 char* 		obtenerDatos(int socketMemoria, posicionMemoria unaPos); 									// Obtiene información de un programa en ejecución.
 
+void		solicitarBytes(int socketMemoria, solicitudMemoria solicitud);								// Solicitar bytes a Memoria.
+
+void*		recibirBytes(int socketMemoria);															// Recibir bytes de Memoria.
+
+void		actualizarBytes(int socketMemoria, solicitudMemoria solicitud, void* valor);					// Actualizar bytes de Memoria.
+
 // Funciones de CPU: las clasificamos así porque son las funciones que componen al CPU para que haga su trabajo.
 
 void				handshake(int socket, u_int32_t codigoCPU);											// Base para todos los handshakes.
 
 solicitudMemoria 	generarSolicitudMemoria(pcb* unPcb, u_int32_t tamanioPaginas);						// Generar una solicitud de datos a memoria.
-// TODO: Testear
+
 u_int32_t			hallarPagina(u_int32_t posicionInstruccion, u_int32_t tamanioPaginas);				// Actualiza estructuras tras una operación.
-// TODO: Testear
+
 void 				interpretarOperacion(); 															// Recibe una instrucción de un programa y la parsea.
 
 void 				ejecutarOperacion(); 																// Ejecuta una instrucción parseada.
@@ -122,6 +135,38 @@ void handshake(int socket, u_int32_t codigoCPU){
 
 void actualizarPC(int *PC, u_int32_t valor){
 	*PC = valor;
+}
+
+void solicitarBytes(int socketMemoria, solicitudMemoria solicitud){
+	paquete* envio = crearHeader(sizeof(solicitudMemoria), SOLICITAR_BYTES_PAG);
+
+	empaquetar(envio, &solicitud.pid, sizeof(u_int32_t));
+	empaquetar(envio, &solicitud.pagina, sizeof(u_int32_t));
+	empaquetar(envio, &solicitud.offset, sizeof(u_int32_t));
+	empaquetar(envio, &solicitud.size, sizeof(u_int32_t));
+
+	enviarPaquete(socketMemoria, envio);
+}
+
+void* recibirBytes(int socketMemoria){
+	void* dato;
+
+	recibirPaqueteVariable(socketMemoria, &dato);
+
+	return dato;
+}
+
+void actualizarBytes(int socketMemoria, solicitudMemoria solicitud, void* valor){
+	paquete* envio = crearHeader(sizeof(solicitudMemoria) + sizeof(int), ALMACENAR_BYTES_PAG);
+
+	empaquetar(envio, &solicitud.pid, sizeof(u_int32_t));
+	empaquetar(envio, &solicitud.pagina, sizeof(u_int32_t));
+	empaquetar(envio, &solicitud.offset, sizeof(u_int32_t));
+	empaquetar(envio, &solicitud.size, sizeof(u_int32_t));
+
+	empaquetarVariable(envio, &valor, solicitud.size);
+
+	enviarPaquete(socketMemoria, envio);
 }
 
 #endif /* FUNCIONESCPU_H_ */

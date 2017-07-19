@@ -30,13 +30,23 @@ int* ultimoAcceso;
 int _entradasCache = 10;
 int _cacheXPrc;
 
-void escribirAdmCache();
+void iniciarDatosConfiguracionCache();
+int* reservarCache() ;
 void iniciarAdmCache(int* cache);
-int compararDatos(strCache a, strCache b);
-int entradaMasAntigua();
-
-void leerEntrada(int* cache, int posicion, strCache *adm, void* contenido);
+void escribirUltimoAcceso(int posicion) ;
+void escribirCache(int* cache, int pid, int pag, void* contenido, int posicion);
+char* leerUltimoAcceso(int posicion);
+void imprimirEntradasActivas();
 void imprimirEntradasSinContenido();
+void leerEntrada(int* cache, int posicion, strCache *adm, void* contenido) ;
+void leerAdmCache(int* cache, int posicion, strCache *adm);
+void leerContenido(int* cache, int posicion, void* contenido);
+int buscarEntrada(int* cache, int pid, int pagina);
+void ingresarNuevaEntrada(int* ptrCache, int pid, int pagina, void* aux) ;
+int compararDatos(strCache a, strCache b);
+int entradaMasAntigua() ;
+int getStrCache();
+
 
 void iniciarDatosConfiguracionCache() {
 	t_config* configuracion = asignarRutaDeArchivo();
@@ -58,7 +68,6 @@ void iniciarAdmCache(int* cache) {
 
 	int movimiento = sizeof(strCache) + _frameSize;
 	int entrada = 0;
-	int movimientoChar = sizeof(temporal_get_string_time());
 	strCache aux;
 	aux.nroPagina = LIBRE;
 	aux.pid = LIBRE;
@@ -125,12 +134,13 @@ void imprimirEntradasSinContenido() {
 
 	void *contenido = malloc(_frameSize);
 	strCache adm;
-	int c;
+	int c=0;
 	log_info(archivoLog, "*** INICIO IMPRESION DE ENTRADAS CACHE ***");
 	while (c < _entradasCache) {
 		leerAdmCache(ptrCache, c, &adm);
 		log_info(archivoLog, "PID: %d", adm.pid);
 		log_info(archivoLog, "Pag: %d", adm.nroPagina);
+		c++;
 	}
 	log_info(archivoLog, "*** FIN ***");
 	free(contenido);

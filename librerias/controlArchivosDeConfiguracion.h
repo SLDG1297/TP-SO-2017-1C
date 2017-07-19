@@ -9,6 +9,7 @@
 #define CONTROLARCHIVOSDECONFIGURACION_H_
 
 #include <commons/config.h>
+#include <stdbool.h>
 
 
 t_config* llamarArchivo(char* RUTA_ARCHIVO) {
