@@ -1,6 +1,7 @@
 #ifndef FILESYSTEM_SADICA_H_
 #define FILESYSTEM_SADICA_H_
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <sys/mman.h>
@@ -20,11 +21,16 @@
 #define CANTIDAD_BLOQUES		5192
 
 
+
+// Estructuras de datos
+
 typedef struct{
 	u_int32_t 	tamanioBloques;				// Tamanio de los bloques que maneja el FS.
 	u_int32_t 	cantidadBloques;			// Cantidad de bloques que maneja el FS.
 	char* 		numeroMagico;				// Ni idea
 } registroMetadata;
+
+
 
 // Variables globales
 
@@ -34,7 +40,9 @@ registroMetadata	metadata;				// Información acerca de la cantidad y tamaño de
 
 int					fdBitmap;				// Descriptor de archivo para Bitmap.bin
 
-char*				bitarray;				// Mapa de bits con los bloques libres y ocupados en el FS.
+void*				mapaDeBits;				// Mapa de bits con los bloques libres y ocupados en el FS.
+
+t_bitarray*			arrayDeBits;			// Estructura para acceder al mapa de bits.
 
 
 
@@ -72,19 +80,17 @@ void 				destruirMetadata(registroMetadata registro);							// Para liberar la m
 
 // Bitmap
 
-char* 				crearRegistroBitmap(size_t tamanio);					// Crear estructuras para determinar los bloques ocupados en el FS.
+int					obtenerBitmapFD();
 
-FILE*				iniciarBitmap(char* pathRaiz);							// Crear bitmap con los bloques libres y ocupados en el FS.
+void				iniciarBitmapFD(char* pathRaiz);
 
-t_bitarray*			leerBitmap(FILE* archivoBitmap);						// Obtener registro de Bitmap.bin.
+void				iniciarBitmapMap(char* pathRaiz);
 
-// TODO: Con mapeo
+void		 		leerBitmapMap();
 
-int iniciarBitmapMap(char* pathRaiz);
 
-t_bitarray* leerBitmapMap(char* pathMetadata);
 
-// Otros
+// Otros (Ordenados alfabéticamente)
 
 u_int32_t			bloquesEnBytes();													// Devuelve la cantidad de bytes que ocupa el mapa de bits.
 
@@ -181,63 +187,61 @@ void plantillaMetadata(char* pathRaiz, void(*procedimiento)(t_config*)){
 
 
 
-// Bitmap
+// Bitmap Viejo
 
-char* crearRegistroBitmap(size_t tamanio){
+char* iniciarRegistroBitmap(size_t tamanio){
 	char* bitarray = malloc(tamanio);		// Array de bitmaps.
 	bzero(bitarray, tamanio);				// Setear en 0.
 
 	return bitarray;
 }
 
-FILE* iniciarBitmap(char* pathRaiz){
-	char* bitarray = crearRegistroBitmap(bloquesEnBytes());								// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
 
-	FILE* archivoBitmap = iniciarArchivo(pathRaiz, "/Metadata/BitmapViejo.bin");		// Abrir archivo Bitmap.bin.
 
-	fwrite(bitarray, sizeof(char), bloquesEnBytes(), archivoBitmap);
+// Bitmap
+
+int obtenerBitmapFD(){
+	return fdBitmap;
+}
+
+void iniciarBitmapFD(char* pathRaiz){
+	fdBitmap = iniciarDescriptorArchivo(pathRaiz, "/Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
+}
+
+void cerrarBitmapFD(){
+	close(fdBitmap);
+}
+
+void iniciarBitmap(char* pathRaiz){
+	char* bitarray = iniciarRegistroBitmap(bloquesEnBytes());					// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
+
+	write(fdBitmap, bitarray, bloquesEnBytes());
 
 	free(bitarray);
-
-	return archivoBitmap;
 }
 
-t_bitarray* leerBitmap(FILE* archivoBitmap){
-	char* bitarray = crearRegistroBitmap(bloquesEnBytes());																	// Bitmap con espacios libres y ocupados en FS.
-	t_bitarray* bitmap;																// Estructura para abstraer la lectura del bitmap.
+void abrirBitmap(char* pathRaiz){
+	struct stat atributosBitmap;
 
-	fread(bitarray, sizeof(char), bloquesEnBytes(), archivoBitmap);					// Leer de archivo el mapa de bits.
+	fstat(fdBitmap, &atributosBitmap);
 
-	bitmap = bitarray_create_with_mode(bitarray, bloquesEnBytes(), LSB_FIRST);		// Asignar estructura de abstraccion.
+	mapaDeBits = mmap(NULL, atributosBitmap.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fdBitmap, 0);
 
-	return bitmap;
+	msync(mapaDeBits, bloquesEnBytes(), MS_SYNC);
 }
 
-int iniciarBitmapMap(char* pathRaiz){
-	char* bitarray = crearRegistroBitmap(bloquesEnBytes());						// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
-
-	FILE* archivoBitmap = iniciarArchivo(pathRaiz, "/Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
-
-	fwrite(bitarray, sizeof(char), bloquesEnBytes(), archivoBitmap);
-
-	free(bitarray);
-
-	return fileno(archivoBitmap);
+void leerBitmap(){
+	arrayDeBits = bitarray_create_with_mode(mapaDeBits, bloquesEnBytes(), LSB_FIRST);
 }
 
-/*t_bitarray* leerBitmapMap(char* pathRaiz){
-	char* bitarray = crearRegistroBitmap(bloquesEnBytes());																	// Bitmap con espacios libres y ocupados en FS.
-	t_bitarray* bitmap;
+t_bitarray* obtenerBitmap(){
+	return arrayDeBits;
+}
 
+void cerrarBitmap(){
+	munmap(mapaDeBits, bloquesEnBytes());
 
-
-	return bitmap;
-}*/
-
-void cerrarBitmap(FILE* archivoBitmap, t_bitarray* bitmap){
-	fclose(archivoBitmap);
-
-	destruirBitarray(bitmap);
+	bitarray_destroy(arrayDeBits);
 }
 
 
@@ -260,11 +264,6 @@ void crearArchivoConDirectorio(char* directorio, char* pathRelativo){
 	free(path);
 }
 
-void destruirBitarray(t_bitarray *bitarray){
-	free(bitarray->bitarray);
-	free(bitarray);
-}
-
 FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
 	char* path = obtenerPath(pathRaiz, pathRelativo);
 
@@ -278,7 +277,7 @@ FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
 int iniciarDescriptorArchivo(char* pathRaiz, char* pathRelativo){
 	char* path = obtenerPath(pathRaiz, pathRelativo);
 
-	int fd = open(path, "wb+");				// Abrir archivo.
+	int fd = open(path, O_RDWR);		// Abrir archivo.
 
 	free(path);
 
@@ -292,7 +291,6 @@ void iniciarDirectorios(char* pathRaiz){
 	// Creo los directorios que pide el enunciado.
 
 	crearArchivoConDirectorio("Metadata", "/Metadata.bin");
-	crearArchivoConDirectorio("Metadata", "/BitmapViejo.bin");
 	crearArchivoConDirectorio("Metadata", "/Bitmap.bin");
 
 	mkdir("Archivos", S_IRWXU);		// TODO: Ver si falta alguno.
