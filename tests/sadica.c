@@ -34,10 +34,10 @@ context (SADICA) {
     } end
 
 	describe("Inicio de Bitmap.bin") {
-    	FILE* archivoBitmap = iniciarBitmap(puntoMontaje);
-    	t_bitarray* bitmap = leerBitmap(archivoBitmap);
+		it("Se puede acceder al bitmap de Bitmap.bin con todos los bloques libres (Deprecado)"){
+	    	FILE* archivoBitmap = iniciarBitmap(puntoMontaje);
+	    	t_bitarray* bitmap = leerBitmap(archivoBitmap);
 
-		it("Se puede acceder al bitmap de Bitmap.bin con todos los bloques libres"){
     		bool verificador = false;
     		off_t i = 0;
 
@@ -50,6 +50,10 @@ context (SADICA) {
     		cerrarBitmap(archivoBitmap, bitmap);
 
     		should_bool(verificador) be falsey;
+    	} end
+
+		it("Se puede acceder al bitmap de Bitmap.bin con todos los bloques libres"){
+    		//iniciarBitmapMap(puntoMontaje);
     	} end
 
     } end
