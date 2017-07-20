@@ -80,11 +80,13 @@ t_bitarray*			leerBitmap(FILE* archivoBitmap);						// Obtener registro de Bitma
 
 u_int32_t			bloquesEnBytes();										// Devuelve la cantidad de bytes que ocupa el mapa de bits.
 
+void				destuirBitarray(t_bitarray *bitarray);
+
 FILE*				iniciarArchivo(char* pathRaiz, char* pathRelativo);		// Abre un archivo simplificado.
 
-char*				obtenerPath(char* pathRaiz, char* pathRelativo);		// Obtiene directorio de un archivo en el FS.
-
 void				iniciarDirectorios(char* pathRaiz);						// Crear los directorios del FS.
+
+char*				obtenerPath(char* pathRaiz, char* pathRelativo);		// Obtiene directorio de un archivo en el FS.
 
 
 
@@ -189,7 +191,7 @@ FILE* iniciarBitmap(char* pathRaiz){
 }
 
 t_bitarray* leerBitmap(FILE* archivoBitmap){
-	char* bitarray;																	// Bitmap con espacios libres y ocupados en FS.
+	char* bitarray = crearRegistroBitmap(bloquesEnBytes());																	// Bitmap con espacios libres y ocupados en FS.
 	t_bitarray* bitmap;																// Estructura para abstraer la lectura del bitmap.
 
 	fread(bitarray, sizeof(char), bloquesEnBytes(), archivoBitmap);					// Leer de archivo el mapa de bits.
@@ -202,11 +204,16 @@ t_bitarray* leerBitmap(FILE* archivoBitmap){
 void cerrarBitmap(FILE* archivoBitmap, t_bitarray* bitmap){
 	fclose(archivoBitmap);
 
-	bitarray_destroy(bitmap);
+	destuirBitarray(bitmap);
 }
 
 u_int32_t bloquesEnBytes(){
 	return metadata.cantidadBloques / 8;
+}
+
+void destuirBitarray(t_bitarray *bitarray){
+	free(bitarray->bitarray);
+	free(bitarray);
 }
 
 FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
@@ -219,15 +226,6 @@ FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
 	return archivo;
 }
 
-char* obtenerPath(char* pathRaiz, char* pathRelativo){
-	char* path = string_new();				// Path real.
-
-	string_append(&path, pathRaiz);
-	string_append(&path, pathRelativo);		// Obtener path real.
-
-	return path;
-}
-
 void iniciarDirectorios(char* pathRaiz){
 	mkdir(pathRaiz, S_IRWXU);		// Creo el directorio de montaje.
 	chdir(pathRaiz);				// Me muevo al directorio del FS.
@@ -237,6 +235,15 @@ void iniciarDirectorios(char* pathRaiz){
 	mkdir("Bloques", S_IRWXU);
 
 	chdir("..");					// Vuelvo al directorio raíz del FS.
+}
+
+char* obtenerPath(char* pathRaiz, char* pathRelativo){
+	char* path = string_new();				// Path real.
+
+	string_append(&path, pathRaiz);
+	string_append(&path, pathRelativo);		// Obtener path real.
+
+	return path;
 }
 
 #endif /* FILESYSTEM_SADICA_H_ */
