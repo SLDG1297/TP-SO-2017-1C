@@ -37,7 +37,7 @@
 //***DEFINE DATOS ESTATICOS
 
 #define SIZE_DATA 1024
-#define RUTA_LOG "./memoriaLog.txt"
+#define RUTA_LOG "../archivosLog/Memoria.txt"
 
 #define INICIAR_PROGRAMA 	1051
 #define SOLICITAR_BYTES_PAG 1052
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 //DECLARACION DE VARIABLES PARA EL CODIGO PRINCIPAL
 
 // declaramos el hilo y sus atributos
-	pthread_t idHilo;
+	pthread_t hConexiones, hConsola;
 
 // CODIGO PRINCIPAL DE LA CONSOLA
 	//*solicitud de bloque de memoria contigua
@@ -94,29 +94,26 @@ int main(int argc, char *argv[]) {
 	inicializarStrAdm(ptrMemoria);
 	imprimirStrAdm(ptrMemoria);
 
-
-
-	//* creamos un socket con el cual vamos a manejar la conexion con el kernel
-	socketServidor = iniciarConexionServidor();
-	laConexionFueExitosa(&socketServidor);
-
-	puts("La conexion al proceso kernel fue exitosa\n");
-	puts("Esperando mensajes\n");
+	iniciarAdmCache(ptrCache);
+	//imprimirEntradasSinContenido();
 
 	//*Creo un hilo que se encargue unicamente de manejar las conexiones a la memoria
 	// Seteamos los atributos (2do parametro) como nulo, ya que de esta manera los atributos son por defecto
 
 	// int pthread_create(pthread_t *thread, const pthread_attr_t *attr,void *(*start_routine) (void *), void *arg)
-	if (pthread_create(&idHilo, NULL, asignarSocketAConexion, NULL) < 0)
+	pthread_create(&hConsola, NULL,(void *)consolaMemoria,NULL);
+	if (pthread_create(&hConexiones, NULL, asignarSocketAConexion, NULL) < 0)
 		printf("No se pudo crear el hilo para asignar un socket a la conexion");
 	else
 		printf("hilo creado");
 
-	consolaMemoria();
+
 	//int pthread_join(pthread_t thread, void **retval);
 	//* Finalmente esperamos a que el hilo original termine
 
-	pthread_join(idHilo, NULL);
+	pthread_join(hConsola,NULL);
+	pthread_join(hConexiones, NULL);
+
 	free(ptrMemoria);
 	free(ptrCache);
 	return 0;
@@ -181,16 +178,21 @@ char* laConexionFueExitosa(int *socket) {
 
 void *asignarSocketAConexion() {
 
-	pthread_t idHilo_OPERACIONES;
+	pthread_t hOperaciones;
 	int valorRtaThread;
 	int socketRecepcion;
 	socketRecepcion = ponerSocketEnEscucha_aceptarConexion();
 
+	//* creamos un socket con el cual vamos a manejar la conexion con el kernel
+	socketServidor = iniciarConexionServidor();
+	laConexionFueExitosa(&socketServidor);
+
+	puts("La conexion al proceso kernel fue exitosa\n");
+	puts("Esperando mensajes\n");
 	while (1) {
-		sem_wait(&semaforo);
 		//Creamos un segundo hilo que se encargue de los pedidos operaciones especificas de la memoria segun pedido de cada conexion
-		valorRtaThread = pthread_create(&idHilo_OPERACIONES, NULL,
-				seleccionOperacionesMemoria, &socketRecepcion);
+		valorRtaThread = pthread_create(&hOperaciones, NULL,
+				(void *)seleccionOperacionesMemoria, &socketRecepcion);
 		//esErrorSimple(valorRtaThread,"No se pudo crear el hilo, dios sabra por que?");
 		if (valorRtaThread == -1)
 			printf("No se pudo crear el hilo, dios sabra por que?");
@@ -198,7 +200,7 @@ void *asignarSocketAConexion() {
 			printf("Hilo correspondiente a socket %d creado", socketRecepcion);
 	}
 
-	pthread_join(idHilo_OPERACIONES, NULL);
+	pthread_join(hOperaciones, NULL);
 
 }
 
@@ -232,7 +234,7 @@ int ponerSocketEnEscucha_aceptarConexion() {
 //Recibe la orden de operacion por medio de la seleccion y realiza la accion correspondiente segun el caso
 void seleccionOperacionesMemoria(int socket) {
 
-	int seleccion, pid, paginas, rtaFuncion, offset, size=0, nroFrame;
+	int seleccion, pid, paginas, rtaFuncion=-1, offset=-1, size=0, nroFrame=-1;
 
 	recibirPaquete(socket, &seleccion, sizeof(u_int32_t));
 
@@ -401,8 +403,6 @@ int asignarPaginasProceso(int pid, int cantPaginas) {
 				pagLibreMemoria);
 	return 0;
 }
-
-
 
 //Cuando el PRC KRN informe el fin de un prog. se deben eliminar las entradas en estructuras usadas de memoria
 

@@ -9,6 +9,7 @@ target/*
 **/.settings/*
 **/.metadata/*
 **/RemoteSystemsTempFiles/*
+archivosLog/*
 
 # Object files
 *.o

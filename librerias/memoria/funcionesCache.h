@@ -15,8 +15,7 @@
 
 #include "../controlArchivosDeConfiguracion.h"
 #include "../serializador.h"
-#include "./funcionesMemoria.h"
-//#include "../../memoria/memoria.c"
+
 
 #define LIBRE -1
 
@@ -26,13 +25,18 @@ typedef struct {
 } strCache;
 
 int* ultimoAcceso;
+// VARIABLES EXTERNAS
+extern int* ptrCache;
+extern int _frameSize;
+extern t_log *archivoLog,*archivoSP;
+
 
 int _entradasCache = 10;
 int _cacheXPrc;
 
 void iniciarDatosConfiguracionCache();
-int* reservarCache() ;
-void iniciarAdmCache(int* cache);
+int* reservarCache();
+void iniciarAdmCache(int* ptrCache);
 void escribirUltimoAcceso(int posicion) ;
 void escribirCache(int* cache, int pid, int pag, void* contenido, int posicion);
 char* leerUltimoAcceso(int posicion);
@@ -57,14 +61,14 @@ void iniciarDatosConfiguracionCache() {
 int* reservarCache() {
 	int sizeCache = sizeof(strCache);
 	iniciarDatosConfiguracionCache();
-	int* ptrCache = malloc(_entradasCache * (sizeCache + getFrameSize()));
+	int* ptrCache = malloc(_entradasCache * (sizeCache + _frameSize));
 	//ENTRADAS CACHE * 4
 	ultimoAcceso = malloc(_entradasCache * sizeof(temporal_get_string_time()));
 	return ptrCache;
 }
 
 //Setea todos los datos de la str adm de la cache en -1
-void iniciarAdmCache(int* cache) {
+void iniciarAdmCache(int* ptrCache) {
 
 	int movimiento = sizeof(strCache) + _frameSize;
 	int entrada = 0;
@@ -73,19 +77,18 @@ void iniciarAdmCache(int* cache) {
 	aux.pid = LIBRE;
 	while (entrada < _entradasCache) {
 		//setea en -1 el pid y el nro de pagina de la str adm
-		memcpy(cache + entrada * movimiento, &aux, sizeof(strCache));
+		memcpy(ptrCache + entrada * movimiento, &aux, sizeof(strCache));
 		//Setea en la hora actual el ultimo acceso, en la estructura paralela
 		escribirUltimoAcceso(entrada);
 		entrada++;
 	}
-
+	return;
 }
 
 // Escribe la hora actual en de una determinada entrada en la cache
 void escribirUltimoAcceso(int posicion) {
-	int movimiento = sizeof(temporal_get_string_time());
-	memcpy(ultimoAcceso + posicion * movimiento, temporal_get_string_time(),
-			movimiento);
+
+	ultimoAcceso[posicion]=temporal_get_string_time();
 }
 
 //Escribe en la cache
@@ -120,9 +123,8 @@ void imprimirEntradasActivas() {
 
 		leerEntrada(ptrCache, c, &adm, contenido);
 		if (adm.pid != LIBRE) {
-			log_info(archivoLog, "PID: %d", adm.pid);
-			log_info(archivoLog, "Pag: %d", adm.nroPagina);
-			log_info(archivoLog, "Contenido:\n", (char *) contenido);
+			log_info(archivoLog, "*** PID= %d || Pag = %d ***", adm.pid, adm.nroPagina);
+			log_info(archivoLog, "***Contenido: %s ***", (char *) contenido);
 		}
 		c++;
 	}
@@ -138,12 +140,10 @@ void imprimirEntradasSinContenido() {
 	log_info(archivoLog, "*** INICIO IMPRESION DE ENTRADAS CACHE ***");
 	while (c < _entradasCache) {
 		leerAdmCache(ptrCache, c, &adm);
-		log_info(archivoLog, "PID: %d", adm.pid);
-		log_info(archivoLog, "Pag: %d", adm.nroPagina);
+		log_info(archivoLog, "*** PID= %d || Pag = %d || UA : %s ***", adm.pid, adm.nroPagina,ultimoAcceso[c]);
 		c++;
 	}
 	log_info(archivoLog, "*** FIN ***");
-	free(contenido);
 }
 
 //Copia el contenido de una entrada de cache y lo devulve
