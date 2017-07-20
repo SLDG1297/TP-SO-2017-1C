@@ -17,23 +17,29 @@ char* puntoMontaje	= "pruebaFS";
 context (SADICA) {
 	describe("Inicio de Metadata.bin") {
 		iniciarDirectorios(puntoMontaje);
-    	registroMetadata metadata;
+
+		registroMetadata prueba  = creadorMetadata(64, 5192, "SADICA");
+		registroMetadata resultado;
 
     	before{
     		iniciarMetadata(puntoMontaje);
-    		metadata = leerMetadata(puntoMontaje);
+    		resultado = devolverMetadata();
     	} end
 
     	it("Se puede acceder al tamaño de bloques de Metadata.bin"){
-    		should_int(metadata.tamanioBloques) be equal to (64);
+    		should_int(resultado.tamanioBloques) be equal to (prueba.tamanioBloques);
     	} end
 
 		it("Se puede acceder a la cantidad de bloques de Metadata.bin"){
-    		should_int(metadata.cantidadBloques) be equal to (5192);
+    		should_int(resultado.cantidadBloques) be equal to (prueba.cantidadBloques);
     	} end
 
 		it("Se puede acceder al número mágico de Metadata.bin"){
-    		should_string(metadata.numeroMagico) be equal to ("SADICA");
+    		should_string(resultado.numeroMagico) be equal to (prueba.numeroMagico);
+    	} end
+
+		it("Se pueden cambiar los datos de Metadata.bin"){
+
     	} end
 
     } end
