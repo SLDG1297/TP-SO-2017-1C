@@ -53,7 +53,7 @@ typedef struct {
 } cpuAsociadoAPcb;
 
 typedef struct {
-	//bool activo;
+	bool activo;
 	int pid;
 	int socket;
 } consola_activa;
@@ -97,7 +97,7 @@ void iniciarConfiguraciones(char* ruta);
 int asignarSocketFS();
 int asignarSocketMemoria();
 int asignarSocketListener();
-void agregarALista(int tipo, int socketDato, t_list *lista);
+void agregarALista(int tipo, int socketDato);
 void *consolaOperaciones();
 void operacionesParaProceso();
 int obtenerTamanioPagina(int sock);
@@ -105,9 +105,11 @@ void handshake(int sock);
 void setFrameSize(int tamanio);
 int obtenerOrden();
 void incrementarContadorPid(int *contadorPid);
-void mensajeDeError(int orden);
-bool perteneceAListaCpu(int socketPosible, cpu_activo nodoCpu);
+bool perteneceAListaCpu(cpu_activo* cpu);
 bool perteneceAListaConsola(consola_activa* consola);
+
+int buscarIndiceConsola(consola_activa *elemento, t_list *lista);
+int buscarIndiceCPU(cpu_activo *elemento, t_list *lista);
 
 void iniciarConfiguraciones(char* ruta) {
 	//CODIGO PARA LLAMAR AL ARCHIVO
@@ -261,6 +263,12 @@ void operacionesParaProceso() {
 
 //Si no es listener, es consola, cpu, o filesystem
 void realizarOperacionDeSocket(int socketPosible) {
+	char* contenido;
+	char bufferPath[1024]; //CORREGIR todo
+	extern int asignadorDePid;
+	extern int sockMemoria;
+	extern int validacionDeMemoria;
+	int tamanioPaginas;
 	int modulo = determinarTipoSocket(socketPosible);
 	switch (modulo) {
 	case ID_CPU:
@@ -271,11 +279,7 @@ void realizarOperacionDeSocket(int socketPosible) {
 	case ID_CONSOLA: //Si es Consola
 		//de la consola solo se van a recibir paths de programas
 
-		char* contenido;
-		char bufferPath[1024]; //CORREGIR todo
-		extern int asignadorDePid;
-		extern int sockMemoria;
-		extern int validacionDeMemoria;
+
 
 		//unregistro de que PIDS tiene cada consola
 
@@ -336,7 +340,7 @@ void realizarOperacionDeSocket(int socketPosible) {
 		 case ID_FS:
 		 break;
 		 default:
-		 break;*/
+		 break;
 
 	}
 
@@ -347,7 +351,7 @@ void actualizarPCB(pcb pcbRecibido) {
 
 }
 
-int buscarIndice(cpu_activo *elemento, t_list *lista) {
+int buscarIndiceCPU(cpu_activo *elemento, t_list *lista) {
 	int tamanio = list_size(lista);
 	int indice = 0;
 
@@ -365,7 +369,7 @@ int buscarIndice(cpu_activo *elemento, t_list *lista) {
 	return -1;
 }
 
-int buscarIndice(consola_activa *elemento, t_list *lista) {
+int buscarIndiceConsola(consola_activa *elemento, t_list *lista) {
 	int tamanio = list_size(lista);
 	int indice = 0;
 

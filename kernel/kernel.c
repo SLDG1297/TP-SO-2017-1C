@@ -40,17 +40,14 @@
 
 #include "../librerias/kernel/funcionesKernel.h"
 #include "../librerias/kernel/menuContextualKernel.h"
+#include "../librerias/kernel/capaMemoria.h"
 
 #define RUTA_ARCHIVO "./config_kernel.cfg"
 #define SIZE_DATA			1024
 #define ID_CONSOLA			1
 #define ID_CPU				2
 #define ID_FS				3
-#define INICIAR_PROGRAMA 	51
-#define SOLICITAR_BYTES_PAG 52
-#define ALMACENAR_BYTES_PAG 53
-#define ASIGNAR_PAGINAS_PRC 54
-#define FINALIZAR_PRG 		55
+
 
 int ordenDeConsolaParaProceso;
 int ordenDeHeap;
@@ -110,6 +107,9 @@ int asignadorDePid = 1;
 
 //DECLARACION DE PROTOTIPOS DE FUNCIONES
 		void operacionSegunIdentificador(int identificador);
+		void *planificadorLargoPlazo();
+		int algoritmoDePlanificacion();//TODO ALGORITMO DE PLANIFICACION
+		void* seleccionarSocketRelevantes();
 // ************** MAIN *********************
 int main(int argc, char *argv[]) {
 
@@ -172,20 +172,20 @@ int main(int argc, char *argv[]) {
 }
 
 
-int consultarDisponibilidadParaProcesos(/*tamaño necesario para el proceso */*programa){
-
+int consultarDisponibilidadParaProcesos(/*TODO tamaño necesario para el proceso programa*/){
+/*TODO
 	if(){
 		return 1;
 
 	}else{
 		return 0;
 	}
-
+*/
 }
 
 
 
-void *planificiadorLargoPlazo(){
+void *planificadorLargoPlazo(){
 
 	//grado de multiprogramacion
 	extern int _gradoMultiprog;
@@ -238,7 +238,7 @@ void *planificadorACortoPlazo(){
 
 		//esperar a señal de que hay algo en la cola de ready
 
-		switch(algoritmoDePlanificacion){
+		switch(algoritmoDePlanificacion()){
 
 		case '1':  //FIFO
 
@@ -253,6 +253,7 @@ void *planificadorACortoPlazo(){
 			break;
 
 		default:
+			break;
 
 		}//fin del switch
 
@@ -365,5 +366,8 @@ void operacionSegunIdentificador(int identificador){
 
 
 
+}
+int algoritmoDePlanificacion(){
+	//TODO
 }
 
