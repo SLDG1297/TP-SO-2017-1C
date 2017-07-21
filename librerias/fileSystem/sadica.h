@@ -9,6 +9,7 @@
 
 #include <commons/bitarray.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include <commons/txt.h>
 
 #include "../serializador.h"
@@ -48,17 +49,15 @@ t_bitarray*			arrayDeBits;			// Estructura para acceder al mapa de bits.
 
 // Declaraciones
 
-// Metadata
+// Metadata (Este me quedó Objetoso)
 
 	// Interfaz
 
-void				iniciarMetadata(char* pathRaiz);
+void				iniciarMetadata(char* pathRaiz);	// Inicia el archivo Metadata.bin desde 0.
 
-void				leerMetadata(char* pathRaiz);
+void				leerMetadata(char* pathRaiz);		// Obtiene el tamaño de los bloques y la cantidad de bloques del FS del archivo Metadata.bin.
 
-void				escribirMetadata(char* pathRaiz);
-
-void				escribirMetadata(char* pathRaiz);
+void				escribirMetadata(char* pathRaiz);	// Cambia el contenido de Metadata.bin.
 
 	// Operaciones internas
 
@@ -74,19 +73,26 @@ registroMetadata	creadorMetadata(u_int32_t tamanio, u_int32_t cantidad, char* ma
 
 void				asignarMetadata(u_int32_t tamanio, u_int32_t cantidad, char* magica);	// Setter.
 
-registroMetadata 	devolverMetadata();														// Getter.
+registroMetadata 	obtenerMetadata();														// Getter.
 
-void 				destruirMetadata(registroMetadata registro);							// Para liberar la memoria del registro metadata.
 
 // Bitmap
 
-int					obtenerBitmapFD();
+void				iniciarBitmapFD(char* pathRaiz);	//
 
-void				iniciarBitmapFD(char* pathRaiz);
+void				cerrarBitmapFD();
 
-void				iniciarBitmapMap(char* pathRaiz);
+int					obtenerBitmapFD();					// Obtener el file descriptor de Bitmap.bin
 
-void		 		leerBitmapMap();
+void				iniciarBitmap(char* pathRaiz);
+
+void				abrirBitmap(char* pathRaiz);
+
+void				leerBitmap();
+
+t_bitarray*			obtenerBitmap();
+
+void				cerrarBitmap();
 
 
 
@@ -104,11 +110,17 @@ int					iniciarDescriptorArchivo(char* pathRaiz, char* pathRelativo);		// Abre u
 
 void				iniciarDirectorios(char* pathRaiz);									// Crear los directorios del FS.
 
+char*				iniciarString(size_t tamanio);
+
 char*				obtenerPath(char* pathRaiz, char* pathRelativo);					// Obtiene directorio de un archivo en el FS.
 
 
 
 // Definiciones
+
+
+
+// Metadata
 
 void iniciarMetadata(char* pathRaiz){
 	plantillaMetadata(pathRaiz, &operacionIniciarMetadata);
@@ -165,7 +177,7 @@ void asignarMetadata(u_int32_t tamanio, u_int32_t cantidad, char* magica){
 	metadata.numeroMagico = magica;
 }
 
-registroMetadata devolverMetadata(){
+registroMetadata obtenerMetadata(){
 	return metadata;
 }
 
@@ -187,17 +199,6 @@ void plantillaMetadata(char* pathRaiz, void(*procedimiento)(t_config*)){
 
 
 
-// Bitmap Viejo
-
-char* iniciarRegistroBitmap(size_t tamanio){
-	char* bitarray = malloc(tamanio);		// Array de bitmaps.
-	bzero(bitarray, tamanio);				// Setear en 0.
-
-	return bitarray;
-}
-
-
-
 // Bitmap
 
 int obtenerBitmapFD(){
@@ -213,7 +214,7 @@ void cerrarBitmapFD(){
 }
 
 void iniciarBitmap(char* pathRaiz){
-	char* bitarray = iniciarRegistroBitmap(bloquesEnBytes());					// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
+	char* bitarray = iniciarString(bloquesEnBytes());					// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
 
 	write(fdBitmap, bitarray, bloquesEnBytes());
 
@@ -297,6 +298,13 @@ void iniciarDirectorios(char* pathRaiz){
 	mkdir("Bloques", S_IRWXU);		// TODO: Ver si falta alguno.
 
 	chdir("..");					// Vuelvo al directorio raíz del FS.
+}
+
+char* iniciarString(size_t tamanio){
+	char* string = malloc(tamanio);		// Array de bitmaps.
+	bzero(string, tamanio);				// Setear en 0.
+
+	return string;
 }
 
 char* obtenerPath(char* pathRaiz, char* pathRelativo){

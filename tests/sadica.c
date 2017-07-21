@@ -17,7 +17,7 @@ context (SADICA) {
 		iniciarMetadata(puntoMontaje);
 
 		registroMetadata prueba  = creadorMetadata(64, 5192, "SADICA");
-		registroMetadata resultado = devolverMetadata();
+		registroMetadata resultado = obtenerMetadata();
 
     	it("Se puede acceder al tamaño de bloques de Metadata.bin"){
     		should_int(resultado.tamanioBloques) be equal to (prueba.tamanioBloques);
@@ -34,14 +34,14 @@ context (SADICA) {
     } end
 
 	describe("Inicio de Bitmap.bin") {
+		iniciarBitmapFD(puntoMontaje);
+		iniciarBitmap(puntoMontaje);
+		abrirBitmap(puntoMontaje);
+		leerBitmap();
+
+		t_bitarray* bitmap = obtenerBitmap();
+
 		it("Se puede acceder al bitmap de Bitmap.bin con todos los bloques libres"){
-    		iniciarBitmapFD(puntoMontaje);
-    		iniciarBitmap(puntoMontaje);
-    		abrirBitmap(puntoMontaje);
-    		leerBitmap();
-
-    		t_bitarray* bitmap = obtenerBitmap();
-
     		bool verificador = false;
     		off_t i = 0;
 
@@ -51,10 +51,10 @@ context (SADICA) {
     			i++;
     		}
 
-    		cerrarBitmap(puntoMontaje);
-
     		should_bool(verificador) be falsey;
     	} end
+
+		cerrarBitmap();
 
     } end
 }
