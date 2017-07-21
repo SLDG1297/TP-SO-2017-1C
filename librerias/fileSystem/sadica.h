@@ -35,6 +35,12 @@ typedef struct{
 
 // Variables globales
 
+// Punto de montaje
+
+char*				puntoMontaje;			// Directorio raíz del FS.
+
+// Metadata
+
 registroMetadata	metadata;				// Información acerca de la cantidad y tamaño de bloques del FS.
 
 // Bitmap
@@ -53,15 +59,15 @@ t_bitarray*			arrayDeBits;			// Estructura para acceder al mapa de bits.
 
 	// Interfaz
 
-void				iniciarMetadata(char* pathRaiz);	// Inicia el archivo Metadata.bin desde 0.
+void				iniciarMetadata();		// Inicia el archivo Metadata.bin desde 0.
 
-void				leerMetadata(char* pathRaiz);		// Obtiene el tamaño de los bloques y la cantidad de bloques del FS del archivo Metadata.bin.
+void				leerMetadata();			// Obtiene el tamaño de los bloques y la cantidad de bloques del FS del archivo Metadata.bin.
 
-void				escribirMetadata(char* pathRaiz);	// Cambia el contenido de Metadata.bin.
+void				escribirMetadata();		// Cambia el contenido de Metadata.bin.
 
 	// Operaciones internas
 
-void 				plantillaMetadata(char* pathRaiz, void(*procedimiento)(t_config*));		// Plantilla para no repetir código en los procedimientos para asignar Metadata.bin.
+void 				plantillaMetadata(void(*procedimiento)(t_config*));						// Plantilla para no repetir código en los procedimientos para asignar Metadata.bin.
 
 void				operacionIniciarMetadata(t_config* configuracionMetadata);				// Cargar el archivo Metadata.bin con los registros correspondientes.
 
@@ -76,43 +82,45 @@ void				asignarMetadata(u_int32_t tamanio, u_int32_t cantidad, char* magica);	//
 registroMetadata 	obtenerMetadata();														// Getter.
 
 
+
 // Bitmap
 
-void				iniciarBitmapFD(char* pathRaiz);	//
+void				iniciarBitmap();					// Inicializa el archivo Bitmap.bin con todos los bloques libres.
 
-void				cerrarBitmapFD();
+void				abrirBitmap();						// Aloca espacio en memoria para las estructuras de Bitmap.bin en memoria.
 
-int					obtenerBitmapFD();					// Obtener el file descriptor de Bitmap.bin
+void				cerrarBitmap();						// Libera todas las estructuras de Bitmap.bin en memoria.
 
-void				iniciarBitmap(char* pathRaiz);
+t_bitarray*			obtenerBitmap();					// Devuelve una instancia del mapa de bits.
 
-void				abrirBitmap(char* pathRaiz);
+void				ocuparBloque(off_t bloque);			// Indicar que un bloque fue ocupado.
 
-void				leerBitmap();
-
-t_bitarray*			obtenerBitmap();
-
-void				cerrarBitmap();
-
+void				desocuparBloque(off_t bloque);		// Indicar que un bloque fue desocupado.
 
 
 // Otros (Ordenados alfabéticamente)
 
 u_int32_t			bloquesEnBytes();													// Devuelve la cantidad de bytes que ocupa el mapa de bits.
 
-void				crearArchivoConDirectorio(char* directorio, char* pathRelativo);
+void				cerrarDirectorioRaiz();												// Liberar el directorio raíz.
 
-void				destruirBitarray(t_bitarray *bitarray);
+char*				concatenarPath(char* pathIzquierdo, char* pathDerecho);				// Concatena dos directorios.
 
-FILE*				iniciarArchivo(char* pathRaiz, char* pathRelativo);					// Abre un archivo simplificado.
+void				crearArchivoConDirectorio(char* directorio, char* pathRelativo);	// Crea un directorio y añade un archivo en él.
 
-int					iniciarDescriptorArchivo(char* pathRaiz, char* pathRelativo);		// Abre un archivo y devuelve su descriptor de archivo.
+void				destruirBitarray(t_bitarray *bitarray);								// Libera una estructura de array de bits.
 
-void				iniciarDirectorios(char* pathRaiz);									// Crear los directorios del FS.
+FILE*				iniciarArchivo(char* pathRelativo);									// Abre un archivo simplificado.
 
-char*				iniciarString(size_t tamanio);
+int					iniciarDescriptorArchivo(char* pathRelativo);						// Abre un archivo y devuelve su descriptor de archivo.
 
-char*				obtenerPath(char* pathRaiz, char* pathRelativo);					// Obtiene directorio de un archivo en el FS.
+void				iniciarDirectorioRaiz(char* pathRaiz);								// Asigna el punto de montaje del FS.
+
+void				iniciarDirectorios();												// Crear los directorios del FS.
+
+char*				iniciarString(size_t tamanio);										// Inicializa un char* con '\0'
+
+char*				obtenerPath(char* pathRelativo);									// Obtiene directorio de un archivo en el FS.
 
 
 
@@ -122,16 +130,16 @@ char*				obtenerPath(char* pathRaiz, char* pathRelativo);					// Obtiene directo
 
 // Metadata
 
-void iniciarMetadata(char* pathRaiz){
-	plantillaMetadata(pathRaiz, &operacionIniciarMetadata);
+void iniciarMetadata(){
+	plantillaMetadata(&operacionIniciarMetadata);		// Aplicación de Template method.
 }
 
-void leerMetadata(char* pathRaiz){
-	plantillaMetadata(pathRaiz, &operacionLeerMetadata);
+void leerMetadata(){
+	plantillaMetadata(&operacionLeerMetadata);			// Aplicación de Template method.
 }
 
-void escribirMetadata(char* pathRaiz){
-	plantillaMetadata(pathRaiz, &operacionEscribirMetadata);
+void escribirMetadata(){
+	plantillaMetadata(&operacionEscribirMetadata);		// Aplicación de Template method.
 }
 
 void operacionIniciarMetadata(t_config* configuracionMetadata){
@@ -181,12 +189,8 @@ registroMetadata obtenerMetadata(){
 	return metadata;
 }
 
-void destruirMetadata(registroMetadata registro){
-	free(registro.numeroMagico);
-}
-
-void plantillaMetadata(char* pathRaiz, void(*procedimiento)(t_config*)){
-	char* pathMetadata = obtenerPath(pathRaiz, "/Metadata/Metadata.bin");
+void plantillaMetadata(void(*procedimiento)(t_config*)){
+	char* pathMetadata = obtenerPath("/Metadata/Metadata.bin");
 
 	t_config* configuracionMetadata = config_create(pathMetadata);
 
@@ -201,27 +205,21 @@ void plantillaMetadata(char* pathRaiz, void(*procedimiento)(t_config*)){
 
 // Bitmap
 
-int obtenerBitmapFD(){
-	return fdBitmap;
-}
+void iniciarBitmap(){
+	fdBitmap = iniciarDescriptorArchivo("/Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
 
-void iniciarBitmapFD(char* pathRaiz){
-	fdBitmap = iniciarDescriptorArchivo(pathRaiz, "/Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
-}
-
-void cerrarBitmapFD(){
-	close(fdBitmap);
-}
-
-void iniciarBitmap(char* pathRaiz){
 	char* bitarray = iniciarString(bloquesEnBytes());					// Array de bits en 0 para indicar que todos los bloques están libres en primera instancia.
 
 	write(fdBitmap, bitarray, bloquesEnBytes());
 
 	free(bitarray);
+
+	close(fdBitmap);
 }
 
-void abrirBitmap(char* pathRaiz){
+void abrirBitmap(){
+	fdBitmap = iniciarDescriptorArchivo("/Metadata/Bitmap.bin");		// Abrir archivo Bitmap.bin.
+
 	struct stat atributosBitmap;
 
 	fstat(fdBitmap, &atributosBitmap);
@@ -229,20 +227,28 @@ void abrirBitmap(char* pathRaiz){
 	mapaDeBits = mmap(NULL, atributosBitmap.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fdBitmap, 0);
 
 	msync(mapaDeBits, bloquesEnBytes(), MS_SYNC);
-}
 
-void leerBitmap(){
 	arrayDeBits = bitarray_create_with_mode(mapaDeBits, bloquesEnBytes(), LSB_FIRST);
-}
-
-t_bitarray* obtenerBitmap(){
-	return arrayDeBits;
 }
 
 void cerrarBitmap(){
 	munmap(mapaDeBits, bloquesEnBytes());
 
 	bitarray_destroy(arrayDeBits);
+
+	close(fdBitmap);
+}
+
+t_bitarray* obtenerBitmap(){
+	return arrayDeBits;
+}
+
+void ocuparBloque(off_t bloque){
+	bitarray_set_bit(arrayDeBits, bloque);
+}
+
+void desocuparBloque(off_t bloque){
+	bitarray_clean_bit(arrayDeBits, bloque);
 }
 
 
@@ -253,10 +259,23 @@ u_int32_t bloquesEnBytes(){
 	return metadata.cantidadBloques / 8;
 }
 
+void cerrarDirectorioRaiz(){
+	free(puntoMontaje);
+}
+
+char* concatenarPath(char* pathIzquierdo, char* pathDerecho){
+	char* path = string_new();				// Path real.
+
+	string_append(&path, pathIzquierdo);
+	string_append(&path, pathDerecho);		// Obtener path real.
+
+	return path;
+}
+
 void crearArchivoConDirectorio(char* directorio, char* pathRelativo){
 	mkdir(directorio, S_IRWXU);
 
-	char* path = obtenerPath(directorio, pathRelativo);
+	char* path = concatenarPath(directorio, pathRelativo);
 
 	FILE* archivo = fopen(path, "wb+");
 
@@ -265,8 +284,8 @@ void crearArchivoConDirectorio(char* directorio, char* pathRelativo){
 	free(path);
 }
 
-FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
-	char* path = obtenerPath(pathRaiz, pathRelativo);
+FILE* iniciarArchivo(char* pathRelativo){
+	char* path = obtenerPath(pathRelativo);
 
 	FILE* archivo = fopen(path, "wb+");		// Abrir archivo.
 
@@ -275,8 +294,8 @@ FILE* iniciarArchivo(char* pathRaiz, char* pathRelativo){
 	return archivo;
 }
 
-int iniciarDescriptorArchivo(char* pathRaiz, char* pathRelativo){
-	char* path = obtenerPath(pathRaiz, pathRelativo);
+int iniciarDescriptorArchivo(char* pathRelativo){
+	char* path = obtenerPath(pathRelativo);
 
 	int fd = open(path, O_RDWR);		// Abrir archivo.
 
@@ -285,9 +304,13 @@ int iniciarDescriptorArchivo(char* pathRaiz, char* pathRelativo){
 	return fd;
 }
 
-void iniciarDirectorios(char* pathRaiz){
-	mkdir(pathRaiz, S_IRWXU);		// Creo el directorio de montaje.
-	chdir(pathRaiz);				// Me muevo al directorio del FS.
+void iniciarDirectorioRaiz(char* pathRaiz){
+	puntoMontaje = string_duplicate(pathRaiz);
+}
+
+void iniciarDirectorios(){
+	mkdir(puntoMontaje, S_IRWXU);		// Creo el directorio de montaje.
+	chdir(puntoMontaje);				// Me muevo al directorio del FS.
 
 	// Creo los directorios que pide el enunciado.
 
@@ -307,13 +330,8 @@ char* iniciarString(size_t tamanio){
 	return string;
 }
 
-char* obtenerPath(char* pathRaiz, char* pathRelativo){
-	char* path = string_new();				// Path real.
-
-	string_append(&path, pathRaiz);
-	string_append(&path, pathRelativo);		// Obtener path real.
-
-	return path;
+char* obtenerPath(char* pathRelativo){
+	return concatenarPath(puntoMontaje, pathRelativo);
 }
 
 #endif /* FILESYSTEM_SADICA_H_ */
