@@ -12,6 +12,21 @@
 
 void mostrarBitmap();
 
+bool todosLibres(off_t desde, off_t hasta);
+
+bool todosOcupados(off_t desde, off_t hasta);
+
+void ocuparDesdeHasta(off_t desde, off_t hasta);
+
+void desocuparDesdeHasta(off_t desde, off_t hasta);
+
+void ocuparTodo();
+
+void desocuparTodo();
+
+bool plantillaTesteo(off_t desde, off_t hasta, bool condicion);
+
+void plantillaOcupacion(off_t desde, off_t hasta, void(*asignador)(off_t));
 
 
 // Definiciones
@@ -28,7 +43,56 @@ void mostrarBitmap(){
 	}
 }
 
+bool todosLibres(off_t desde, off_t hasta){
+	plantillaTesteo(desde, hasta, false);
+}
 
+bool todosOcupados(off_t desde, off_t hasta){
+	plantillaTesteo(desde, hasta, true);
+}
+
+void ocuparDesdeHasta(off_t desde, off_t hasta){
+	plantillaOcupacion(desde, hasta, &ocuparBloque);
+}
+
+void desocuparDesdeHasta(off_t desde, off_t hasta){
+	plantillaOcupacion(desde, hasta, &desocuparBloque);
+}
+
+void ocuparTodo(){
+	ocuparDesdeHasta(0, bloquesEnBytes() * 8);
+}
+
+void desocuparTodo(){
+	desocuparDesdeHasta(0, bloquesEnBytes() * 8);
+}
+
+bool plantillaTesteo(off_t desde, off_t hasta, bool condicion){
+	bool verificador = condicion;
+	t_bitarray* bitmap = obtenerBitmap();
+
+	off_t i = desde;
+
+	while(i < hasta && verificador == condicion)
+	{
+		verificador = bitarray_test_bit(bitmap, i);
+		i++;
+	}
+
+	return verificador;
+}
+
+void plantillaOcupacion(off_t desde, off_t hasta, void(*asignador)(off_t)){
+	t_bitarray* bitmap = obtenerBitmap();
+
+	off_t i = desde;
+
+	while(i < hasta)
+	{
+		asignador(i);
+		i++;
+	}
+}
 
 // Pruebas
 
@@ -71,13 +135,7 @@ context (SADICA) {
 		} end
 
 		it("Se puede acceder al bitmap de Bitmap.bin con todos los bloques libres"){
-    		off_t i = 0;
-
-    		while(i < bloquesEnBytes() * 8 && verificador == false)
-    		{
-    			verificador = bitarray_test_bit(bitmap, i);
-    			i++;
-    		}
+			verificador = todosLibres(0, bloquesEnBytes() * 8);
 
     		should_bool(verificador) be falsey;
     	} end
@@ -99,82 +157,38 @@ context (SADICA) {
     	} end
 
 		it("Se pueden ocupar los primeros 1000 bloques"){
-    		off_t i = 0;
+    		ocuparDesdeHasta(0, 1000);
 
-    		while(i < 1000)
-    		{
-    			ocuparBloque(i);
-    			i++;
-    		}
-
-    		i = 0;
-
-    		do
-    		{
-    			verificador = bitarray_test_bit(bitmap, i);
-    			i++;
-    		}
-    		while(i < 1000 && verificador == true);
-
-    		should_int(i) be equal to (1000);
+    		verificador = todosOcupados(0, 1000);
 
     		should_bool(verificador) be truthy;
     	} end
 
 		it("Se pueden desocupar los bloques entre 20 y 50"){
-    		off_t i = 19;
+    		desocuparDesdeHasta(19, 50);
 
-    		while(i < 50)
-    		{
-    			desocuparBloque(i);
-    			i++;
-    		}
-
-    		i = 19;
-
-    		do
-    		{
-    			verificador = bitarray_test_bit(bitmap, i);
-    			i++;
-    		}
-    		while(i < 50 && verificador == false);
-
-    		should_int(i) be equal to (50);
+    		verificador = todosLibres(19, 50);
 
     		should_bool(verificador) be falsey;
     	} end
 
 		it("Se puede setear todos los bloques ocupados, cerrar el bitmap, abrirlo, y que sigan los bloques llenos"){
-    		off_t i = 0;
-
-    		while(i < bloquesEnBytes() * 8 && verificador == false)
-    		{
-    			ocuparBloque(i);
-    			i++;
-    		}
+    		ocuparTodo();
 
     		cerrarBitmap();
 
     		abrirBitmap();
 
-    		bitmap = obtenerBitmap();
-
-    		i = 0;
-
-    		do
-    		{
-    			verificador = bitarray_test_bit(bitmap, i);
-    			i++;
-    		}
-    		while(i < bloquesEnBytes() * 8 && verificador == true);
-
-    		should_int(i) be equal to (bloquesEnBytes() * 8);
+    		verificador = todosOcupados(0, bloquesEnBytes() * 8);
 
     		should_bool(verificador) be truthy;
     	} end
 
     } end
 
+	describe("Inicio del directorio de Archivos."){
+    		desocuparTodo();
+    } end
 
 	cerrarBitmap();
 

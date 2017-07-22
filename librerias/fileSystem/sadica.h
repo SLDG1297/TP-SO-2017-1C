@@ -28,8 +28,17 @@
 typedef struct{
 	u_int32_t 	tamanioBloques;				// Tamanio de los bloques que maneja el FS.
 	u_int32_t 	cantidadBloques;			// Cantidad de bloques que maneja el FS.
-	char* 		numeroMagico;				// Ni idea
-} registroMetadata;
+	char* 		numeroMagico;				// Ni idea. Supestamente es un valor que se usa para distinguir algo. Pero ni idea.
+}
+
+registroMetadata;							// Indica la composición del FS.
+
+typedef struct{
+	u_int32_t	tamanioArchivo;				// Indica el tamaño total del archivo
+	u_int32_t*	bloques;					// Bloques asingados al archivo.
+}
+
+registroArchivo;							// Indica la composición de un archivo
 
 
 
@@ -98,29 +107,40 @@ void				ocuparBloque(off_t bloque);			// Indicar que un bloque fue ocupado.
 void				desocuparBloque(off_t bloque);		// Indicar que un bloque fue desocupado.
 
 
+
+// File Metadata
+
+
+
+void				escribirArchivo(char* pathArchivo);
+
+registroArchivo		leerArchivo(char* pathArchivo);
+
 // Otros (Ordenados alfabéticamente)
 
-u_int32_t			bloquesEnBytes();													// Devuelve la cantidad de bytes que ocupa el mapa de bits.
+u_int32_t			bloquesEnBytes();																		// Devuelve la cantidad de bytes que ocupa el mapa de bits.
 
-void				cerrarDirectorioRaiz();												// Liberar el directorio raíz.
+void				cerrarDirectorioRaiz();																	// Liberar el directorio raíz.
 
-char*				concatenarPath(char* pathIzquierdo, char* pathDerecho);				// Concatena dos directorios.
+char*				concatenarPath(char* pathIzquierdo, char* pathDerecho);									// Concatena dos directorios.
 
-void				crearArchivoConDirectorio(char* directorio, char* pathRelativo);	// Crea un directorio y añade un archivo en él.
+void				crearArchivoConDirectorio(char* directorio, char* pathRelativo);						// Crea un directorio y añade un archivo en él.
 
-void				destruirBitarray(t_bitarray *bitarray);								// Libera una estructura de array de bits.
+void				destruirBitarray(t_bitarray *bitarray);													// Libera una estructura de array de bits.
 
-FILE*				iniciarArchivo(char* pathRelativo);									// Abre un archivo simplificado.
+FILE*				iniciarArchivo(char* pathRelativo);														// Abre un archivo simplificado.
 
-int					iniciarDescriptorArchivo(char* pathRelativo);						// Abre un archivo y devuelve su descriptor de archivo.
+int					iniciarDescriptorArchivo(char* pathRelativo);											// Abre un archivo y devuelve su descriptor de archivo.
 
-void				iniciarDirectorioRaiz(char* pathRaiz);								// Asigna el punto de montaje del FS.
+void				iniciarDirectorioRaiz(char* pathRaiz);													// Asigna el punto de montaje del FS.
 
-void				iniciarDirectorios();												// Crear los directorios del FS.
+void				iniciarDirectorios();																	// Crear los directorios del FS.
 
-char*				iniciarString(size_t tamanio);										// Inicializa un char* con '\0'
+char*				iniciarString(size_t tamanio);															// Inicializa un char* con '\0'.
 
-char*				obtenerPath(char* pathRelativo);									// Obtiene directorio de un archivo en el FS.
+char*				obtenerPath(char* pathRelativo);														// Obtiene directorio de un archivo en el FS.
+
+void				plantillaConfiguracion(char* pathConfiguracion, void(*procedimiento)(t_config*));		// Plantilla para alocar y liberar archivos de configuración.
 
 
 
@@ -140,6 +160,10 @@ void leerMetadata(){
 
 void escribirMetadata(){
 	plantillaMetadata(&operacionEscribirMetadata);		// Aplicación de Template method.
+}
+
+void plantillaMetadata(void(*procedimiento)(t_config*)){
+	plantillaConfiguracion("/Metadata/Metadata.bin", procedimiento);
 }
 
 void operacionIniciarMetadata(t_config* configuracionMetadata){
@@ -187,18 +211,6 @@ void asignarMetadata(u_int32_t tamanio, u_int32_t cantidad, char* magica){
 
 registroMetadata obtenerMetadata(){
 	return metadata;
-}
-
-void plantillaMetadata(void(*procedimiento)(t_config*)){
-	char* pathMetadata = obtenerPath("/Metadata/Metadata.bin");
-
-	t_config* configuracionMetadata = config_create(pathMetadata);
-
-	procedimiento(configuracionMetadata);
-
-	config_destroy(configuracionMetadata);
-
-	free(pathMetadata);
 }
 
 
@@ -250,6 +262,12 @@ void ocuparBloque(off_t bloque){
 void desocuparBloque(off_t bloque){
 	bitarray_clean_bit(arrayDeBits, bloque);
 }
+
+
+
+// File Metadata
+
+
 
 
 
@@ -328,6 +346,18 @@ char* iniciarString(size_t tamanio){
 	bzero(string, tamanio);				// Setear en 0.
 
 	return string;
+}
+
+void plantillaConfiguracion(char* pathConfiguracion, void(*procedimiento)(t_config*)){
+	char* path = obtenerPath(pathConfiguracion);
+
+	t_config* configuracion = config_create(path);
+
+	procedimiento(configuracion);
+
+	config_destroy(configuracion);
+
+	free(path);
 }
 
 char* obtenerPath(char* pathRelativo){
