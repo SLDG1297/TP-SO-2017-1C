@@ -97,13 +97,19 @@ void plantillaOcupacion(off_t desde, off_t hasta, void(*asignador)(off_t)){
 // Pruebas
 
 context (SADICA) {
-	iniciarDirectorioRaiz("pruebaFS");
+	iniciarDirectorioRaiz("pruebaFS/mnt/FS_SADICA");
 
 	iniciarDirectorios();
 
 	iniciarMetadata();
 
 	iniciarBitmap();
+
+	describe("Crear directorios") {
+		it ("Se puede crear el directorio pruebaDirectorio/UTN/Alumnos/Ingresantes2015"){
+
+		} end
+	} end
 
 	describe("Inicio de Metadata.bin") {
 		registroMetadata prueba  = creadorMetadata(64, 5192, "SADICA");

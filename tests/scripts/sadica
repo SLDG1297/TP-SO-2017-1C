@@ -1,5 +1,5 @@
 #!/bin/bash
 cd ..
 gcc sadica.c -o sadica -lcommons -lcspecs
-valgrind ./sadica
+valgrind --leak-check=full ./sadica
 rm sadica

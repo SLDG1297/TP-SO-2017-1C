@@ -116,6 +116,8 @@ void				escribirArchivo(char* pathArchivo);
 
 registroArchivo		leerArchivo(char* pathArchivo);
 
+
+
 // Otros (Ordenados alfabéticamente)
 
 u_int32_t			bloquesEnBytes();																		// Devuelve la cantidad de bytes que ocupa el mapa de bits.
@@ -124,7 +126,9 @@ void				cerrarDirectorioRaiz();																	// Liberar el directorio raíz.
 
 char*				concatenarPath(char* pathIzquierdo, char* pathDerecho);									// Concatena dos directorios.
 
-void				crearArchivoConDirectorio(char* directorio, char* pathRelativo);						// Crea un directorio y añade un archivo en él.
+void 				crearArchivo(char* pathArchivo);														// Crea un archivo nuevo.
+
+void				crearDirectorio(char* pathDirectorio);													// Crea un directorio y añade un archivo en él.
 
 void				destruirBitarray(t_bitarray *bitarray);													// Libera una estructura de array de bits.
 
@@ -137,6 +141,8 @@ void				iniciarDirectorioRaiz(char* pathRaiz);													// Asigna el punto de
 void				iniciarDirectorios();																	// Crear los directorios del FS.
 
 char*				iniciarString(size_t tamanio);															// Inicializa un char* con '\0'.
+
+char*				obtenerDirectorio(char* pathArchivo);													// Crea los directorios con un archivo nuevo.
 
 char*				obtenerPath(char* pathRelativo);														// Obtiene directorio de un archivo en el FS.
 
@@ -290,15 +296,46 @@ char* concatenarPath(char* pathIzquierdo, char* pathDerecho){
 	return path;
 }
 
-void crearArchivoConDirectorio(char* directorio, char* pathRelativo){
-	mkdir(directorio, S_IRWXU);
+void crearArchivo(char* pathArchivo){
+	char* path = obtenerPath(pathArchivo);
 
-	char* path = concatenarPath(directorio, pathRelativo);
+	FILE* nuevoArchivo = iniciarArchivo(pathArchivo);
 
-	FILE* archivo = fopen(path, "wb+");
+	fclose(nuevoArchivo);
 
-	fclose(archivo);
+	free(path);
+}
 
+void crearDirectorio(char* pathDirectorio){
+	char* path = obtenerPath(pathDirectorio);
+	char** directorio = string_split(path, "/");
+
+	int i = 0;
+	int j = 0;
+
+	while(directorio[i] != NULL)
+	{
+		mkdir(directorio[i], S_IRWXU);
+		chdir(directorio[i]);
+
+		i++;
+	}
+
+	j = i;
+
+	while(i > 0)
+	{
+		chdir("..");
+		i--;
+	}
+
+	while(j > 0)
+	{
+		free(directorio[j]);
+		j--;
+	}
+
+	free(directorio);
 	free(path);
 }
 
@@ -324,21 +361,18 @@ int iniciarDescriptorArchivo(char* pathRelativo){
 
 void iniciarDirectorioRaiz(char* pathRaiz){
 	puntoMontaje = string_duplicate(pathRaiz);
+
+	crearDirectorio("/");
 }
 
 void iniciarDirectorios(){
-	mkdir(puntoMontaje, S_IRWXU);		// Creo el directorio de montaje.
-	chdir(puntoMontaje);				// Me muevo al directorio del FS.
+	crearDirectorio("/Metadata");
+	crearArchivo("/Metadata/Metadata.bin");
+	crearArchivo("/Metadata/Bitmap.bin");
 
-	// Creo los directorios que pide el enunciado.
+	crearDirectorio("/Archivos");
 
-	crearArchivoConDirectorio("Metadata", "/Metadata.bin");
-	crearArchivoConDirectorio("Metadata", "/Bitmap.bin");
-
-	mkdir("Archivos", S_IRWXU);		// TODO: Ver si falta alguno.
-	mkdir("Bloques", S_IRWXU);		// TODO: Ver si falta alguno.
-
-	chdir("..");					// Vuelvo al directorio raíz del FS.
+	crearDirectorio("/Bloques");
 }
 
 char* iniciarString(size_t tamanio){
